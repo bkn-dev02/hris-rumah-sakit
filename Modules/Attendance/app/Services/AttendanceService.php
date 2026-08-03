@@ -65,16 +65,16 @@ class AttendanceService implements AttendanceServiceInterface
             }
 
             return $this->attendanceRepository->create([
-                'employee_id'               => $data->employeeId,
-                'work_date'                 => $workDate,
-                'shift_id'                  => $schedule->shift_id,
-                'check_in_at'               => now(),
-                'check_in_latitude'         => $data->latitude,
-                'check_in_longitude'        => $data->longitude,
-                'check_in_photo'            => $data->photoPath,
-                'check_in_location_id'      => $location->id,
-                'check_in_distance_meters'  => $location->distanceTo($data->latitude, $data->longitude),
-                'source'                    => 'mobile',
+                'employee_id' => $data->employeeId,
+                'work_date' => $workDate,
+                'shift_id' => $schedule->shift_id,
+                'check_in_at' => now(),
+                'check_in_latitude' => $data->latitude,
+                'check_in_longitude' => $data->longitude,
+                'check_in_photo' => $data->photoPath,
+                'check_in_location_id' => $location->id,
+                'check_in_distance_meters' => $location->distanceTo($data->latitude, $data->longitude),
+                'source' => 'mobile',
             ]);
         });
     }

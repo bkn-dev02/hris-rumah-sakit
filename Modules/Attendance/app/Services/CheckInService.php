@@ -50,4 +50,9 @@ class CheckInService implements CheckInServiceInterface
 
         return $this->repository->delete($checkIn);
     }
+
+    public function findByEmployeeAndDate(int $employeeId, string $workDate): ?CheckIn
+    {
+        return $this->repository->findByEmployeeAndDate($employeeId, $workDate);
+    }
 }
