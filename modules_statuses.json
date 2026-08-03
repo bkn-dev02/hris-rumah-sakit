@@ -1,0 +1,13 @@
+{
+    "Security": true,
+    "Shared": true,
+    "Master": true,
+    "HR": true,
+    "Attendance": true,
+    "Leave": true,
+    "Dashboard": true,
+    "Report": true,
+    "Performance": true,
+    "Training": true,
+    "Asset": true
+}
