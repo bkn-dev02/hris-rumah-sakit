@@ -24,6 +24,10 @@ use Modules\Attendance\Contracts\Services\AttendanceExceptionRequestServiceInter
 use Modules\Attendance\Services\AttendanceExceptionRequestService;
 use Modules\Attendance\Contracts\Services\AttendanceCorrectionServiceInterface;
 use Modules\Attendance\Services\AttendanceCorrectionService;
+use Modules\Attendance\Contracts\Services\CheckInServiceInterface;
+use Modules\Attendance\Services\CheckInService;
+use Modules\Attendance\Contracts\Repositories\CheckInRepositoryInterface;
+use Modules\Attendance\Repositories\CheckInRepository;
 
 class AttendanceServiceProvider extends ModuleServiceProvider
 {
@@ -63,12 +67,14 @@ class AttendanceServiceProvider extends ModuleServiceProvider
         $this->app->bind(AttendanceRepositoryInterface::class, AttendanceRepository::class);
         $this->app->bind(AttendanceExceptionRequestRepositoryInterface::class, AttendanceExceptionRequestRepository::class);
         $this->app->bind(AttendanceCorrectionRepositoryInterface::class, AttendanceCorrectionRepository::class);
+        $this->app->bind(CheckInRepositoryInterface::class, CheckInRepository::class);
 
         $this->app->bind(AttendanceLocationServiceInterface::class, AttendanceLocationService::class);
         $this->app->bind(AttendanceStatusServiceInterface::class, AttendanceStatusService::class);
         $this->app->bind(AttendanceServiceInterface::class, AttendanceService::class);
         $this->app->bind(AttendanceExceptionRequestServiceInterface::class, AttendanceExceptionRequestService::class);
         $this->app->bind(AttendanceCorrectionServiceInterface::class, AttendanceCorrectionService::class);
+        $this->app->bind(CheckInServiceInterface::class, CheckInService::class);
     }
 
     /**

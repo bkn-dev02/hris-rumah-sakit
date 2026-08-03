@@ -29,9 +29,9 @@ class AttendanceController extends Controller
 
             $attendance = $this->attendanceService->checkIn(CheckInData::fromArray([
                 'employee_id' => $employeeId,
-                'latitude'    => $request->validated('latitude'),
-                'longitude'   => $request->validated('longitude'),
-                'photo_path'  => $photoPath,
+                'latitude' => $request->validated('latitude'),
+                'longitude' => $request->validated('longitude'),
+                'photo_path' => $photoPath,
             ]));
 
             return $this->success($attendance, 'Check-in berhasil.');
@@ -49,9 +49,9 @@ class AttendanceController extends Controller
 
             $attendance = $this->attendanceService->checkOut(CheckOutData::fromArray([
                 'employee_id' => $employeeId,
-                'latitude'    => $request->validated('latitude'),
-                'longitude'   => $request->validated('longitude'),
-                'photo_path'  => $photoPath,
+                'latitude' => $request->validated('latitude'),
+                'longitude' => $request->validated('longitude'),
+                'photo_path' => $photoPath,
             ]));
 
             return $this->success($attendance, 'Check-out berhasil.');
@@ -76,9 +76,9 @@ class AttendanceController extends Controller
             'success' => true,
             'message' => 'Lokasi ditemukan.',
             'data' => [
-                'name'          => $location->name,
-                'latitude'      => (float) $location->latitude,
-                'longitude'     => (float) $location->longitude,
+                'name' => $location->name,
+                'latitude' => (float) $location->latitude,
+                'longitude' => (float) $location->longitude,
                 'radius_meters' => $location->radius_meters,
             ],
         ]);

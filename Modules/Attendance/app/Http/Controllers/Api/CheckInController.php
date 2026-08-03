@@ -1,11 +1,13 @@
 <?php
 
-namespace Modules\Attendance\Http\Controllers\Web;
+namespace Modules\Attendance\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
 use Modules\Attendance\Contracts\Services\CheckInServiceInterface;
 use Modules\Attendance\Http\Requests\StoreCheckInRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CheckInController extends Controller
 {
@@ -27,11 +29,59 @@ class CheckInController extends Controller
 
     public function store(StoreCheckInRequest $request)
     {
-        $this->checkInService->create($request->validated());
+        $request->validate([
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
+            'location_id' => ['required', 'exists:attendance_locations,id'],
+            'photo' => ['required', 'image', 'max:5120'],
+            'note' => ['nullable', 'string'],
+        ]);
 
-        return redirect()
-            ->route('attendance.check-ins.index')
-            ->with('success', 'Check-in berhasil disimpan.');
+        $employee = Auth::user()->employee;
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data pegawai tidak ditemukan.'
+            ], 404);
+        }
+
+        $alreadyCheckIn = $this->checkInService
+            ->findByEmployeeAndDate(
+                $employee->id,
+                now()->toDateString()
+            );
+
+        if ($alreadyCheckIn) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah check-in hari ini.'
+            ], 422);
+        }
+
+        $photoPath = $request->file('photo')->store(
+            'attendance/check-ins',
+            'public'
+        );
+
+        $checkIn = $this->checkInService->create([
+            'employee_id' => $employee->id,
+            'checked_at' => now(),
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'photo' => $photoPath,
+            'location_id' => $request->location_id,
+            'distance_meters' => 0,
+            'ip' => $request->ip(),
+            'device' => $request->userAgent(),
+            'note' => $request->note,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Check-in berhasil.',
+            'data' => $checkIn
+        ], 201);
     }
 
     public function edit(int $check_in)

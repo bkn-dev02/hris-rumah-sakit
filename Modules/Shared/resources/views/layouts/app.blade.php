@@ -33,9 +33,6 @@
                 @yield('content')
             </main>
 
-            {{-- Footer --}}
-            @include('shared::partials.footer')
-
         </div>
 
     </div>

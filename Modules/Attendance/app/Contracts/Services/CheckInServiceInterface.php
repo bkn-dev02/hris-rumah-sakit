@@ -16,4 +16,6 @@ interface CheckInServiceInterface
     public function update(int $id, array $data): CheckIn;
 
     public function delete(int $id): bool;
+
+    public function findByEmployeeAndDate(int $employeeId, string $workDate): ?CheckIn;
 }
