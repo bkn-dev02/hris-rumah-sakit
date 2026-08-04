@@ -56,16 +56,6 @@ class Attendance extends Model
         return $this->belongsTo(Shift::class);
     }
 
-    public function checkInLocation(): BelongsTo
-    {
-        return $this->belongsTo(AttendanceLocation::class, 'check_in_location_id');
-    }
-
-    public function checkOutLocation(): BelongsTo
-    {
-        return $this->belongsTo(AttendanceLocation::class, 'check_out_location_id');
-    }
-
     public function status(): BelongsTo
     {
         return $this->belongsTo(AttendanceStatus::class, 'attendance_status_id');
@@ -74,16 +64,6 @@ class Attendance extends Model
     public function corrections(): HasMany
     {
         return $this->hasMany(AttendanceCorrection::class);
-    }
-
-    public function hasCheckedIn(): bool
-    {
-        return !is_null($this->check_in_at);
-    }
-
-    public function hasCheckedOut(): bool
-    {
-        return !is_null($this->check_out_at);
     }
 
     public function isComplete(): bool
