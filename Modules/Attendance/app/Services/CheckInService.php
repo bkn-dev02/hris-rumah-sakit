@@ -2,8 +2,6 @@
 
 namespace Modules\Attendance\Services;
 
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Modules\Attendance\Contracts\Repositories\CheckInRepositoryInterface;
 use Modules\Attendance\Contracts\Services\CheckInServiceInterface;
@@ -13,11 +11,6 @@ use Modules\Attendance\Models\CheckIn;
 class CheckInService implements CheckInServiceInterface
 {
     public function __construct(protected CheckInRepositoryInterface $repository) {}
-
-    public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator
-    {
-        return $this->repository->paginate($perPage, $filters);
-    }
 
     public function findById(int $id): CheckIn
     {

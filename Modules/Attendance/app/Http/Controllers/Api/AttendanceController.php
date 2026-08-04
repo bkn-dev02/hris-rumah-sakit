@@ -5,11 +5,7 @@ namespace Modules\Attendance\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Attendance\Contracts\Services\AttendanceServiceInterface;
-use Modules\Attendance\DTOs\CheckInData;
-use Modules\Attendance\DTOs\CheckOutData;
 use Modules\Attendance\Exceptions\AttendanceException;
-use Modules\Attendance\Http\Requests\Api\CheckInRequest;
-use Modules\Attendance\Http\Requests\Api\CheckOutRequest;
 use Modules\Shared\Traits\ApiResponse;
 
 class AttendanceController extends Controller
@@ -19,46 +15,6 @@ class AttendanceController extends Controller
     public function __construct(
         protected AttendanceServiceInterface $attendanceService
     ) {}
-
-    public function checkIn(CheckInRequest $request)
-    {
-        try {
-            $employeeId = $this->resolveEmployeeId($request);
-
-            $photoPath = $request->file('photo')->store('attendance/check-ins', 'public');
-
-            $attendance = $this->attendanceService->checkIn(CheckInData::fromArray([
-                'employee_id' => $employeeId,
-                'latitude' => $request->validated('latitude'),
-                'longitude' => $request->validated('longitude'),
-                'photo_path' => $photoPath,
-            ]));
-
-            return $this->success($attendance, 'Check-in berhasil.');
-        } catch (AttendanceException $e) {
-            return $this->error($e->getMessage(), 422);
-        }
-    }
-
-    public function checkOut(CheckOutRequest $request)
-    {
-        try {
-            $employeeId = $this->resolveEmployeeId($request);
-
-            $photoPath = $request->file('photo')->store('attendance/check-outs', 'public');
-
-            $attendance = $this->attendanceService->checkOut(CheckOutData::fromArray([
-                'employee_id' => $employeeId,
-                'latitude' => $request->validated('latitude'),
-                'longitude' => $request->validated('longitude'),
-                'photo_path' => $photoPath,
-            ]));
-
-            return $this->success($attendance, 'Check-out berhasil.');
-        } catch (AttendanceException $e) {
-            return $this->error($e->getMessage(), 422);
-        }
-    }
 
     public function myLocation(Request $request)
     {
@@ -76,6 +32,7 @@ class AttendanceController extends Controller
             'success' => true,
             'message' => 'Lokasi ditemukan.',
             'data' => [
+                'id' => $location->id,
                 'name' => $location->name,
                 'latitude' => (float) $location->latitude,
                 'longitude' => (float) $location->longitude,

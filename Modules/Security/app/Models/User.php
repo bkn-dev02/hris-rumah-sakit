@@ -62,7 +62,7 @@ class User extends Authenticatable
 
     public function employee(): HasOne
     {
-        return $this->hasOne(Employee::class);
+        return $this->hasOne(Employee::class, 'user_id');
     }
 
     public function hasPermission(string $code): bool
