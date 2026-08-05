@@ -7,11 +7,15 @@ use Illuminate\Database\QueryException;
 use Modules\Attendance\Contracts\Services\CheckInServiceInterface;
 use Modules\Attendance\Http\Requests\StoreCheckInRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Modules\Attendance\Contracts\Services\AttendanceServiceInterface;
+use Modules\Attendance\Exceptions\AttendanceException;
 
 class CheckInController extends Controller
 {
     public function __construct(
-        protected CheckInServiceInterface $checkInService
+        protected CheckInServiceInterface $checkInService,
+        protected AttendanceServiceInterface $attendanceService,
     ) {}
 
     public function store(StoreCheckInRequest $request)
@@ -35,20 +39,33 @@ class CheckInController extends Controller
             ], 422);
         }
 
-        $photoPath = $request->file('photo')->store('attendance/check-ins', 'public');
+        try {
+            $checkIn = DB::transaction(function () use ($request, $employee) {
+                $photoPath = $request->file('photo')->store('attendance/check-ins', 'public');
 
-        $checkIn = $this->checkInService->create([
-            'employee_id' => $employee->id,
-            'checked_at' => now(),
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'photo' => $photoPath,
-            'location_id' => $request->location_id,
-            'distance_meters' => 0,
-            'ip' => $request->ip(),
-            'device' => $request->userAgent(),
-            'note' => $request->note,
-        ]);
+                $checkIn = $this->checkInService->create([
+                    'employee_id' => $employee->id,
+                    'checked_at' => now(),
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'photo' => $photoPath,
+                    'location_id' => $request->location_id,
+                    'distance_meters' => 0,
+                    'ip' => $request->ip(),
+                    'device' => $request->userAgent(),
+                    'note' => $request->note,
+                ]);
+
+                $this->attendanceService->checkIn($employee->id, $checkIn->id);
+
+                return $checkIn;
+            });
+        } catch (AttendanceException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
 
         return response()->json([
             'success' => true,

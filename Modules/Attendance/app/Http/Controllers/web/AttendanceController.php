@@ -16,14 +16,14 @@ class AttendanceController extends Controller
     public function __construct(
         protected AttendanceServiceInterface $attendanceService,
         protected AttendanceCorrectionServiceInterface $correctionService,
-        protected AttendanceStatusServiceInterface $statusService
+        protected AttendanceStatusServiceInterface $statusService,
     ) {}
 
     public function index(Request $request)
     {
         $filters = $request->only(['employee_id', 'status_id', 'start_date', 'end_date']);
 
-        $attendances = $this->attendanceService->paginate(15, $filters);
+        $attendances = $this->attendanceService->paginateForDisplay(15, $request->only(['start_date', 'end_date', 'status_id']));
         $statuses = $this->statusService->activeList();
 
         return view('attendance::attendances.index', compact('attendances', 'statuses'));
@@ -54,5 +54,51 @@ class AttendanceController extends Controller
         return redirect()
             ->route('attendance.attendances.show', $attendance)
             ->with('success', 'Status kehadiran berhasil dikoreksi.');
+    }
+
+    public function today(Request $request)
+    {
+        $employeeId = $this->resolveEmployeeId($request);
+
+        $data = $this->attendanceService->todayForDisplay($employeeId);
+
+        return response()->json([
+            'success' => true,
+            'message' => $data ? 'Data ditemukan.' : 'Belum ada absensi hari ini.',
+            'data'    => $data,
+        ]);
+    }
+
+    public function history(Request $request)
+    {
+        $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        $employeeId = $this->resolveEmployeeId($request);
+
+        $data = $this->attendanceService->historyForDisplay(
+            $employeeId,
+            $request->input('start_date'),
+            $request->input('end_date'),
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat ditemukan.',
+            'data'    => $data,
+        ]);
+    }
+
+    protected function resolveEmployeeId(Request $request): int
+    {
+        $employee = $request->user()->employee;
+
+        if (!$employee) {
+            throw new AttendanceException('Akun Anda tidak terhubung dengan data pegawai.');
+        }
+
+        return $employee->id;
     }
 }

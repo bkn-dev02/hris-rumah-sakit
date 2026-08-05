@@ -14,7 +14,7 @@ class AttendanceDashboardController extends Controller
     public function index()
     {
         $summary = $this->attendanceService->todaySummary();
-        $recentAttendances = $this->attendanceService->recentToday(10);
+        $recentAttendances = $this->attendanceService->recentTodayForDisplay();
 
         return view('attendance::index', compact('summary', 'recentAttendances'));
     }
