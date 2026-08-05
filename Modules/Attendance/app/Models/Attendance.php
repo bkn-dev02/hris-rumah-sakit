@@ -66,6 +66,16 @@ class Attendance extends Model
         return $this->hasMany(AttendanceCorrection::class);
     }
 
+    public function hasCheckedIn(): bool
+    {
+        return !is_null($this->check_in_id);
+    }
+
+    public function hasCheckedOut(): bool
+    {
+        return !is_null($this->check_out_id);
+    }
+
     public function isComplete(): bool
     {
         return $this->hasCheckedIn() && $this->hasCheckedOut();
@@ -83,7 +93,7 @@ class Attendance extends Model
 
     public function scopeIncomplete($query)
     {
-        return $query->whereNotNull('check_in_at')->whereNull('check_out_at');
+        return $query->whereNotNull('check_in_id')->whereNull('check_out_id');
     }
 
     public function scopeUnresolved($query)

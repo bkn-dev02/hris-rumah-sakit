@@ -13,12 +13,11 @@ use Modules\Attendance\Contracts\Repositories\AttendanceLocationRepositoryInterf
 use Modules\Attendance\Contracts\Repositories\AttendanceRepositoryInterface;
 use Modules\Attendance\Contracts\Repositories\AttendanceStatusRepositoryInterface;
 use Modules\Attendance\Contracts\Services\AttendanceServiceInterface;
-use Modules\Attendance\DTOs\CheckInData;
-use Modules\Attendance\DTOs\CheckOutData;
-use Modules\Attendance\Exceptions\AttendanceException;
 use Modules\Attendance\Models\Attendance;
 use Modules\Master\Contracts\Services\EmployeeShiftScheduleServiceInterface;
 use Modules\Master\Contracts\Services\EmployeeServiceInterface;
+use Modules\Attendance\Exceptions\AttendanceException;
+use Illuminate\Support\Facades\Cache;
 
 class AttendanceService implements AttendanceServiceInterface
 {
@@ -36,81 +35,34 @@ class AttendanceService implements AttendanceServiceInterface
         protected EmployeeServiceInterface $employeeService,
     ) {}
 
-    public function checkIn(CheckInData $data): Attendance
+    public function checkIn(int $employeeId, int $checkInId): Attendance
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($employeeId, $checkInId) {
 
-            if ($this->attendanceRepository->findOpenForEmployee($data->employeeId)) {
-                throw new AttendanceException('Anda masih memiliki check-in yang belum checkout. Silakan checkout terlebih dahulu.');
+            $workDate = Carbon::today();
+
+            if ($this->attendanceRepository->findByEmployeeAndDate($employeeId, $workDate->toDateString())) {
+                throw new AttendanceException('Data absensi untuk hari ini sudah ada.');
             }
 
-            $schedule = $this->shiftScheduleService->current($data->employeeId);
+            $schedule = $this->shiftScheduleService->current($employeeId);
 
             if (!$schedule) {
                 throw new AttendanceException('Anda belum memiliki jadwal shift aktif. Hubungi admin.');
             }
 
-            $workDate = Carbon::today();
-
-            if ($this->attendanceRepository->findByEmployeeAndDate($data->employeeId, $workDate->toDateString())) {
-                throw new AttendanceException('Anda sudah melakukan absensi hari ini.');
-            }
-
-            $location = $this->locationRepository
-                ->activeList()
-                ->first(fn($loc) => $loc->isWithinRadius($data->latitude, $data->longitude));
-
-            if (!$location) {
-                throw new AttendanceException('Lokasi Anda berada di luar radius area kerja yang diizinkan.');
-            }
-
-            return $this->attendanceRepository->create([
-                'employee_id' => $data->employeeId,
+            $attendance = $this->attendanceRepository->create([
+                'employee_id' => $employeeId,
                 'work_date' => $workDate,
                 'shift_id' => $schedule->shift_id,
-                'check_in_at' => now(),
-                'check_in_latitude' => $data->latitude,
-                'check_in_longitude' => $data->longitude,
-                'check_in_photo' => $data->photoPath,
-                'check_in_location_id' => $location->id,
-                'check_in_distance_meters' => $location->distanceTo($data->latitude, $data->longitude),
+                'check_in_id' => $checkInId,
                 'source' => 'mobile',
             ]);
-        });
-    }
 
-    public function checkOut(CheckOutData $data): Attendance
-    {
-        return DB::transaction(function () use ($data) {
+            Cache::forget("attendance:summary:{$workDate->toDateString()}");
+            Cache::forget("attendance:recent:{$workDate->toDateString()}:10");
 
-            $attendance = $this->attendanceRepository->findOpenForEmployee($data->employeeId);
-
-            if (!$attendance) {
-                throw new AttendanceException('Anda belum melakukan check-in.');
-            }
-
-            $location = $this->locationRepository
-                ->activeList()
-                ->first(fn($loc) => $loc->isWithinRadius($data->latitude, $data->longitude));
-
-            if (!$location) {
-                throw new AttendanceException('Lokasi Anda berada di luar radius area kerja yang diizinkan.');
-            }
-
-            $this->attendanceRepository->update($attendance, [
-                'check_out_at'               => now(),
-                'check_out_latitude'         => $data->latitude,
-                'check_out_longitude'        => $data->longitude,
-                'check_out_photo'            => $data->photoPath,
-                'check_out_location_id'      => $location->id,
-                'check_out_distance_meters'  => $location->distanceTo($data->latitude, $data->longitude),
-            ]);
-
-            $attendance = $attendance->fresh(['shift', 'employee']);
-
-            $this->resolveStatusFor($attendance);
-
-            return $attendance->fresh();
+            return $attendance;
         });
     }
 
@@ -120,7 +72,54 @@ class AttendanceService implements AttendanceServiceInterface
             ?? $this->attendanceRepository->findByEmployeeAndDate($employeeId, Carbon::today()->toDateString());
     }
 
-    public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    public function recentTodayForDisplay(int $limit = 10): array
+    {
+        $today = Carbon::today()->toDateString();
+
+        return Cache::remember("attendance:recent:{$today}:{$limit}", now()->addMinutes(10), function () use ($limit) {
+            return $this->recentToday($limit)
+                ->map(fn($attendance) => $this->toDisplayArray($attendance))
+                ->all();
+        });
+    }
+
+    protected function toDisplayArray(Attendance $attendance): array
+    {
+        [$badgeLabel, $badgeColor] = match (true) {
+            is_null($attendance->check_out_id) => ['Belum Check Out', 'amber'],
+            is_null($attendance->attendance_status_id) => ['Perlu Review', 'slate'],
+            $attendance->status->code === 'TERLAMBAT' => [$attendance->status->name, 'rose'],
+            default => [$attendance->status->name, 'emerald'],
+        };
+
+        return [
+            'id' => $attendance->id,
+            'work_date' => $attendance->work_date->translatedFormat('d M Y'),
+            'employee_name' => $attendance->employee->name,
+            'employment_status_name' => $attendance->employee->employmentStatus->name ?? '-',
+            'check_in_time' => $attendance->checkIn?->checked_at?->format('H:i') ?? '-',
+            'check_in_photo_url'      => $attendance->checkIn?->photo
+                ? asset('storage/' . $attendance->checkIn->photo)
+                : null,
+            'check_out_time' => $attendance->checkOut?->checked_at?->format('H:i'),
+            'badge_label' => $badgeLabel,
+            'badge_color' => $badgeColor,
+        ];
+    }
+
+    public function paginateForDisplay(int $perPage = 25, array $filters = []): LengthAwarePaginator
+    {
+        $today = Carbon::today()->toDateString();
+
+        $filters['start_date'] = $filters['start_date'] ?? $today;
+        $filters['end_date']   = $filters['end_date'] ?? $today;
+
+        return $this->attendanceRepository
+            ->paginate($perPage, $filters)
+            ->through(fn(Attendance $attendance) => $this->toDisplayArray($attendance));
+    }
+
+    public function paginate(int $perPage = 25, array $filters = []): LengthAwarePaginator
     {
         return $this->attendanceRepository->paginate($perPage, $filters);
     }
@@ -231,6 +230,9 @@ class AttendanceService implements AttendanceServiceInterface
         $shift = $attendance->shift;
         $workDate = $attendance->work_date->toDateString();
 
+        $checkInTime = $attendance->checkIn->checked_at;
+        $checkOutTime = $attendance->checkOut->checked_at;
+
         $shiftStart = Carbon::parse("{$workDate} {$shift->start_time}");
         $shiftEnd = Carbon::parse("{$workDate} {$shift->end_time}");
 
@@ -241,10 +243,10 @@ class AttendanceService implements AttendanceServiceInterface
         $lateThreshold = $shiftStart->copy()->addMinutes(self::DEFAULT_LATE_TOLERANCE_MINUTES);
         $earlyLeaveThreshold = $shiftEnd->copy()->subMinutes(self::DEFAULT_EARLY_LEAVE_TOLERANCE_MINUTES);
 
-        $isLate = $attendance->check_in_at->greaterThan($lateThreshold);
-        $isEarlyLeave = $attendance->check_out_at->lessThan($earlyLeaveThreshold);
+        $isLate = $checkInTime->greaterThan($lateThreshold);
+        $isEarlyLeave = $checkOutTime->lessThan($earlyLeaveThreshold);
 
-        $workedMinutes = $attendance->check_in_at->diffInMinutes($attendance->check_out_at);
+        $workedMinutes = $checkInTime->diffInMinutes($checkOutTime);
         $shiftDurationMinutes = $shiftStart->diffInMinutes($shiftEnd);
 
         if ($workedMinutes < ($shiftDurationMinutes * 0.5)) {
@@ -273,21 +275,57 @@ class AttendanceService implements AttendanceServiceInterface
     {
         $today = Carbon::today()->toDateString();
 
-        $totalEmployees = $this->employeeService->getAll()->count();
-        $present = $this->attendanceRepository->countCheckedInForDate($today);
-        $onLeave = $this->exceptionRepository->countApprovedForDate($today);
-        $absent = max($totalEmployees - $present - $onLeave, 0);
+        return Cache::remember("attendance_summary:{$today}", now()->addMinutes(10), function () use ($today) {
+            $totalEmployees = $this->employeeService->getAll()->count();
+            $present = $this->attendanceRepository->countCheckedInForDate($today);
+            $onLeave = $this->exceptionRepository->countApprovedForDate($today);
+            $absent = max($totalEmployees - $present - $onLeave, 0);
 
-        return [
-            'total_employees' => $totalEmployees,
-            'present'          => $present,
-            'on_leave'         => $onLeave,
-            'absent'           => $absent,
-        ];
+            return ['total' => $totalEmployees, 'present' => $present, 'on_leave' => $onLeave, 'absent' => $absent,];
+        });
     }
 
     public function recentToday(int $limit = 10): Collection
     {
         return $this->attendanceRepository->recentForDate(Carbon::today()->toDateString(), $limit);
+    }
+
+    public function todayForDisplay(int $employeeId): ?array
+    {
+        $attendance = $this->todayFor($employeeId);
+
+        return $attendance ? $this->toMobileArray($attendance) : null;
+    }
+
+    public function historyForDisplay(int $employeeId, ?string $startDate = null, ?string $endDate = null): array
+    {
+        $startDate = $startDate ?? Carbon::today()->subDays(30)->toDateString();
+        $endDate = $endDate ?? Carbon::today()->toDateString();
+
+        return $this->attendanceRepository
+            ->history($employeeId, $startDate, $endDate)
+            ->map(fn(Attendance $attendance) => $this->toMobileArray($attendance))
+            ->all();
+    }
+
+    protected function toMobileArray(Attendance $attendance): array
+    {
+        $status = match (true) {
+            is_null($attendance->check_in_id) => 'not_checked_in',
+            is_null($attendance->check_out_id) => 'checked_in',
+            default => 'checked_out',
+        };
+
+        return [
+            'status'              => $status,
+            'work_date'           => $attendance->work_date->toDateString(),
+            'shift_name'          => $attendance->shift->name ?? null,
+            'check_in_time'       => $attendance->checkIn?->checked_at?->format('H:i'),
+            'check_in_photo_url'  => $attendance->checkIn?->photo
+                ? asset('storage/' . $attendance->checkIn->photo)
+                : null,
+            'check_out_time'      => $attendance->checkOut?->checked_at?->format('H:i'),
+            'attendance_status'   => $attendance->status->name ?? null,
+        ];
     }
 }

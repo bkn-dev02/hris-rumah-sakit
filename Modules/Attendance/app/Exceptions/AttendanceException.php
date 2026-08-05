@@ -4,7 +4,4 @@ namespace Modules\Attendance\Exceptions;
 
 use RuntimeException;
 
-class AttendanceException extends RuntimeException
-{
-    //
-}
+class AttendanceException extends RuntimeException {}

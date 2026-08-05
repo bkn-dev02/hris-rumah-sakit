@@ -45,9 +45,35 @@ class AttendanceController extends Controller
     {
         $employeeId = $this->resolveEmployeeId($request);
 
-        $attendance = $this->attendanceService->todayFor($employeeId);
+        $data = $this->attendanceService->todayForDisplay($employeeId);
 
-        return $this->success($attendance);
+        return response()->json([
+            'success' => true,
+            'message' => $data ? 'Data ditemukan.' : 'Belum ada absensi hari ini.',
+            'data'    => $data,
+        ]);
+    }
+
+    public function history(Request $request)
+    {
+        $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        $employeeId = $this->resolveEmployeeId($request);
+
+        $data = $this->attendanceService->historyForDisplay(
+            $employeeId,
+            $request->input('start_date'),
+            $request->input('end_date'),
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat ditemukan.',
+            'data'    => $data,
+        ]);
     }
 
     protected function resolveEmployeeId(Request $request): int
