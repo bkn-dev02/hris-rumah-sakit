@@ -24,7 +24,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
     public function paginate(int $perPage = 10, bool $trashed = false): LengthAwarePaginator
     {
         return $this->model
-            ->with('employmentStatus', 'user')
+            ->with(['employmentStatus', 'user', 'placements.position'])
             ->when($trashed, fn($query) => $query->onlyTrashed())
             ->orderBy('name')
             ->paginate($perPage);

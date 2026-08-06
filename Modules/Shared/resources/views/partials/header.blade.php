@@ -1,25 +1,13 @@
-<header class="fixed inset-x-0 top-0 bg-slate-50 z-50 w-full h-16 gap-5 flex items-center justify-between transition-all duration-300 shadow-md text-blue-700">
+<header class="fixed inset-x-0 top-0 bg-slate-50 z-50 w-full h-16 gap-5 flex items-center justify-between px-4 md:px-8 transition-all duration-300 shadow-md text-sky-800">
 
     <!-- Left: Brand -->
-    <div class="flex-1 h-full flex justify-center items-center gap-4">
-        <img src="#" alt="Logo" class="h-10 w-10 rounded-full object-cover">
-        <span class="font-bold text-lg italic">Rumah Sakit</span>
-    </div>
-    <!-- Middle: Search -->
-    <div class="flex-3 h-full flex justify-center items-center">
-        <input type="text" placeholder="Cari..." class="w-1/2 py-2.5 pl-10 pr-12 text-sm text-gray-700 bg-white/90 backdrop-blur-sm border-2 border-blue-200 rounded-full shadow-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 transition-all duration-300 placeholder-gray-400 hover:shadow-blue-100/50">
+    <div class="h-full flex justify-center items-center gap-4">
+        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-10 rounded-full object-cover">
+        <span class="font-bold text-xs md:text-sm lg:text-lg italic">HRIS Rumah Sakit</span>
     </div>
 
     <!-- RIGHT: Actions -->
-    <div class="flex-1 flex items-center gap-2 sm:gap-3">
-
-        <!-- Notifikasi -->
-        <button class="relative p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 hover-lift">
-            <i class="fas fa-bell text-lg"></i>
-            <span class="notification-dot absolute top-1 right-1.5"></span>
-        </button>
-
-        <!-- Profil -->
+    <div class="flex items-center gap-2 sm:gap-3">
         <div class="relative" x-data="{ open: false }">
             <button
                 @click="open = !open"

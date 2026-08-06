@@ -16,27 +16,17 @@
 </head>
 
 <body class="bg-slate-50">
-
     <div class="min-h-screen">
-
-        {{-- Header --}}
         @include('shared::partials.header')
-
-        <div class="flex justify-center m-auto min-h-screen mt-16 w-full">
-            {{-- Sidebar --}}
-            <div class="w-64">
+        <div class="flex flex-col lg:flex-row min-h-screen mt-16 w-full">
+            <aside class="w-full lg:w-64 shrink-0">
                 @include('shared::partials.sidebar')
-            </div>
-
-            {{-- Konten halaman --}}
-            <main class="flex-1 px-2 py-2">
+            </aside>
+            <main class="flex-1 px-4 py-4">
                 @yield('content')
             </main>
-
         </div>
-
     </div>
-
 </body>
 
 </html>

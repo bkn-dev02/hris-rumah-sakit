@@ -12,31 +12,33 @@
     @endif
 
     <div class="flex items-center gap-4">
-        <a href="{{ route('master.employees.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-blue-100 bg-blue-900 hover:bg-blue-800 transition duration-200 translate-x-0 hover:-translate-x-1">
-            <i class="fa fa-arrow-left text-md text-blue-50"></i>
+        <a href="{{ route('master.employees.index') }}" class="w-10 h-10 flex items-center justify-center rounded-full bg-sky-800 hover:bg-sky-900 transition duration-200 translate-x-0 hover:-translate-x-1">
+            <i class="fa fa-arrow-left text-xs md:text-md text-sky-50"></i>
         </a>
-        <h1 class="text-xl font-semibold text-blue-800">Detail Employee</h1>
+        <h1 class="text-md md:text-xl font-semibold text-sky-800">Detail Employee</h1>
     </div>
 
-    {{-- Bio card --}}
-    <div class="mt-6 bg-white shadow-md p-6">
+    <div class="mt-6 bg-sky-100 shadow-md p-6 rounded-lg">
         <div class="flex items-center gap-4">
-            <x-shared::avatar
-                :src="$employee->photo ? asset('storage/' . $employee->photo) : null"
-                :name="$employee->name"
-                size="xl" />
-            <div>
-                <h2 class="text-lg font-semibold text-slate-800">{{ $employee->name }}</h2>
-                <p class="text-sm text-slate-500">{{ $employee->employee_number }} &middot; {{ $employee->employmentStatus->name ?? '-' }}</p>
-                <div class="mt-1">
-                    @if($employee->is_active)
-                    <x-shared::badge variant="success" dot>Aktif</x-shared::badge>
-                    @else
-                    <x-shared::badge variant="secondary" dot>Nonaktif</x-shared::badge>
-                    @endif
+            <div class="flex flex-col gap-4 lg:flex-row items-center">
+                <x-shared::avatar
+                    :src="$employee->photo ? asset('storage/' . $employee->photo) : null"
+                    :name="$employee->name"
+                    size="xl" />
+                <div class="">
+                    <h2 class="text-lg font-semibold text-slate-800">{{ $employee->name }}</h2>
+                    <p class="text-sm text-slate-500">{{ $employee->position }}</p>
+                    <p class="text-sm text-slate-500">{{ $employee->employmentStatus->name ?? '-' }}</p>
+                    <div class="mt-1">
+                        @if($employee->is_active)
+                        <x-shared::badge variant="success" dot>Aktif</x-shared::badge>
+                        @else
+                        <x-shared::badge variant="secondary" dot>Nonaktif</x-shared::badge>
+                        @endif
+                    </div>
                 </div>
             </div>
-            <a href="{{ route('master.employees.edit', $employee->slug) }}" class="ml-auto bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200">
+            <a href="{{ route('master.employees.edit', $employee->slug) }}" class="ml-auto bg-sky-800 hover:bg-sky-900 text-sky-50 px-4 py-2 rounded-full text-sm font-medium transition duration-200">
                 <i class="fa fa-pen text-sm"></i> Edit Data
             </a>
         </div>
