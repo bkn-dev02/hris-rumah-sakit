@@ -12,7 +12,7 @@ class ProfileController extends Controller
 
     public function show(Request $request)
     {
-        $user = $request->user()->load('employee');
+        $user = $request->user()->load('employee.employmentStatus');
         $employee = $user->employee;
 
         if (! $employee) {
@@ -106,6 +106,8 @@ class ProfileController extends Controller
             'education_major'    => $employee->education_major,
             'photo_url'          => $employee->photo ? Storage::disk('public')->url($employee->photo) : null,
             'hire_date'          => optional($employee->hire_date)->format('Y-m-d'),
+            'employment_status' => $employee->employmentStatus?->name,
+            'position' => $employee->currentPosition()?->name,
             'is_active'          => (bool) $employee->is_active,
         ];
     }

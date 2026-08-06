@@ -117,7 +117,7 @@
     </div>
 
     {{-- Attendance List --}}
-    <div class="space-y-3 bg-sky-100 mt-4 p-4 rounded-lg">
+    <div class="space-y-2 bg-sky-100 mt-4 p-4 rounded-lg">
         <div class="hidden lg:grid lg:grid-cols-12 lg:items-center rounded-lg bg-gradient-to-r from-sky-950 to-sky-800 px-6 py-4 shadow-md">
 
             <div class="col-span-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
@@ -125,12 +125,17 @@
                 <span>Info Karyawan</span>
             </div>
 
-            <div class="col-span-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
+            <div class="col-span-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
+                <i class="fa-solid fa-clock"></i>
+                <span>Shift</span>
+            </div>
+
+            <div class="col-span-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
                 <i class="fa-solid fa-right-to-bracket"></i>
                 <span>Jam Masuk</span>
             </div>
 
-            <div class="col-span-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
+            <div class="col-span-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Jam Pulang</span>
             </div>
@@ -158,8 +163,15 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3 lg:col-span-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-950 ring-2 ring-sky-200 overflow-hidden">
+                <div class="flex items-center gap-3 lg:col-span-2">
+                    <div>
+                        <p class="font-bold uppercase text-sky-950 text-xs">{{ $attendance['shift_name'] }}</p>
+                        <p class="text-xs text-gray-500">({{ $attendance['start_time'] }} - {{ $attendance['end_time'] }})</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 lg:col-span-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-950 ring-2 ring-sky-500 overflow-hidden">
                         @if($attendance['check_in_photo_url'])
                         <img src="{{ $attendance['check_in_photo_url'] }}" alt="Foto check-in" class="h-full w-full object-cover">
                         @else
@@ -168,14 +180,21 @@
                     </div>
                     <div>
                         <p class="text-xs font-medium uppercase text-gray-400">Check In</p>
-                        <p class="font-semibold text-gray-800">{{ $attendance['check_in_time'] }}</p>
+                        <div class="flex text-sky-800 items-center gap-1">
+                            <i class="fa-solid fa-clock"></i>
+                            <p class="font-semibold">{{ $attendance['check_in_time'] }}</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3 lg:col-span-3">
+                <div class="flex items-center gap-3 lg:col-span-2">
                     @if($attendance['check_out_time'])
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-950 text-white ring-2 ring-sky-200">
-                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-950 ring-2 ring-sky-500 overflow-hidden">
+                        @if($attendance['check_out_photo_url'])
+                        <img src="{{ $attendance['check_out_photo_url'] }}" alt="Foto check-out" class="h-full w-full object-cover">
+                        @else
+                        <i class="fa-solid fa-right-to-bracket text-sm"></i>
+                        @endif
                     </div>
                     <div>
                         <p class="text-xs font-medium uppercase text-gray-400">Check Out</p>

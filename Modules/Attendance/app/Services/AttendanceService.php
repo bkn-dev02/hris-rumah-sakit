@@ -2,7 +2,6 @@
 
 namespace Modules\Attendance\Services;
 
-use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -18,11 +17,12 @@ use Modules\Master\Contracts\Services\EmployeeShiftScheduleServiceInterface;
 use Modules\Master\Contracts\Services\EmployeeServiceInterface;
 use Modules\Attendance\Exceptions\AttendanceException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
 
 class AttendanceService implements AttendanceServiceInterface
 {
 
-    protected const DEFAULT_LATE_TOLERANCE_MINUTES = 15;
+    protected const DEFAULT_LATE_TOLERANCE_MINUTES = 0;
     protected const DEFAULT_EARLY_LEAVE_TOLERANCE_MINUTES = 15;
 
     public function __construct(
@@ -66,6 +66,32 @@ class AttendanceService implements AttendanceServiceInterface
         });
     }
 
+    public function checkOut(int $employeeId, int $checkOutId): Attendance
+    {
+        return DB::transaction(function () use ($employeeId, $checkOutId) {
+
+            $attendance = $this->attendanceRepository->findOpenForEmployee($employeeId);
+
+            if (!$attendance) {
+                throw new AttendanceException('Anda belum melakukan check-in hari ini.');
+            }
+
+            $this->attendanceRepository->update($attendance, [
+                'check_out_id' => $checkOutId,
+            ]);
+
+            $attendance = $attendance->fresh(['shift', 'checkIn', 'checkOut', 'employee']);
+
+            $this->resolveStatusFor($attendance);
+
+            $workDate = $attendance->work_date->toDateString();
+            Cache::forget("attendance:summary:{$workDate}");
+            Cache::forget("attendance:recent:{$workDate}:10");
+
+            return $attendance->fresh();
+        });
+    }
+
     public function todayFor(int $employeeId): ?Attendance
     {
         return $this->attendanceRepository->findOpenForEmployee($employeeId)
@@ -102,6 +128,16 @@ class AttendanceService implements AttendanceServiceInterface
                 ? asset('storage/' . $attendance->checkIn->photo)
                 : null,
             'check_out_time' => $attendance->checkOut?->checked_at?->format('H:i'),
+            'check_out_photo_url'      => $attendance->checkOut?->photo
+                ? asset('storage/' . $attendance->checkOut->photo)
+                : null,
+            'shift_name' => $attendance->shift->name ?? '-',
+            'start_time' => $attendance->shift?->start_time
+                ? Carbon::parse($attendance->shift->start_time)->format('H:i')
+                : null,
+            'end_time' => $attendance->shift?->end_time
+                ? Carbon::parse($attendance->shift->end_time)->format('H:i')
+                : null,
             'badge_label' => $badgeLabel,
             'badge_color' => $badgeColor,
         ];
@@ -324,10 +360,9 @@ class AttendanceService implements AttendanceServiceInterface
             'work_date'           => $attendance->work_date->toDateString(),
             'shift_name'          => $attendance->shift->name ?? null,
             'check_in_time'       => $attendance->checkIn?->checked_at?->format('H:i'),
-            'check_in_photo_url'  => $attendance->checkIn?->photo
-                ? asset('storage/' . $attendance->checkIn->photo)
-                : null,
+            'check_in_photo_url'  => $attendance->checkIn?->photo ? asset('storage/' . $attendance->checkIn->photo) : null,
             'check_out_time'      => $attendance->checkOut?->checked_at?->format('H:i'),
+            'check_out_photo_url' => $attendance->checkOut?->photo ? asset('storage/' . $attendance->checkOut->photo) : null,
             'attendance_status'   => $attendance->status->name ?? null,
         ];
     }

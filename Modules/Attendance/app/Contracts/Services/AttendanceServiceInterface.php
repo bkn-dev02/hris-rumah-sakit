@@ -35,4 +35,6 @@ interface AttendanceServiceInterface
     public function todayForDisplay(int $employeeId): ?array;
 
     public function historyForDisplay(int $employeeId, ?string $startDate = null, ?string $endDate = null): array;
+
+    public function checkOut(int $employeeId, int $checkOutId): Attendance;
 }
