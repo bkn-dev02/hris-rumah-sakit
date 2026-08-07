@@ -87,6 +87,51 @@ class Employee extends Model
         return $this->currentPlacement()?->position;
     }
 
+    public function getPositionAttribute(): ?string
+    {
+        return $this->currentPosition()?->name;
+    }
+
+    public function getWorkDurationAttribute(): string
+    {
+        if (!$this->hire_date) {
+            return '-';
+        }
+
+        $startDate = $this->hire_date->copy()->startOfDay();
+        $today = now()->startOfDay();
+
+        if ($startDate->gt($today)) {
+            return '-';
+        }
+
+        $diffInDays = $startDate->diffInDays($today);
+
+        if ($diffInDays >= 365) {
+            $years = intdiv($diffInDays, 365);
+            $remainingDays = $diffInDays % 365;
+            $months = intdiv($remainingDays, 30);
+
+            return $months > 0 ? "{$years} tahun {$months} bulan" : "{$years} tahun";
+        }
+
+        if ($diffInDays >= 30) {
+            $months = intdiv($diffInDays, 30);
+            $remainingDays = $diffInDays % 30;
+            $weeks = intdiv($remainingDays, 7);
+
+            return $weeks > 0 ? "{$months} bulan {$weeks} minggu" : "{$months} bulan";
+        }
+
+        if ($diffInDays >= 7) {
+            $weeks = intdiv($diffInDays, 7);
+
+            return "{$weeks} minggu";
+        }
+
+        return "{$diffInDays} hari";
+    }
+
     public function currentShiftSchedule(): ?EmployeeShiftSchedule
     {
         return $this->shiftSchedules()->active()->latest('start_date')->first();

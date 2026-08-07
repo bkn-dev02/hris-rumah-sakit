@@ -1,27 +1,13 @@
 <aside class="fixed inset-y-0 left-0 top-16 z-40 flex w-64 -translate-x-full flex-col overflow-y-auto bg-sky-950 shadow-lg transition-transform duration-200 ease-out peer-checked:translate-x-0 lg:translate-x-0">
-    <div class="flex flex-col items-center justify-center gap-3 border-b border-slate-500/60 p-6">
-        <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-slate-200 bg-slate-500">
-            <img src="#" alt="Logo" class="h-10 w-10 rounded-full object-cover">
-        </div>
-        <div class="text-center">
-            <p class="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Admin Panel
-            </p>
-        </div>
-    </div>
-
     <nav class="flex-1 overflow-y-auto px-3 py-4 lg:pt-6" x-data="{ openMenu: '{{ $openMenu }}' }">
         <ul class="space-y-1">
             @foreach($menus as $menu)
-
             @php
             $hasChildren = isset($menu['children']);
-
             $childPatterns = $hasChildren ? collect($menu['children'])
             ->flatMap(fn ($c) => $c['active'])
             ->all()
             : [];
-
             $isActive = request()->routeIs(...$menu['active'], ...$childPatterns);
             @endphp
 
