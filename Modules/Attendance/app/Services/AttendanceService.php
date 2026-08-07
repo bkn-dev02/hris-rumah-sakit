@@ -121,8 +121,9 @@ class AttendanceService implements AttendanceServiceInterface
         return [
             'id' => $attendance->id,
             'work_date' => $attendance->work_date->translatedFormat('d M Y'),
-            'employee_name' => $attendance->employee->name,
+            'employee_name' => $attendance->employee->name ?? '-',
             'employment_status_name' => $attendance->employee->employmentStatus->name ?? '-',
+            'employee_position_name' => $attendance->employee->currentPosition()?->name ?? '-',
             'check_in_time' => $attendance->checkIn?->checked_at?->format('H:i') ?? '-',
             'check_in_photo_url'      => $attendance->checkIn?->photo
                 ? asset('storage/' . $attendance->checkIn->photo)
@@ -269,8 +270,8 @@ class AttendanceService implements AttendanceServiceInterface
         $checkInTime = $attendance->checkIn->checked_at;
         $checkOutTime = $attendance->checkOut->checked_at;
 
-        $shiftStart = Carbon::parse("{$workDate} {$shift->start_time}");
-        $shiftEnd = Carbon::parse("{$workDate} {$shift->end_time}");
+        $shiftStart = Carbon::parse("{$workDate} {$shift->start_time->format('H:i')}");
+        $shiftEnd = Carbon::parse("{$workDate} {$shift->end_time->format('H:i')}");
 
         if ($shiftEnd->lessThanOrEqualTo($shiftStart)) {
             $shiftEnd->addDay();

@@ -43,6 +43,9 @@ class CheckInController extends Controller
             $checkIn = DB::transaction(function () use ($request, $employee) {
                 $photoPath = $request->file('photo')->store('attendance/check-ins', 'public');
 
+                $location = \Modules\Attendance\Models\AttendanceLocation::findOrFail($request->location_id);
+                $distance = $location->distanceTo((float) $request->latitude, (float) $request->longitude);
+
                 $checkIn = $this->checkInService->create([
                     'employee_id' => $employee->id,
                     'checked_at' => now(),
@@ -50,7 +53,7 @@ class CheckInController extends Controller
                     'longitude' => $request->longitude,
                     'photo' => $photoPath,
                     'location_id' => $request->location_id,
-                    'distance_meters' => 0,
+                    'distance_meters' => (int) $distance,
                     'ip' => $request->ip(),
                     'device' => $request->userAgent(),
                     'note' => $request->note,
