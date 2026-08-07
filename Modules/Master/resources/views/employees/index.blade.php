@@ -105,12 +105,11 @@
                     </div>
                     <div class="lg:col-span-2">
                         <p class="text-sm text-sky-600 break-all">
-                            <i class="fa-solid fa-hospital lg:hidden"></i> {{ $employee->currentDepartment()?->name ?? '-' }}
+                            {{ $employee->currentDepartment()?->name ?? '-' }}
                         </p>
                     </div>
                     <div class="lg:col-span-2">
                         <span class="text-sm text-sky-600">
-                            <i class="fa-solid fa-id-card lg:hidden"></i>
                             {{ $employee->employmentStatus->name ?? '-' }}
                         </span>
                         @if($employee->trashed())
@@ -131,12 +130,12 @@
                     </div>
                     <div class="lg:col-span-2">
                         <p class="text-sm text-sky-600">
-                            <i class="fa-solid fa-phone lg:hidden"></i> {{ $employee->phone ?? '-' }}
+                            {{ $employee->phone ?? '-' }}
                         </p>
                     </div>
                     <div class="lg:col-span-2">
                         <p class="text-sm text-sky-600">
-                            <i class="fa-solid fa-calendar-days lg:hidden"></i> {{ $employee->work_duration ?? '-' }}
+                            {{ $employee->work_duration ?? '-' }}
                         </p>
                     </div>
                     <div class="lg:col-span-1">

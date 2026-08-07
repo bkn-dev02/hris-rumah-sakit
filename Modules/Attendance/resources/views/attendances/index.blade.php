@@ -96,11 +96,11 @@
 
                 <div class="lg:col-span-3">
                     <p class="font-semibold text-sky-950">{{ $attendance['employee_name'] }}</p>
-                    <p class="text-xs text-gray-500">{{ $attendance['employment_status_name'] }}</p>
+                    <p class="text-xs text-gray-500">{{ $attendance['employee_position_name'] ?? '-' }}</p>
                 </div>
 
                 <div class="flex items-center gap-3 lg:col-span-2">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-950 ring-2 ring-sky-200 overflow-hidden">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-950 ring-2 ring-sky-400 overflow-hidden">
                         @if($attendance['check_in_photo_url'])
                         <img src="{{ $attendance['check_in_photo_url'] }}" alt="Foto check-in" class="h-full w-full object-cover">
                         @else
@@ -111,17 +111,14 @@
                 </div>
 
                 <div class="flex items-center gap-3 lg:col-span-2">
-                    @if($attendance['check_out_time'])
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-950 text-white ring-2 ring-sky-200">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-950 ring-2 ring-sky-400 overflow-hidden">
+                        @if($attendance['check_out_photo_url'])
+                        <img src="{{ $attendance['check_out_photo_url'] }}" alt="Foto check-out" class="h-full w-full object-cover">
+                        @else
                         <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                        @endif
                     </div>
                     <p class="font-semibold text-gray-800">{{ $attendance['check_out_time'] }}</p>
-                    @else
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
-                    <p class="font-semibold text-gray-400">-</p>
-                    @endif
                 </div>
 
                 <div class="lg:col-span-2">

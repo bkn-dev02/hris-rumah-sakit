@@ -159,7 +159,7 @@
                 <div class="flex items-center gap-3 lg:col-span-3">
                     <div>
                         <p class="font-semibold text-sky-950">{{ $attendance['employee_name'] }}</p>
-                        <p class="text-xs text-gray-500">{{ $attendance['employment_status_name'] }}</p>
+                        <p class="text-xs text-gray-500">{{ $attendance['employee_position_name'] }}</p>
                     </div>
                 </div>
 
@@ -219,10 +219,10 @@
                 </div>
 
                 <div class="lg:col-span-1 lg:text-end">
-                    <button class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-br from-sky-950 via-sky-900 to-sky-800 hover:bg-gradient-to-tl px-4 py-2 text-sm font-medium text-white transition duration-200 transform translate-y-0 hover:translate-y-[-2px] cursor-pointer">
+                    <a href="{{ route('attendance.attendances.show', $attendance['id']) }}" class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-br from-sky-950 via-sky-900 to-sky-800 hover:bg-gradient-to-tl px-4 py-2 text-sm font-medium text-white transition duration-200 transform translate-y-0 hover:translate-y-[-2px] cursor-pointer">
                         <i class="fa-solid fa-eye text-sm"></i>
                         Detail
-                    </button>
+                    </a>
                 </div>
 
             </div>

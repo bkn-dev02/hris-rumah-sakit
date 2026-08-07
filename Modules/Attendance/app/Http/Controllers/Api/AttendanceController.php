@@ -65,18 +65,20 @@ class AttendanceController extends Controller
         try {
             $attendance = DB::transaction(function () use ($request, $employeeId) {
                 $photoPath = $request->file('photo')->store('attendance/check-outs', 'public');
+                $location = \Modules\Attendance\Models\AttendanceLocation::findOrFail($request->location_id);
+                $distance = $location->distanceTo((float) $request->latitude, (float) $request->longitude);
 
                 $checkOut = $this->checkOutService->create([
-                    'employee_id' => $employeeId,
-                    'checked_at' => now(),
-                    'latitude' => $request->latitude,
-                    'longitude' => $request->longitude,
-                    'photo' => $photoPath,
-                    'location_id' => $request->location_id,
-                    'distance_meters' => 0,
-                    'ip' => $request->ip(),
-                    'device' => $request->userAgent(),
-                    'note' => $request->note,
+                    'employee_id'     => $employeeId,
+                    'checked_at'      => now(),
+                    'latitude'        => $request->latitude,
+                    'longitude'       => $request->longitude,
+                    'photo'           => $photoPath,
+                    'location_id'     => $request->location_id,
+                    'distance_meters' => (int) $distance,
+                    'ip'              => $request->ip(),
+                    'device'          => $request->userAgent(),
+                    'note'            => $request->note,
                 ]);
 
                 return $this->attendanceService->checkOut($employeeId, $checkOut->id);
