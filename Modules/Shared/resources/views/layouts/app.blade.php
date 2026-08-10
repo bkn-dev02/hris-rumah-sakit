@@ -6,7 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ config('app.name') }}</title>
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ asset('images/logo.jpeg') }}">
+    <title>@yield('title', config('app.name')) - RS Bina Insani</title>
 
     @vite([
     'resources/css/app.css',
