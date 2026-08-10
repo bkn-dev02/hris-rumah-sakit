@@ -19,13 +19,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
     public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return $this->model
-            ->with([
-                'employee' => fn($query) => $query->withTrashed()->with('employmentStatus'),
-                'shift',
-                'status',
-                'checkIn',
-                'checkOut',
-            ])
+            ->with(['employee.employmentStatus', 'shift', 'status', 'checkIn', 'checkOut'])
             ->when($filters['employee_id'] ?? null, fn($query, $value) => $query->where('employee_id', $value))
             ->when($filters['status_id'] ?? null, function ($query, $value) {
                 if ($value === 'unresolved') {
@@ -42,15 +36,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
 
     public function findById(int $id): ?Attendance
     {
-        return $this->model
-            ->with([
-                'employee' => fn($query) => $query->withTrashed()->with('employmentStatus'),
-                'shift',
-                'status',
-                'checkIn.location',
-                'checkOut.location',
-            ])
-            ->find($id);
+        return $this->model->with(['employee', 'shift', 'status', 'checkIn.location', 'checkOut.location'])->find($id);
     }
 
     public function findByEmployeeAndDate(int $employeeId, string $workDate): ?Attendance
@@ -64,13 +50,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
     public function history(int $employeeId, ?string $startDate = null, ?string $endDate = null): Collection
     {
         return $this->model
-            ->with([
-                'employee' => fn($query) => $query->withTrashed(),
-                'shift',
-                'status',
-                'checkIn',
-                'checkOut',
-            ])
+            ->with(['shift', 'status', 'checkIn', 'checkOut'])
             ->where('employee_id', $employeeId)
             ->when($startDate, fn($query, $value) => $query->whereDate('work_date', '>=', $value))
             ->when($endDate, fn($query, $value) => $query->whereDate('work_date', '<=', $value))
@@ -125,12 +105,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
     public function recentForDate(string $date, int $limit = 10): Collection
     {
         return $this->model
-            ->with([
-                'employee' => fn($query) => $query->withTrashed()->with('employmentStatus'),
-                'checkIn',
-                'checkOut',
-                'status',
-            ])
+            ->with(['employee.employmentStatus', 'checkIn', 'checkOut', 'status'])
             ->whereDate('work_date', $date)
             ->orderByDesc('created_at')
             ->limit($limit)

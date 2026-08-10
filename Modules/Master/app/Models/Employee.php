@@ -181,4 +181,26 @@ class Employee extends Model
     {
         return $this->belongsTo(AttendanceLocation::class, 'attendance_location_id');
     }
+
+    public function directSupervisor(): ?Employee
+    {
+        $myPlacement = $this->currentPlacement();
+        if (! $myPlacement) {
+            return null;
+        }
+
+        $myLevel = $myPlacement->position->level;
+
+        $higherPlacement = EmployeePlacement::query()
+            ->active()
+            ->where('department_id', $myPlacement->department_id)
+            ->where('employee_id', '!=', $this->id)
+            ->whereHas('position', fn($q) => $q->where('level', '>', $myLevel))
+            ->with('position')
+            ->get()
+            ->sortByDesc(fn($placement) => $placement->position->level)
+            ->first();
+
+        return $higherPlacement?->employee;
+    }
 }

@@ -22,25 +22,25 @@ class SidebarComposer
                 'active' => ['master.*'],
                 'children' => [
                     [
-                        'label' => 'Employee',
+                        'label' => 'Manajemen Pegawai',
                         'icon'  => 'fa-solid fa-user',
                         'route' => 'master.employees.index',
                         'active' => ['master.employees.*'],
                     ],
                     [
-                        'label' => 'Department',
+                        'label' => 'Manajemen Department',
                         'icon'  => 'fa-solid fa-building',
                         'route' => 'master.departments.index',
                         'active' => ['master.departments.*'],
                     ],
                     [
-                        'label' => 'Position',
+                        'label' => 'Manajemen Position',
                         'icon'  => 'fa-solid fa-briefcase',
                         'route' => 'master.positions.index',
                         'active' => ['master.positions.*'],
                     ],
                     [
-                        'label' => 'Shift',
+                        'label' => 'Manejemen Shift',
                         'icon'  => 'fa-solid fa-clock',
                         'route' => 'master.shifts.index',
                         'active' => ['master.shifts.*'],
@@ -89,6 +89,12 @@ class SidebarComposer
                         'permission' => 'attendance-statuses.view',
                     ],
                 ],
+            ],
+            [
+                'label' => 'Manajemen Cuti & Izin',
+                'icon'  => 'fa-solid fa-calendar-days',
+                'route' => 'leaves.index',
+                'active' => ['leaves.*'],
             ],
             [
                 'label' => 'Security & Account',
