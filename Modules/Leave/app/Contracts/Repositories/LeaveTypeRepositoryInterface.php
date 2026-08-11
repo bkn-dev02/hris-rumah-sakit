@@ -12,4 +12,6 @@ interface LeaveTypeRepositoryInterface
     public function find(int $id): ?LeaveType;
 
     public function quotaFor(int $employeeId, int $leaveTypeId, int $year): int;
+
+    public function allActiveRequiringQuota(): Collection;
 }

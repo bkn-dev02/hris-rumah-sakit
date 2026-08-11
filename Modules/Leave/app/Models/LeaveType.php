@@ -10,10 +10,11 @@ class LeaveType extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['code', 'name', 'description', 'is_active'];
+    protected $fillable = ['code', 'name', 'description', 'is_active', 'requires_quota'];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'requires_quota' => 'boolean',
     ];
 
     public function quotas(): HasMany

@@ -1,16 +1,18 @@
 {
     "name": "nwidart/security",
-    "description": "Security module for HRIS",
+    "description": "",
     "authors": [
         {
-            "name": "HRIS",
-            "email": "noreply@example.com"
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
         }
     ],
     "extra": {
         "laravel": {
             "providers": [],
-            "aliases": {}
+            "aliases": {
+
+            }
         }
     },
     "autoload": {

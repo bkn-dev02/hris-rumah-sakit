@@ -10,7 +10,7 @@
         rel="icon"
         type="image/png"
         href="{{ asset('images/logo.jpeg') }}">
-    <title>@yield('title', config('app.name')) - RS Bina Insani</title>
+    <title>@yield('title', config('app.name')) - RS Kasih Insani</title>
 
     @vite([
     'resources/css/app.css',
