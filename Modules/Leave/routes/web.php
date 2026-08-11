@@ -1,11 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Leave\Http\Controllers\LeaveController;
+use Modules\Leave\Http\Controllers\Web\LeaveController;
+use Modules\Leave\Http\Controllers\Web\LeaveTypeController;
+use Modules\Leave\Http\Controllers\Web\EmployeeLeaveQuotaController;
 
 Route::middleware(['auth', 'verified'])
-    ->prefix('leaves')
-    ->as('leaves.')
+    ->prefix('leave')
+    ->as('leave.')
     ->group(function () {
         Route::get('/', [LeaveController::class, 'index'])->name('index');
+
+        Route::middleware('permission:leave-types.manage')->group(function () {
+            Route::resource('leave-types', LeaveTypeController::class);
+        });
+
+        Route::middleware('permission:leave-quotas.manage')->group(function () {
+            Route::put('employees/{employee}/quotas', [EmployeeLeaveQuotaController::class, 'updateForEmployee'])
+                ->name('employees.quotas.update');
+        });
     });

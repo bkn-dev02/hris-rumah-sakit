@@ -93,8 +93,24 @@ class SidebarComposer
             [
                 'label' => 'Manajemen Cuti & Izin',
                 'icon'  => 'fa-solid fa-calendar-days',
-                'route' => 'leaves.index',
-                'active' => ['leaves.*'],
+                'route' => 'leave.index',
+                'active' => ['leave.*'],
+                'children' => [
+                    [
+                        'label' => 'Pengajuan Cuti',
+                        'icon'  => 'fa-solid fa-file-signature',
+                        'route' => 'leave.index',
+                        'active' => ['leave.index'],
+                        'permission' => 'leave-requests.view',
+                    ],
+                    [
+                        'label' => 'Jenis Cuti',
+                        'icon'  => 'fa-solid fa-list-ul',
+                        'route' => 'leave.leave-types.index',
+                        'active' => ['leave.leave-types.*'],
+                        'permission' => 'leave-types.manage',
+                    ],
+                ],
             ],
             [
                 'label' => 'Security & Account',

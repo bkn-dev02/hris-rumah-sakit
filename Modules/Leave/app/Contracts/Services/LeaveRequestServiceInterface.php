@@ -6,18 +6,25 @@ use Illuminate\Database\Eloquent\Collection;
 use Modules\Leave\DTOs\LeaveRequestData;
 use Modules\Leave\Models\LeaveRequest;
 use Modules\Master\Models\Employee;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface LeaveRequestServiceInterface
 {
-    /** Daftar jenis cuti aktif + sisa kuota tahun berjalan untuk karyawan ini */
     public function getLeaveTypesWithQuota(Employee $employee): Collection;
 
-    /** Ajukan cuti baru. Melempar exception kalau kuota tidak cukup / tanggal bentrok. */
     public function submit(LeaveRequestData $data): LeaveRequest;
 
-    /** Riwayat pengajuan cuti milik karyawan ini */
     public function myRequests(Employee $employee): Collection;
 
-    /** Detail satu pengajuan, hanya kalau milik karyawan ini */
     public function findMyRequest(int $id, Employee $employee): ?LeaveRequest;
+
+    public function pendingForSupervisor(Employee $supervisor): Collection;
+
+    public function decideBySupervisor(int $leaveRequestId, Employee $supervisor, bool $approve, ?string $note = null): LeaveRequest;
+
+    public function pendingForHr(): Collection;
+
+    public function decideByHr(int $leaveRequestId, Employee $hrApprover, bool $approve, ?string $note = null): LeaveRequest;
+
+    public function allRequests(array $filters, int $perPage = 15): LengthAwarePaginator;
 }

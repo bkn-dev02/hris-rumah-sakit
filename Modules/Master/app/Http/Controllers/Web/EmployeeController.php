@@ -12,13 +12,19 @@ use Modules\Master\Contracts\Services\EmploymentStatusServiceInterface;
 use Modules\Master\DTOs\EmployeeData;
 use Modules\Security\Services\UserService;
 use Modules\Master\Models\Employee;
+use Modules\Leave\Contracts\Repositories\LeaveTypeRepositoryInterface;
+use Modules\Leave\Contracts\Repositories\EmployeeLeaveQuotaRepositoryInterface;
+use Modules\Leave\Contracts\Repositories\LeaveRequestRepositoryInterface;
 
 class EmployeeController extends Controller
 {
     public function __construct(
         protected EmployeeServiceInterface $employeeService,
         protected EmploymentStatusServiceInterface $employmentStatusService,
-        protected UserService $userService
+        protected UserService $userService,
+        protected LeaveTypeRepositoryInterface $leaveTypeRepository,
+        protected EmployeeLeaveQuotaRepositoryInterface $employeeLeaveQuotaRepository,
+        protected LeaveRequestRepositoryInterface $leaveRequestRepository
     ) {}
 
     public function index(Request $request)
@@ -59,13 +65,29 @@ class EmployeeController extends Controller
         return view('master::employees.show', compact('employee'));
     }
 
-    public function edit(string $employee)
+    public function edit(Request $request, string $employee)
     {
         $employee = $this->employeeService->findBySlug($employee);
         $employmentStatuses = $this->employmentStatusService->getAll();
         $users = $this->userService->availableForEmployee($employee->user_id);
 
-        return view('master::employees.edit', compact('employee', 'employmentStatuses', 'users'));
+        $quotaYear = (int) $request->get('quota_year', now()->year);
+        $leaveTypes = $this->leaveTypeRepository->allActiveRequiringQuota();
+        $existingQuotas = $this->employeeLeaveQuotaRepository->forEmployeeYear($employee->id, $quotaYear);
+
+        $usedDays = $leaveTypes->mapWithKeys(function ($leaveType) use ($employee, $quotaYear) {
+            return [$leaveType->id => $this->leaveRequestRepository->usedDaysByEmployeeAndType($employee->id, $leaveType->id, $quotaYear)];
+        });
+
+        return view('master::employees.edit', compact(
+            'employee',
+            'employmentStatuses',
+            'users',
+            'leaveTypes',
+            'existingQuotas',
+            'quotaYear',
+            'usedDays'
+        ));
     }
 
     public function update(UpdateEmployeeRequest $request, string $employee)

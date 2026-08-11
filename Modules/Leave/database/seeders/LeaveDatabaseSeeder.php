@@ -11,6 +11,8 @@ class LeaveDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        $this->call([
+            LeavePermissionSeeder::class,
+        ]);
     }
 }
