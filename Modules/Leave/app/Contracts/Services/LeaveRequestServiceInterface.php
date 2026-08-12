@@ -27,4 +27,6 @@ interface LeaveRequestServiceInterface
     public function decideByHr(int $leaveRequestId, Employee $hrApprover, bool $approve, ?string $note = null): LeaveRequest;
 
     public function allRequests(array $filters, int $perPage = 15): LengthAwarePaginator;
+
+    public function cancel(int $leaveRequestId, Employee $employee): LeaveRequest;
 }

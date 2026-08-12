@@ -110,6 +110,20 @@ class SidebarComposer
                         'active' => ['leave.leave-types.*'],
                         'permission' => 'leave-types.manage',
                     ],
+                    [
+                        'label' => 'Approval Atasan',
+                        'icon'  => 'fa-solid fa-user-check',
+                        'route' => 'leave.approvals.supervisor',
+                        'active' => ['leave.approvals.supervisor'],
+                        'permission' => 'leave-requests.approve-supervisor',
+                    ],
+                    [
+                        'label' => 'Approval HRD',
+                        'icon'  => 'fa-solid fa-user-shield',
+                        'route' => 'leave.approvals.hr',
+                        'active' => ['leave.approvals.hr'],
+                        'permission' => 'leave-requests.approve-hr',
+                    ],
                 ],
             ],
             [

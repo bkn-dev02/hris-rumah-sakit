@@ -114,4 +114,13 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
             ->paginate($perPage)
             ->withQueryString();
     }
+
+    public function findCancellableByEmployee(int $id, int $employeeId): ?LeaveRequest
+    {
+        return LeaveRequest::query()
+            ->where('id', $id)
+            ->where('employee_id', $employeeId)
+            ->whereIn('status', ['pending_supervisor', 'pending_hr'])
+            ->first();
+    }
 }

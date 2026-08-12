@@ -31,4 +31,6 @@ interface LeaveRequestRepositoryInterface
     public function allPendingHr(): Collection;
 
     public function paginateAll(array $filters, int $perPage = 15): LengthAwarePaginator;
+
+    public function findCancellableByEmployee(int $id, int $employeeId): ?LeaveRequest;
 }
