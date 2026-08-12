@@ -12,5 +12,6 @@ Route::prefix('v1')
             Route::post('/requests', [LeaveController::class, 'store']);
             Route::get('/requests', [LeaveController::class, 'myRequests']);
             Route::get('/requests/{id}', [LeaveController::class, 'show']);
+            Route::post('/requests/{id}/cancel', [LeaveController::class, 'cancel']);
         });
     });

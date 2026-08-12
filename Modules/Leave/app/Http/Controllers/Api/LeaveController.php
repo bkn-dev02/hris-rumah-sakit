@@ -114,4 +114,24 @@ class LeaveController extends Controller
 
         return $employee;
     }
+
+    public function cancel(Request $request, int $id)
+    {
+        $employee = $this->resolveEmployee($request);
+
+        try {
+            $leaveRequest = $this->leaveRequestService->cancel($id, $employee);
+        } catch (RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengajuan cuti berhasil dibatalkan.',
+            'data' => $leaveRequest,
+        ]);
+    }
 }

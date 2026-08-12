@@ -49,6 +49,10 @@ class LeaveRequestService implements LeaveRequestServiceInterface
             throw new RuntimeException('Jenis cuti tidak ditemukan atau tidak aktif.');
         }
 
+        if (\Carbon\Carbon::parse($data->startDate)->startOfDay()->isPast()) {
+            throw new RuntimeException('Tanggal mulai cuti tidak boleh di masa lalu.');
+        }
+
         if ($this->leaveRequestRepository->hasOverlapping($employee->id, $data->startDate, $data->endDate)) {
             throw new RuntimeException('Tanggal cuti bentrok dengan pengajuan lain.');
         }
@@ -170,5 +174,18 @@ class LeaveRequestService implements LeaveRequestServiceInterface
     public function allRequests(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         return $this->leaveRequestRepository->paginateAll($filters, $perPage);
+    }
+
+    public function cancel(int $leaveRequestId, Employee $employee): LeaveRequest
+    {
+        $leaveRequest = $this->leaveRequestRepository->findCancellableByEmployee($leaveRequestId, $employee->id);
+
+        if (! $leaveRequest) {
+            throw new RuntimeException('Pengajuan cuti tidak ditemukan atau sudah tidak bisa dibatalkan.');
+        }
+
+        return $this->leaveRequestRepository->updateStatus($leaveRequest, [
+            'status' => 'cancelled',
+        ]);
     }
 }
