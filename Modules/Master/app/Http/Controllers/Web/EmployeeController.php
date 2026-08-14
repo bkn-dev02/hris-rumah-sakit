@@ -5,6 +5,7 @@ namespace Modules\Master\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Modules\Attendance\Models\AttendanceLocation;
 use Modules\Master\Http\Requests\StoreEmployeeRequest;
 use Modules\Master\Http\Requests\UpdateEmployeeRequest;
 use Modules\Master\Contracts\Services\EmployeeServiceInterface;
@@ -30,8 +31,12 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         $employees = $this->employeeService->paginate(10, trashed: $request->boolean('trashed'));
+        $attendanceLocations = AttendanceLocation::query()
+            ->active()
+            ->orderBy('name')
+            ->get();
 
-        return view('master::employees.index', compact('employees'));
+        return view('master::employees.index', compact('employees', 'attendanceLocations'));
     }
 
     public function create()
@@ -120,6 +125,22 @@ class EmployeeController extends Controller
         return redirect()
             ->route('master.employees.index')
             ->with('success', 'Employee berhasil dihapus.');
+    }
+
+    public function setAttendanceLocation(Request $request, string $employee)
+    {
+        $validated = $request->validate([
+            'attendance_location_id' => ['nullable', 'integer', 'exists:attendance_locations,id'],
+        ]);
+
+        $employeeModel = $this->employeeService->findBySlug($employee);
+        $employeeModel->update([
+            'attendance_location_id' => $validated['attendance_location_id'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('master.employees.index')
+            ->with('success', 'Lokasi absensi pegawai berhasil diperbarui.');
     }
 
     public function restore(string $employee)

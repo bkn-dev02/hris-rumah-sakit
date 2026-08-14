@@ -83,6 +83,7 @@ Route::middleware(['auth', 'verified'])
                 Route::get('/{employee}/edit', 'edit')->name('edit')->middleware('permission:employees.update');
                 Route::put('/{employee}', 'update')->name('update')->middleware('permission:employees.update');
                 Route::delete('/{employee}', 'destroy')->name('destroy')->middleware('permission:employees.delete');
+                Route::patch('/{employee}/attendance-location', 'setAttendanceLocation')->name('setAttendanceLocation')->middleware('permission:employees.update');
                 Route::patch('/{employee}/restore', 'restore')->name('restore')->middleware('permission:employees.update');
                 Route::delete('/{employee}/force-delete', 'forceDelete')->name('forceDelete')->middleware('permission:employees.delete');
 

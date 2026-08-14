@@ -2,7 +2,9 @@
 
 namespace Modules\Attendance\Contracts\Services;
 
+use Illuminate\Support\Collection;
 use Modules\Attendance\Models\CheckIn;
+use Modules\Master\Models\Employee;
 
 interface CheckInServiceInterface
 {
@@ -15,4 +17,14 @@ interface CheckInServiceInterface
     public function delete(int $id): bool;
 
     public function findByEmployeeAndDate(int $employeeId, string $workDate): ?CheckIn;
+
+    public function createEmergency(array $data): CheckIn;
+
+    public function decideEmergency(int $checkInId, Employee $hrApprover, bool $approve, ?string $note = null): CheckIn;
+
+    public function pendingEmergencies(): Collection;
+
+    public function hasUnseenEmergency(): bool;
+
+    public function markEmergencySeen(): void;
 }

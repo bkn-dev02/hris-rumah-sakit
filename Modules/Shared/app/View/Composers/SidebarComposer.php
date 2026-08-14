@@ -68,6 +68,13 @@ class SidebarComposer
                         'permission' => 'attendances.view',
                     ],
                     [
+                        'label' => 'Presensi Darurat',
+                        'icon'  => 'fa-solid fa-triangle-exclamation',
+                        'route' => 'attendance.emergency.index',
+                        'active' => ['attendance.emergency.*'],
+                        'permission' => 'emergency-attendance.approve',
+                    ],
+                    [
                         'label' => 'Pengajuan',
                         'icon'  => 'fa-solid fa-file-signature',
                         'route' => 'attendance.exception-requests.index',

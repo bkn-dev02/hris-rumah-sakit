@@ -170,6 +170,15 @@
                                 class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sky-900 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-sky-900/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-sky-800 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
+                            <button
+                                type="button"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 cursor-pointer open-attendance-location-modal"
+                                data-slug="{{ $employee->slug }}"
+                                data-name="{{ $employee->name }}"
+                                data-current-location="{{ $employee->attendance_location_id ?? '' }}"
+                                title="Atur lokasi absensi">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </button>
                             <form
                                 method="POST"
                                 action="{{ route('master.employees.destroy', $employee->slug) }}"
@@ -185,6 +194,50 @@
                             @endif
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div id="attendance-location-modal-{{ $employee->slug }}" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/60 p-4">
+                <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-sky-600">Lokasi absensi</p>
+                            <h3 class="mt-1 text-lg font-bold text-slate-800">{{ $employee->name }}</h3>
+                        </div>
+                        <button type="button" class="close-attendance-location-modal rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100" aria-label="Tutup modal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <form method="POST" action="{{ route('master.employees.setAttendanceLocation', $employee->slug) }}" class="mt-5">
+                        @csrf
+                        @method('PATCH')
+                        <div>
+                            <label for="attendance_location_id_{{ $employee->slug }}" class="mb-2 block text-sm font-medium text-slate-700">
+                                Pilih lokasi absensi
+                            </label>
+                            <select
+                                id="attendance_location_id_{{ $employee->slug }}"
+                                name="attendance_location_id"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100">
+                                <option value="">-- Tidak ada lokasi --</option>
+                                @foreach($attendanceLocations as $location)
+                                <option value="{{ $location->id }}" {{ $employee->attendance_location_id == $location->id ? 'selected' : '' }}>
+                                    {{ $location->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mt-5 flex justify-end gap-3">
+                            <button type="button" class="close-attendance-location-modal rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                                Batal
+                            </button>
+                            <button type="submit" class="rounded-xl bg-sky-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-sky-800">
+                                Simpan Lokasi
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
             @empty
@@ -220,4 +273,42 @@
     @endif
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const openButtons = document.querySelectorAll('.open-attendance-location-modal');
+
+        openButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                const slug = this.dataset.slug;
+                const modal = document.getElementById('attendance-location-modal-' + slug);
+
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            });
+        });
+
+        document.querySelectorAll('.close-attendance-location-modal').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const modal = this.closest('[id^="attendance-location-modal-"]');
+
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            });
+        });
+
+        document.querySelectorAll('[id^="attendance-location-modal-"]').forEach(function(modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            });
+        });
+    });
+</script>
 @endsection

@@ -27,7 +27,7 @@
                         </p>
 
                         <h3 class="mt-2 text-3xl font-bold text-sky-950">
-                            1,248
+                            {{ number_format($stats['total']) }}
                         </h3>
 
                         <p class="mt-2 text-xs text-slate-500">
@@ -56,12 +56,12 @@
                         </p>
 
                         <h3 class="mt-2 text-3xl font-bold text-sky-950">
-                            1,085
+                            {{ number_format($stats['present']) }}
                         </h3>
 
                         <p class="mt-2 text-xs text-slate-500">
                             <span class="font-semibold text-emerald-600">
-                                86.9%
+                                {{ $stats['present_pct'] }}%
                             </span>
                             dari total pegawai
                         </p>
@@ -85,12 +85,12 @@
                         </p>
 
                         <h3 class="mt-2 text-3xl font-bold text-sky-950">
-                            87
+                            {{ number_format($stats['late']) }}
                         </h3>
 
                         <p class="mt-2 text-xs text-slate-500">
                             <span class="font-semibold text-amber-600">
-                                7.0%
+                                {{ $stats['late_pct'] }}%
                             </span>
                             dari total kehadiran
                         </p>
@@ -114,12 +114,12 @@
                         </p>
 
                         <h3 class="mt-2 text-3xl font-bold text-sky-950">
-                            76
+                            {{ number_format($stats['absent']) }}
                         </h3>
 
                         <p class="mt-2 text-xs text-slate-500">
                             <span class="font-semibold text-rose-600">
-                                6.1%
+                                {{ $stats['absent_pct'] }}%
                             </span>
                             dari total pegawai
                         </p>
@@ -154,7 +154,7 @@
                         </p>
 
                         <p class="mt-1 text-2xl font-bold text-sky-950">
-                            32
+                            {{ number_format($stats['leave']) }}
                         </p>
                     </div>
 
@@ -176,7 +176,7 @@
                         </p>
 
                         <p class="mt-1 text-2xl font-bold text-sky-950">
-                            24
+                            {{ number_format($stats['overtime']) }}
                         </p>
                     </div>
 
@@ -198,7 +198,7 @@
                         </p>
 
                         <p class="mt-1 text-2xl font-bold text-sky-950">
-                            18
+                            {{ number_format($stats['pending']) }}
                         </p>
                     </div>
 
@@ -242,15 +242,7 @@
                     {{-- Fake Chart --}}
                     <div class="flex h-64 items-end gap-3 border-b border-l border-slate-200 px-4 pb-0">
 
-                        @foreach([
-                        ['day' => 'Sen', 'height' => '70%', 'value' => '980'],
-                        ['day' => 'Sel', 'height' => '82%', 'value' => '1,045'],
-                        ['day' => 'Rab', 'height' => '76%', 'value' => '1,012'],
-                        ['day' => 'Kam', 'height' => '90%', 'value' => '1,085'],
-                        ['day' => 'Jum', 'height' => '84%', 'value' => '1,060'],
-                        ['day' => 'Sab', 'height' => '45%', 'value' => '580'],
-                        ['day' => 'Min', 'height' => '30%', 'value' => '390'],
-                        ] as $item)
+                        @foreach($chartData as $item)
 
                         <div class="group flex h-full flex-1 flex-col items-center justify-end gap-2">
 

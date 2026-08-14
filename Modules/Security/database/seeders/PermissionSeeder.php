@@ -76,6 +76,8 @@ class PermissionSeeder extends Seeder
             ['module' => 'Attendance', 'name' => 'Tambah Status Kehadiran', 'code' => 'attendance-statuses.create'],
             ['module' => 'Attendance', 'name' => 'Edit Status Kehadiran', 'code' => 'attendance-statuses.update'],
             ['module' => 'Attendance', 'name' => 'Hapus Status Kehadiran', 'code' => 'attendance-statuses.delete'],
+            // Attendance - Presensi Darurat
+            ['module' => 'Attendance', 'name' => 'Approve Presensi Darurat', 'code' => 'emergency-attendance.approve'],
         ];
 
         foreach ($permissions as $permission) {
