@@ -43,12 +43,19 @@
 
                     @php
                     $childActive = request()->routeIs(...$child['active']);
+                    $showEmergencyBadge = $child['route'] === 'attendance.emergency.index'
+                    && app(\Modules\Attendance\Contracts\Services\CheckInServiceInterface::class)->hasUnseenEmergency();
                     @endphp
 
                     <li>
                         <a href="{{ Route::has($child['route']) ? route($child['route']) : '#' }}" class="group flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 text-sm transition-all duration-200 {{ $childActive ? 'border-white bg-slate-100 font-medium text-slate-700 shadow-sm' : 'border-transparent text-slate-200 hover:border-slate-300 hover:bg-slate-500/70 hover:text-white' }}">
                             <i class="{{ $child['icon'] }} w-4 text-center text-xs {{ $childActive ? 'text-slate-700' : 'text-slate-300 group-hover:text-white' }}"></i>
-                            <span> {{ $child['label'] }} </span>
+                            <span class="flex flex-1 items-center gap-2">
+                                {{ $child['label'] }}
+                                @if ($showEmergencyBadge)
+                                <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                                @endif
+                            </span>
                         </a>
                     </li>
 

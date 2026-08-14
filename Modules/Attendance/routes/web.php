@@ -6,6 +6,7 @@ use Modules\Attendance\Http\Controllers\Web\AttendanceExceptionRequestController
 use Modules\Attendance\Http\Controllers\Web\AttendanceLocationController;
 use Modules\Attendance\Http\Controllers\Web\AttendanceStatusController;
 use Modules\Attendance\Http\Controllers\Web\AttendanceDashboardController;
+use Modules\Attendance\Http\Controllers\Web\EmergencyCheckInApprovalController;
 
 Route::middleware(['auth', 'verified'])
     ->prefix('attendance')
@@ -34,6 +35,15 @@ Route::middleware(['auth', 'verified'])
                 Route::get('/{exceptionRequest}', 'show')->name('show')->middleware('permission:attendance-exceptions.view');
                 Route::post('/{exceptionRequest}/approve', 'approve')->name('approve')->middleware('permission:attendance-exceptions.approve');
                 Route::post('/{exceptionRequest}/reject', 'reject')->name('reject')->middleware('permission:attendance-exceptions.approve');
+            });
+
+        // Presensi Darurat - approval HRD
+        Route::prefix('emergency')
+            ->name('emergency.')
+            ->controller(EmergencyCheckInApprovalController::class)
+            ->group(function () {
+                Route::get('/', 'index')->name('index')->middleware('permission:emergency-attendance.approve');
+                Route::post('/{id}/decide', 'decide')->name('decide')->middleware('permission:emergency-attendance.approve');
             });
 
         // Master - Lokasi Absensi

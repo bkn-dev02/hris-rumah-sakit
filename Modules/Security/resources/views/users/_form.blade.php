@@ -2,47 +2,140 @@
 
 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
+    {{-- Username --}}
     <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Username</label>
-        <input type="text" name="username" value="{{ old('username', $user->username ?? '') }}"
-            class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-        @error('username') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-    </div>
-
-    <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Email</label>
-        <input type="email" name="email" value="{{ old('email', $user->email ?? '') }}"
-            class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-        @error('email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-    </div>
-
-    <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">
-            Password {{ $isEdit ? '(kosongkan jika tidak diubah)' : '' }}
+        <label class="mb-1 block text-sm font-medium text-sky-600">
+            Username
         </label>
-        <input type="password" name="password"
-            class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-        @error('password') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+
+        <input
+            type="text"
+            name="username"
+            value="{{ old('username', $user->username ?? '') }}"
+            placeholder="Masukkan username"
+            autocomplete="username"
+            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm
+                   focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+        @error('username')
+        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
     </div>
 
+
+    {{-- Email --}}
     <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Konfirmasi Password</label>
-        <input type="password" name="password_confirmation"
-            class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <label class="mb-1 block text-sm font-medium text-sky-600">
+            Email
+        </label>
+
+        <input
+            type="email"
+            name="email"
+            value="{{ old('email', $user->email ?? '') }}"
+            placeholder="Masukkan alamat email"
+            autocomplete="email"
+            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm
+                   focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+        @error('email')
+        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
     </div>
 
-    <div class="flex items-center gap-2 sm:col-span-2">
-        <input type="checkbox" name="is_active" value="1" id="is_active"
-            @checked(old('is_active', $user->is_active ?? true))
-        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-        <label for="is_active" class="text-sm text-slate-700">Akun aktif</label>
+
+    {{-- Password --}}
+    <div>
+        <label class="mb-1 block text-sm font-medium text-sky-600">
+            Password
+            @if($isEdit)
+            <span class="font-normal text-slate-400">
+                (kosongkan jika tidak diubah)
+            </span>
+            @endif
+        </label>
+
+        <div class="relative">
+            <input
+                type="password"
+                name="password"
+                id="password"
+                placeholder="{{ $isEdit ? 'Masukkan password baru' : 'Masukkan password' }}"
+                autocomplete="{{ $isEdit ? 'new-password' : 'new-password' }}"
+                class="w-full rounded-lg border border-slate-200 px-3 py-2 pr-10 text-sm
+                       focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+            <button
+                type="button"
+                onclick="togglePassword('password', 'passwordIcon')"
+                class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400
+                       hover:text-sky-600"
+                aria-label="Tampilkan password">
+                <i id="passwordIcon" class="fa-solid fa-eye"></i>
+            </button>
+        </div>
+
+        @error('password')
+        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
     </div>
+
+
+    {{-- Konfirmasi Password --}}
+    <div>
+        <label class="mb-1 block text-sm font-medium text-sky-600">
+            Konfirmasi Password
+        </label>
+
+        <div class="relative">
+            <input
+                type="password"
+                name="password_confirmation"
+                id="password_confirmation"
+                placeholder="Ulangi password"
+                autocomplete="new-password"
+                class="w-full rounded-lg border border-slate-200 px-3 py-2 pr-10 text-sm
+                       focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+            <button
+                type="button"
+                onclick="togglePassword('password_confirmation', 'passwordConfirmationIcon')"
+                class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400
+                       hover:text-sky-600"
+                aria-label="Tampilkan konfirmasi password">
+                <i id="passwordConfirmationIcon" class="fa-solid fa-eye"></i>
+            </button>
+        </div>
+    </div>
+
+
+    {{-- Status --}}
+    <div class="flex items-center gap-2 sm:col-span-2">
+        <input
+            type="checkbox"
+            name="is_active"
+            value="1"
+            id="is_active"
+            @checked(old('is_active', $user->is_active ?? true))
+        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+        >
+
+        <label for="is_active" class="text-sm text-sky-600">
+            Akun aktif
+        </label>
+    </div>
+
+
+    {{-- Role --}}
     <div class="sm:col-span-2">
-        <label class="mb-2 block text-sm font-medium text-slate-700">Role</label>
+        <label class="mb-2 block text-sm font-medium text-sky-600">
+            Role
+        </label>
 
         <div class="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 p-4 sm:grid-cols-2">
             @forelse($roles as $role)
-            <label class="flex items-center gap-2 text-sm text-slate-700">
+
+            <label class="flex items-center gap-2 text-sm text-sky-600">
                 <input
                     type="checkbox"
                     name="roles[]"
@@ -50,16 +143,48 @@
                     @checked(in_array($role->id, old('roles', $assignedRoleIds ?? [])))
                 class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 >
+
                 {{ $role->name }}
+
                 @if($role->is_system)
-                <span class="text-xs text-slate-400">(sistem)</span>
+                <span class="text-xs text-slate-400">
+                    (sistem)
+                </span>
                 @endif
             </label>
+
             @empty
-            <p class="text-sm text-slate-400">Belum ada role tersedia.</p>
+
+            <p class="text-sm text-slate-400">
+                Belum ada role tersedia.
+            </p>
+
             @endforelse
         </div>
-        @error('roles') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+
+        @error('roles')
+        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
     </div>
 
 </div>
+
+
+<script>
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (input.type === 'password') {
+            input.type = 'text';
+
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
