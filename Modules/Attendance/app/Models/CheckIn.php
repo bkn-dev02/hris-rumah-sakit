@@ -11,6 +11,7 @@ class CheckIn extends Model
 {
     protected $fillable = [
         'employee_id',
+        'type',
         'checked_at',
         'latitude',
         'longitude',

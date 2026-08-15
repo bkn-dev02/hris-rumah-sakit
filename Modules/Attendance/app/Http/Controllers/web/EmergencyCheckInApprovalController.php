@@ -6,17 +6,22 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Modules\Attendance\Contracts\Services\CheckInServiceInterface;
+use Modules\Attendance\Contracts\Services\AttendanceServiceInterface;
+use Modules\Attendance\Exceptions\AttendanceException;
 
 class EmergencyCheckInApprovalController extends Controller
 {
     public function __construct(
         protected CheckInServiceInterface $checkInService,
+        protected AttendanceServiceInterface $attendanceService,
     ) {}
 
     public function index()
     {
         $checkIns = $this->checkInService->pendingEmergencies();
+
         $this->checkInService->markEmergencySeen();
+
         return view('attendance::emergency.index', compact('checkIns'));
     }
 
@@ -34,13 +39,17 @@ class EmergencyCheckInApprovalController extends Controller
         }
 
         try {
-            $this->checkInService->decideEmergency(
+            $checkIn = $this->checkInService->decideEmergency(
                 $id,
                 $employee,
                 $request->decision === 'approve',
                 $request->note
             );
-        } catch (RuntimeException $e) {
+
+            if ($request->decision === 'approve') {
+                $this->attendanceService->checkIn($checkIn->employee_id, $checkIn->id);
+            }
+        } catch (RuntimeException | AttendanceException $e) {
             return back()->with('error', $e->getMessage());
         }
 
