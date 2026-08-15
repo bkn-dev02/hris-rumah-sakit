@@ -91,7 +91,7 @@ class CheckInService implements CheckInServiceInterface
 
     public function hasUnseenEmergency(): bool
     {
-        $latestPendingId = \Modules\Attendance\Models\CheckIn::query()
+        $latestPendingId = CheckIn::query()
             ->pendingEmergency()
             ->max('id');
 
@@ -106,10 +106,31 @@ class CheckInService implements CheckInServiceInterface
 
     public function markEmergencySeen(): void
     {
-        $latestPendingId = \Modules\Attendance\Models\CheckIn::query()
+        $latestPendingId = CheckIn::query()
             ->pendingEmergency()
             ->max('id');
 
         session(['last_seen_emergency_id' => $latestPendingId ?? session('last_seen_emergency_id', 0)]);
+    }
+
+    public function myEmergencyToday(int $employeeId): ?CheckIn
+    {
+        return $this->repository->findTodayByEmployeeAndType($employeeId, 'emergency');
+    }
+
+    public function findMyEmergency(int $id, int $employeeId): CheckIn
+    {
+        $checkIn = $this->repository->findById($id);
+
+        if (! $checkIn || $checkIn->type !== 'emergency' || $checkIn->employee_id !== $employeeId) {
+            throw new ModelNotFoundException('Presensi darurat tidak ditemukan.');
+        }
+
+        return $checkIn;
+    }
+
+    public function myEmergencyHistory(int $employeeId): Collection
+    {
+        return $this->repository->allByEmployeeAndType($employeeId, 'emergency');
     }
 }

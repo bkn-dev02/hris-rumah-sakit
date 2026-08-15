@@ -4,6 +4,7 @@ namespace Modules\Attendance\Repositories;
 
 use Modules\Attendance\Contracts\Repositories\CheckInRepositoryInterface;
 use Modules\Attendance\Models\CheckIn;
+use Illuminate\Support\Collection;
 
 class CheckInRepository implements CheckInRepositoryInterface
 {
@@ -40,5 +41,24 @@ class CheckInRepository implements CheckInRepositoryInterface
             ->where('employee_id', $employeeId)
             ->whereDate('checked_at', $date)
             ->first();
+    }
+
+    public function findTodayByEmployeeAndType(int $employeeId, string $type): ?CheckIn
+    {
+        return $this->model
+            ->where('employee_id', $employeeId)
+            ->where('type', $type)
+            ->whereDate('checked_at', now()->toDateString())
+            ->latest('checked_at')
+            ->first();
+    }
+
+    public function allByEmployeeAndType(int $employeeId, string $type): Collection
+    {
+        return $this->model
+            ->where('employee_id', $employeeId)
+            ->where('type', $type)
+            ->orderByDesc('checked_at')
+            ->get();
     }
 }

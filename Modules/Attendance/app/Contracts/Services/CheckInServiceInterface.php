@@ -27,4 +27,10 @@ interface CheckInServiceInterface
     public function hasUnseenEmergency(): bool;
 
     public function markEmergencySeen(): void;
+
+    public function myEmergencyToday(int $employeeId): ?CheckIn;
+
+    public function findMyEmergency(int $id, int $employeeId): CheckIn;
+
+    public function myEmergencyHistory(int $employeeId): Collection;
 }
