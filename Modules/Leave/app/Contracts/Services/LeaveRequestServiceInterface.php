@@ -18,13 +18,9 @@ interface LeaveRequestServiceInterface
 
     public function findMyRequest(int $id, Employee $employee): ?LeaveRequest;
 
-    public function pendingForSupervisor(Employee $supervisor): Collection;
+    public function pendingForApprover(Employee $approver): Collection;
 
-    public function decideBySupervisor(int $leaveRequestId, Employee $supervisor, bool $approve, ?string $note = null): LeaveRequest;
-
-    public function pendingForHr(): Collection;
-
-    public function decideByHr(int $leaveRequestId, Employee $hrApprover, bool $approve, ?string $note = null): LeaveRequest;
+    public function decide(int $leaveRequestId, Employee $approver, bool $approve, ?string $note = null): LeaveRequest;
 
     public function allRequests(array $filters, int $perPage = 15): LengthAwarePaginator;
 

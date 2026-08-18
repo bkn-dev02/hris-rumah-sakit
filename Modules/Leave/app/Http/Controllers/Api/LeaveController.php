@@ -18,6 +18,99 @@ class LeaveController extends Controller
         protected LeaveRequestServiceInterface $leaveRequestService,
     ) {}
 
+    public function statuses(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Status cuti ditemukan.',
+            'data' => [
+                [
+                    'code' => 'pending',
+                    'name' => 'Menunggu Persetujuan',
+                    'label' => 'pending',
+                ],
+                [
+                    'code' => 'approved',
+                    'name' => 'Disetujui',
+                    'label' => 'approved',
+                ],
+                [
+                    'code' => 'rejected',
+                    'name' => 'Ditolak',
+                    'label' => 'rejected',
+                ],
+                [
+                    'code' => 'cancelled',
+                    'name' => 'Dibatalkan',
+                    'label' => 'cancelled',
+                ],
+            ],
+        ]);
+    }
+
+    public function myRequests(Request $request)
+    {
+        $employee = $this->resolveEmployee($request);
+
+        $requests = $this->leaveRequestService->myRequests($employee);
+        $requests->load(['leaveType', 'approvals.approver']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat pengajuan cuti ditemukan.',
+            'data' => $requests->map(fn($r) => $this->transformLeaveRequest($r)),
+        ]);
+    }
+
+    public function show(Request $request, int $id)
+    {
+        $employee = $this->resolveEmployee($request);
+
+        $leaveRequest = $this->leaveRequestService->findMyRequest($id, $employee);
+
+        if (! $leaveRequest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengajuan cuti tidak ditemukan.',
+            ], 404);
+        }
+
+        $leaveRequest->load(['leaveType', 'approvals.approver']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail pengajuan ditemukan.',
+            'data' => $this->transformLeaveRequest($leaveRequest),
+        ]);
+    }
+
+    protected function transformLeaveRequest(\Modules\Leave\Models\LeaveRequest $leaveRequest): array
+    {
+        return [
+            'id' => $leaveRequest->id,
+            'leave_type_id' => $leaveRequest->leave_type_id,
+            'leave_type' => ['name' => $leaveRequest->leaveType->name],
+            'start_date' => $leaveRequest->start_date->format('Y-m-d'),
+            'end_date' => $leaveRequest->end_date->format('Y-m-d'),
+            'total_days' => $leaveRequest->total_days,
+            'reason' => $leaveRequest->reason,
+            'attachment' => $leaveRequest->attachment,
+            'status' => $leaveRequest->status,
+            'approvals' => $leaveRequest->approvals->map(fn($a) => [
+                'id' => $a->id,
+                'sequence' => $a->sequence,
+                'type' => $a->type,
+                'status' => $a->status,
+                'approver_name' => $a->approver->name,
+                'approver_position' => $a->type === 'hrd'
+                    ? 'HRD'
+                    : ($a->approver->currentPosition()?->name ?? $a->typeLabel()),
+                'decided_at' => $a->decided_at?->format('d M Y, H:i'),
+                'note' => $a->note,
+            ]),
+        ];
+    }
+
     public function leaveTypes(Request $request)
     {
         $employee = $this->resolveEmployee($request);
@@ -64,41 +157,8 @@ class LeaveController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Pengajuan cuti berhasil dikirim.',
-            'data' => $leaveRequest->load('leaveType'),
+            'data' => $this->transformLeaveRequest($leaveRequest->load(['leaveType', 'approvals.approver'])),
         ], 201);
-    }
-
-    public function myRequests(Request $request)
-    {
-        $employee = $this->resolveEmployee($request);
-
-        $requests = $this->leaveRequestService->myRequests($employee);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Riwayat pengajuan cuti ditemukan.',
-            'data' => $requests->load('leaveType'),
-        ]);
-    }
-
-    public function show(Request $request, int $id)
-    {
-        $employee = $this->resolveEmployee($request);
-
-        $leaveRequest = $this->leaveRequestService->findMyRequest($id, $employee);
-
-        if (! $leaveRequest) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pengajuan cuti tidak ditemukan.',
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Detail pengajuan ditemukan.',
-            'data' => $leaveRequest->load('leaveType', 'supervisor', 'hrApprover'),
-        ]);
     }
 
     protected function resolveEmployee(Request $request)

@@ -5,12 +5,16 @@ use Modules\Attendance\Http\Controllers\Api\AttendanceController;
 use Modules\Attendance\Http\Controllers\Api\AttendanceExceptionRequestController;
 use Modules\Attendance\Http\Controllers\Api\CheckInController;
 use Modules\Attendance\Http\Controllers\Api\EmergencyCheckInController;
+use Modules\Attendance\Http\Controllers\Api\AttendanceStatusController;
 
 Route::prefix('v1')
     ->middleware('auth:sanctum')
     ->group(function () {
 
         Route::prefix('attendance')->group(function () {
+            Route::get('/statuses', [AttendanceStatusController::class, 'index']);
+            Route::get('/statuses/leave', [AttendanceStatusController::class, 'leaveStatus']);
+
             Route::post('/check-in', [CheckInController::class, 'store']);
             Route::get('/location', [AttendanceController::class, 'myLocation']);
             Route::post('/check-out', [AttendanceController::class, 'checkOut']);
