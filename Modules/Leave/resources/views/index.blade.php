@@ -31,8 +31,7 @@
             <label class="mb-1 block text-xs font-medium text-slate-500">Status</label>
             <select name="status" class="rounded-lg border-slate-300 text-sm focus:border-sky-500 focus:ring-sky-500">
                 <option value="">Semua Status</option>
-                <option value="pending_supervisor" @selected(request('status')==='pending_supervisor' )>Menunggu Atasan</option>
-                <option value="pending_hr" @selected(request('status')==='pending_hr' )>Menunggu HRD</option>
+                <option value="pending" @selected(request('status')==='pending' )>Menunggu Persetujuan</option>
                 <option value="approved" @selected(request('status')==='approved' )>Disetujui</option>
                 <option value="rejected" @selected(request('status')==='rejected' )>Ditolak</option>
                 <option value="cancelled" @selected(request('status')==='cancelled' )>Dibatalkan</option>
@@ -128,18 +127,16 @@
                     <div class="lg:col-span-2">
                         <p class="mb-1 text-xs font-medium uppercase tracking-wide text-slate-400 lg:hidden">Status</p>
                         @php
-                        $statusMap = [
-                        'pending_supervisor' => ['label' => 'Menunggu Atasan', 'color' => 'amber'],
-                        'pending_hr' => ['label' => 'Menunggu HRD', 'color' => 'amber'],
-                        'approved' => ['label' => 'Disetujui', 'color' => 'emerald'],
-                        'rejected' => ['label' => 'Ditolak', 'color' => 'rose'],
-                        'cancelled' => ['label' => 'Dibatalkan', 'color' => 'slate'],
-                        ];
-                        $status = $statusMap[$leaveRequest->status] ?? ['label' => $leaveRequest->status, 'color' => 'slate'];
+                        $statusColor = match ($leaveRequest->status) {
+                        'approved' => 'emerald',
+                        'rejected' => 'rose',
+                        'cancelled' => 'slate',
+                        default => 'amber',
+                        };
                         @endphp
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-{{ $status['color'] }}-50 px-3 py-1 text-xs font-semibold text-{{ $status['color'] }}-700">
-                            <span class="h-1.5 w-1.5 rounded-full bg-{{ $status['color'] }}-500"></span>
-                            {{ $status['label'] }}
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-{{ $statusColor }}-50 px-3 py-1 text-xs font-semibold text-{{ $statusColor }}-700">
+                            <span class="h-1.5 w-1.5 rounded-full bg-{{ $statusColor }}-500"></span>
+                            {{ $leaveRequest->statusLabel() }}
                         </span>
                     </div>
 

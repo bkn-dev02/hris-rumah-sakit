@@ -5,6 +5,7 @@ namespace Modules\Leave\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Master\Models\Employee;
 
 class LeaveRequest extends Model
@@ -20,19 +21,11 @@ class LeaveRequest extends Model
         'reason',
         'attachment',
         'status',
-        'supervisor_id',
-        'supervisor_decided_at',
-        'supervisor_note',
-        'hr_id',
-        'hr_decided_at',
-        'hr_note',
     ];
 
     protected $casts = [
-        'start_date'             => 'date:Y-m-d',
-        'end_date'               => 'date:Y-m-d',
-        'supervisor_decided_at'  => 'datetime',
-        'hr_decided_at'          => 'datetime',
+        'start_date' => 'date:Y-m-d',
+        'end_date'   => 'date:Y-m-d',
     ];
 
     public function employee(): BelongsTo
@@ -45,13 +38,32 @@ class LeaveRequest extends Model
         return $this->belongsTo(LeaveType::class);
     }
 
-    public function supervisor(): BelongsTo
+    public function approvals(): HasMany
     {
-        return $this->belongsTo(Employee::class, 'supervisor_id');
+        return $this->hasMany(LeaveRequestApproval::class)->orderBy('sequence');
     }
 
-    public function hrApprover(): BelongsTo
+    public function currentApproval(): ?LeaveRequestApproval
     {
-        return $this->belongsTo(Employee::class, 'hr_id');
+        return $this->approvals->firstWhere('status', 'pending');
+    }
+
+    public function isPendingApprovalBy(Employee $employee): bool
+    {
+        $current = $this->currentApproval();
+
+        return $current && $current->approver_employee_id === $employee->id;
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            'approved' => 'Disetujui',
+            'rejected' => 'Ditolak',
+            'cancelled' => 'Dibatalkan',
+            default => $this->currentApproval()
+                ? 'Menunggu persetujuan ' . $this->currentApproval()->approver->name
+                : 'Menunggu persetujuan',
+        };
     }
 }

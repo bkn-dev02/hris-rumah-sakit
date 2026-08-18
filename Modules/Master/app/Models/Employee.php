@@ -190,17 +190,31 @@ class Employee extends Model
         }
 
         $myLevel = $myPlacement->position->level;
+        $department = $myPlacement->department;
+        $guard = 0;
 
-        $higherPlacement = EmployeePlacement::query()
-            ->active()
-            ->where('department_id', $myPlacement->department_id)
-            ->where('employee_id', '!=', $this->id)
-            ->whereHas('position', fn($q) => $q->where('level', '>', $myLevel))
-            ->with('position')
-            ->get()
-            ->sortByDesc(fn($placement) => $placement->position->level)
-            ->first();
+        while ($department) {
+            $higherPlacement = EmployeePlacement::query()
+                ->active()
+                ->where('department_id', $department->id)
+                ->where('employee_id', '!=', $this->id)
+                ->whereHas('position', fn($q) => $q->where('level', '>', $myLevel))
+                ->with('position')
+                ->get()
+                ->sortBy(fn($placement) => $placement->position->level)
+                ->first();
 
-        return $higherPlacement?->employee;
+            if ($higherPlacement) {
+                return $higherPlacement->employee;
+            }
+
+            $department = $department->parent;
+
+            if (++$guard > 50) {
+                throw new \RuntimeException('Struktur departemen terlalu dalam atau terjadi siklus.');
+            }
+        }
+
+        return null;
     }
 }

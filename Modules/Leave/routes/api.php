@@ -8,6 +8,7 @@ Route::prefix('v1')
     ->group(function () {
 
         Route::prefix('leave')->group(function () {
+            Route::get('/statuses', [LeaveController::class, 'statuses']);
             Route::get('/leave-types', [LeaveController::class, 'leaveTypes']);
             Route::post('/requests', [LeaveController::class, 'store']);
             Route::get('/requests', [LeaveController::class, 'myRequests']);

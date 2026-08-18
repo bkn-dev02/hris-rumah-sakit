@@ -31,15 +31,9 @@ class LeavePermissionSeeder extends Seeder
             ],
             [
                 'module' => 'Leave',
-                'name' => 'Approve Cuti (Atasan)',
-                'code' => 'leave-requests.approve-supervisor',
-                'description' => 'Menyetujui atau menolak pengajuan cuti sebagai atasan',
-            ],
-            [
-                'module' => 'Leave',
-                'name' => 'Approve Cuti (HRD)',
-                'code' => 'leave-requests.approve-hr',
-                'description' => 'Menyetujui atau menolak pengajuan cuti sebagai HRD (final)',
+                'name' => 'Approve Cuti',
+                'code' => 'leave-requests.approve',
+                'description' => 'Menyetujui atau menolak pengajuan cuti sesuai giliran approval (atasan/HRD/direktur)',
             ],
         ];
 
@@ -56,10 +50,14 @@ class LeavePermissionSeeder extends Seeder
                 ]
             );
 
-            $createdIds[] = $record->id;
+            $createdIds[$permission['code']] = $record->id;
         }
 
         $superAdmin = Role::where('code', 'super-admin')->first();
-        $superAdmin?->permissions()->syncWithoutDetaching($createdIds);
+        $superAdmin?->permissions()->syncWithoutDetaching(array_values($createdIds));
+
+        Role::whereIn('code', ['supervisor', 'kepala-unit', 'hrd', 'direktur'])
+            ->get()
+            ->each(fn(Role $role) => $role->permissions()->syncWithoutDetaching([$createdIds['leave-requests.approve']]));
     }
 }

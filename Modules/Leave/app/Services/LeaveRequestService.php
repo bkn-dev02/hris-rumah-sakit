@@ -2,7 +2,11 @@
 
 namespace Modules\Leave\Services;
 
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Modules\Attendance\Models\Attendance;
+use Modules\Attendance\Models\AttendanceStatus;
 use Modules\Leave\Contracts\Repositories\LeaveRequestRepositoryInterface;
 use Modules\Leave\Contracts\Repositories\LeaveTypeRepositoryInterface;
 use Modules\Leave\Contracts\Services\LeaveRequestServiceInterface;
@@ -11,13 +15,13 @@ use Modules\Leave\Models\Holiday;
 use Modules\Leave\Models\LeaveRequest;
 use Modules\Master\Models\Employee;
 use RuntimeException;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class LeaveRequestService implements LeaveRequestServiceInterface
 {
     public function __construct(
         protected LeaveRequestRepositoryInterface $leaveRequestRepository,
         protected LeaveTypeRepositoryInterface $leaveTypeRepository,
+        protected ApprovalChainBuilder $approvalChainBuilder,
     ) {}
 
     public function getLeaveTypesWithQuota(Employee $employee): Collection
@@ -73,9 +77,9 @@ class LeaveRequestService implements LeaveRequestServiceInterface
             }
         }
 
-        $supervisor = $employee->directSupervisor();
+        $chain = $this->approvalChainBuilder->build($employee);
 
-        return $this->leaveRequestRepository->create([
+        return $this->leaveRequestRepository->createWithApprovalChain([
             'employee_id' => $employee->id,
             'leave_type_id' => $leaveType->id,
             'start_date' => $data->startDate,
@@ -83,9 +87,8 @@ class LeaveRequestService implements LeaveRequestServiceInterface
             'total_days' => $totalDays,
             'reason' => $data->reason,
             'attachment' => $data->attachment,
-            'status' => $supervisor ? 'pending_supervisor' : 'pending_hr',
-            'supervisor_id' => $supervisor?->id,
-        ]);
+            'status' => 'pending',
+        ], $chain);
     }
 
     public function myRequests(Employee $employee): Collection
@@ -130,45 +133,96 @@ class LeaveRequestService implements LeaveRequestServiceInterface
         return $totalDays;
     }
 
-    public function pendingForSupervisor(Employee $supervisor): Collection
+    public function pendingForApprover(Employee $approver): Collection
     {
-        return $this->leaveRequestRepository->allPendingBySupervisor($supervisor->id);
+        return $this->leaveRequestRepository->allPendingForApprover($approver->id);
     }
 
-    public function decideBySupervisor(int $leaveRequestId, Employee $supervisor, bool $approve, ?string $note = null): LeaveRequest
+    public function decide(int $leaveRequestId, Employee $approver, bool $approve, ?string $note = null): LeaveRequest
     {
-        $leaveRequest = $this->leaveRequestRepository->findPendingSupervisor($leaveRequestId, $supervisor->id);
+        $leaveRequest = $this->leaveRequestRepository->find($leaveRequestId);
 
-        if (! $leaveRequest) {
-            throw new RuntimeException('Pengajuan cuti tidak ditemukan atau bukan wewenang Anda.');
-        }
-
-        return $this->leaveRequestRepository->updateStatus($leaveRequest, [
-            'status' => $approve ? 'pending_hr' : 'rejected',
-            'supervisor_decided_at' => now(),
-            'supervisor_note' => $note,
-        ]);
-    }
-
-    public function pendingForHr(): Collection
-    {
-        return $this->leaveRequestRepository->allPendingHr();
-    }
-
-    public function decideByHr(int $leaveRequestId, Employee $hrApprover, bool $approve, ?string $note = null): LeaveRequest
-    {
-        $leaveRequest = $this->leaveRequestRepository->findPendingHr($leaveRequestId);
-
-        if (! $leaveRequest) {
+        if (! $leaveRequest || $leaveRequest->status !== 'pending') {
             throw new RuntimeException('Pengajuan cuti tidak ditemukan atau sudah diproses.');
         }
 
-        return $this->leaveRequestRepository->updateStatus($leaveRequest, [
+        $currentStep = $leaveRequest->currentApproval();
+
+        if (! $currentStep || $currentStep->approver_employee_id !== $approver->id) {
+            throw new RuntimeException('Belum giliran Anda untuk memutuskan pengajuan ini.');
+        }
+
+        $currentStep->update([
             'status' => $approve ? 'approved' : 'rejected',
-            'hr_id' => $hrApprover->id,
-            'hr_decided_at' => now(),
-            'hr_note' => $note,
+            'decided_at' => now(),
+            'note' => $note,
         ]);
+
+        if (! $approve) {
+            $leaveRequest->update(['status' => 'rejected']);
+        } elseif ($leaveRequest->approvals()->where('status', 'pending')->doesntExist()) {
+            $leaveRequest->update(['status' => 'approved']);
+            $this->createApprovedLeaveAttendance($leaveRequest);
+        }
+
+        return $leaveRequest->fresh('approvals.approver');
+    }
+
+    protected function createApprovedLeaveAttendance(LeaveRequest $leaveRequest): void
+    {
+        $employee = $leaveRequest->employee()->first();
+
+        if (! $employee) {
+            return;
+        }
+
+        $status = $this->resolveLeaveAttendanceStatus();
+
+        $dates = CarbonPeriod::create($leaveRequest->start_date, $leaveRequest->end_date);
+
+        foreach ($dates as $date) {
+            $workDate = $date->toDateString();
+            $shift = $employee->activeShiftFor($workDate) ?? $employee->currentShift();
+
+            if (! $shift) {
+                continue;
+            }
+
+            Attendance::query()->updateOrCreate(
+                [
+                    'employee_id' => $employee->id,
+                    'work_date' => $workDate,
+                ],
+                [
+                    'shift_id' => $shift->id,
+                    'attendance_status_id' => $status->id,
+                    'determination_type' => 'manual',
+                    'source' => 'manual',
+                    'notes' => 'Cuti disetujui: ' . ($leaveRequest->leaveType->name ?? 'Cuti'),
+                ]
+            );
+        }
+    }
+
+    protected function resolveLeaveAttendanceStatus(): AttendanceStatus
+    {
+        $status = AttendanceStatus::query()
+            ->whereIn('code', ['CUTI', 'LEAVE'])
+            ->first();
+
+        if ($status) {
+            return $status;
+        }
+
+        return AttendanceStatus::query()->firstOrCreate(
+            ['code' => 'CUTI'],
+            [
+                'name' => 'Cuti',
+                'category' => 'exception',
+                'determination_type' => 'manual',
+                'is_active' => true,
+            ]
+        );
     }
 
     public function allRequests(array $filters, int $perPage = 15): LengthAwarePaginator
