@@ -67,7 +67,7 @@
                 <i class="fa-solid fa-user"></i> Pegawai
             </div>
             <div class="col-span-2 text-xs font-semibold uppercase tracking-wide">
-                <i class="fa-solid fa-hospital"></i> Departemen
+                <i class="fa-solid fa-hospital"></i> Posisi
             </div>
             <div class="col-span-2 text-xs font-semibold uppercase tracking-wide">
                 <i class="fa-solid fa-id-card"></i> Status
@@ -85,8 +85,8 @@
 
         <div class="divide-y divide-slate-100">
             @forelse($employees as $employee)
-            <div class="group px-4 py-5 transition-colors duration-200 hover:bg-sky-50/40 sm:px-6">
-                <div class="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-center lg:gap-4">
+            <div class="group px-4 py-5 transition-colors duration-200 hover:bg-sky-50/40 sm:px-6 sm:py-6">
+                <div class="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12 lg:items-center lg:gap-4">
                     <div class="lg:col-span-3">
                         <div class="flex items-center gap-3">
                             <x-shared::avatar
@@ -97,15 +97,17 @@
                                 <p class="truncate text-sm font-semibold text-sky-900 capitalize">
                                     {{ $employee->name }}
                                 </p>
-                                <p class="mt-0.5 text-xs text-sky-500">
-                                    {{ $employee->position ?? '-' }}
+                                @if($employee->profession)
+                                <p class="mt-0.5 text-xs font-medium text-sky-600">
+                                    {{ $employee->profession }}
                                 </p>
+                                @endif
                             </div>
                         </div>
                     </div>
                     <div class="lg:col-span-2">
                         <p class="text-sm text-sky-600 break-all">
-                            {{ $employee->currentDepartment()?->name ?? '-' }}
+                            {{ $employee->position ?? '-' }} {{ $employee->currentDepartment()?->name ?? '-' }}
                         </p>
                     </div>
                     <div class="lg:col-span-2">
@@ -139,55 +141,74 @@
                         </p>
                     </div>
                     <div class="lg:col-span-1">
-                        <div class="flex items-center justify-start gap-2 lg:justify-center">
+                        <div class="grid w-full max-w-[220px] grid-cols-4 gap-2 sm:gap-3 md:grid-cols-4 lg:max-w-[180px] lg:grid-cols-2 lg:grid-rows-2 lg:gap-2">
                             @if($employee->trashed())
                             <form
                                 method="POST"
-                                action="{{ route('master.employees.restore', $employee->slug) }}">
+                                action="{{ route('master.employees.restore', $employee->slug) }}"
+                                class="w-full">
                                 @csrf
                                 @method('PATCH')
                                 <button
                                     type="submit"
-                                    class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 cursor-pointer">
+                                    class="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 cursor-pointer"
+                                    title="Pulihkan karyawan"
+                                    aria-label="Pulihkan karyawan">
                                     <i class="fa-solid fa-rotate-left"></i>
                                 </button>
                             </form>
                             <form
                                 method="POST"
                                 action="{{ route('master.employees.forceDelete', $employee->slug) }}"
-                                onsubmit="return confirm('Hapus permanen? Tindakan ini tidak bisa dibatalkan.')">
+                                onsubmit="return confirm('Hapus permanen? Tindakan ini tidak bisa dibatalkan.')"
+                                class="w-full">
                                 @csrf
                                 @method('DELETE')
                                 <button
                                     type="submit"
-                                    class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 cursor-pointer">
+                                    class="inline-flex w-full items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 cursor-pointer"
+                                    title="Hapus permanen"
+                                    aria-label="Hapus permanen">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </form>
                             @else
                             <a
                                 href="{{ route('master.employees.show', $employee->slug) }}"
-                                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-sky-900 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-sky-900/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-sky-800 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700">
+                                class="inline-flex w-full items-center justify-center rounded-lg bg-sky-900 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-sky-900/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-sky-800 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                                title="Lihat detail"
+                                aria-label="Lihat detail">
                                 <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <a
+                                href="{{ route('master.employees.edit', $employee->slug) }}"
+                                class="inline-flex w-full items-center justify-center rounded-lg bg-amber-500 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+                                title="Edit karyawan"
+                                aria-label="Edit karyawan">
+                                <i class="fa-solid fa-pen-to-square"></i>
                             </a>
                             <button
                                 type="button"
-                                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 cursor-pointer open-attendance-location-modal"
+                                class="inline-flex w-full items-center justify-center rounded-lg bg-violet-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 cursor-pointer open-attendance-location-modal"
                                 data-slug="{{ $employee->slug }}"
                                 data-name="{{ $employee->name }}"
                                 data-current-location="{{ $employee->attendance_location_id ?? '' }}"
-                                title="Atur lokasi absensi">
+                                title="Atur lokasi absensi"
+                                aria-label="Atur lokasi absensi">
                                 <i class="fa-solid fa-location-dot"></i>
                             </button>
                             <form
                                 method="POST"
                                 action="{{ route('master.employees.destroy', $employee->slug) }}"
-                                onsubmit="return confirm('Nonaktifkan karyawan ini?')">
+                                onsubmit="return confirm('Nonaktifkan karyawan ini?')"
+                                class="w-full">
                                 @csrf
                                 @method('DELETE')
                                 <button
                                     type="submit"
-                                    class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 cursor-pointer">
+                                    class="inline-flex w-full items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 cursor-pointer"
+                                    title="Nonaktifkan karyawan"
+                                    aria-label="Nonaktifkan karyawan">
                                     <i class="fa-solid fa-user-slash"></i>
                                 </button>
                             </form>

@@ -23,6 +23,7 @@ class Employee extends Model
         'gender',
         'place_of_birth',
         'date_of_birth',
+        'profession',
         'national_id_number',
         'address',
         'phone',

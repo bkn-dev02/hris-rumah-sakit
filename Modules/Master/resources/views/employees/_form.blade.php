@@ -75,6 +75,13 @@
     </div>
 
     <div>
+        <label class="mb-1 block text-sm font-medium text-sky-900">Profesi</label>
+        <input type="text" name="profession" value="{{ old('profession', $employee->profession ?? '') }}" placeholder="mis. Dokter, Perawat, dst"
+            class="w-full rounded-lg border border-sky-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        @error('profession') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+    </div>
+
+    <div>
         <label class="mb-1 block text-sm font-medium text-sky-900">NIK</label>
         <input type="text" name="national_id_number" value="{{ old('national_id_number', $employee->national_id_number ?? '') }}"
             class="w-full rounded-lg border border-sky-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">

@@ -162,6 +162,17 @@ $workDuration->d ? $workDuration->d . ' hari' : null,
                             </p>
                         </div>
 
+                        {{-- Profesi --}}
+                        <div>
+                            <p class="text-xs font-medium uppercase tracking-wide text-sky-600">
+                                Profesi
+                            </p>
+
+                            <p class="mt-1 font-medium text-sky-900">
+                                {{ $employee->profession ?? '-' }}
+                            </p>
+                        </div>
+
                         {{-- NIK --}}
                         <div>
                             <p class="text-xs font-medium uppercase tracking-wide text-sky-600">
