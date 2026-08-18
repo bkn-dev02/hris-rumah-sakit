@@ -26,6 +26,7 @@ class UpdateEmployeeRequest extends FormRequest
             'gender'                => ['required', 'in:male,female'],
             'place_of_birth'        => ['nullable', 'string', 'max:100'],
             'date_of_birth'         => ['nullable', 'date', 'before:today'],
+            'profession'            => ['nullable', 'string', 'max:100'],
             'national_id_number'    => ['nullable', 'string', 'max:20'],
             'address'               => ['nullable', 'string'],
             'phone'                 => ['nullable', 'string', 'max:20'],
