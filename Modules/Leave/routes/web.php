@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Leave\Http\Controllers\DashboardLeaveController;
 use Modules\Leave\Http\Controllers\Web\LeaveController;
 use Modules\Leave\Http\Controllers\Web\LeaveTypeController;
 use Modules\Leave\Http\Controllers\Web\EmployeeLeaveQuotaController;
@@ -9,7 +10,9 @@ Route::middleware(['auth', 'verified'])
     ->prefix('leave')
     ->as('leave.')
     ->group(function () {
-        Route::get('/', [LeaveController::class, 'index'])->name('index');
+        Route::get('/', [DashboardLeaveController::class, 'index'])->name('index');
+
+        Route::get('/requests', [LeaveController::class, 'index'])->name('requests.index');
 
         Route::middleware('permission:leave-types.manage')->group(function () {
             Route::resource('leave-types', LeaveTypeController::class);

@@ -45,6 +45,8 @@
                     $childActive = request()->routeIs(...$child['active']);
                     $showEmergencyBadge = $child['route'] === 'attendance.emergency.index'
                     && app(\Modules\Attendance\Contracts\Services\CheckInServiceInterface::class)->hasUnseenEmergency();
+                    $showLeaveBadge = $child['route'] === 'leave.requests.index'
+                    && app(\Modules\Leave\Contracts\Services\LeaveRequestServiceInterface::class)->hasUnseenPending();
                     @endphp
 
                     <li>
@@ -52,7 +54,7 @@
                             <i class="{{ $child['icon'] }} w-4 text-center text-xs {{ $childActive ? 'text-slate-700' : 'text-slate-300 group-hover:text-white' }}"></i>
                             <span class="flex flex-1 items-center gap-2">
                                 {{ $child['label'] }}
-                                @if ($showEmergencyBadge)
+                                @if ($showEmergencyBadge || $showLeaveBadge)
                                 <span class="h-2 w-2 rounded-full bg-rose-500"></span>
                                 @endif
                             </span>

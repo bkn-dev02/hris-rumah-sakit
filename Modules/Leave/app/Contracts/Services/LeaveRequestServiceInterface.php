@@ -25,4 +25,8 @@ interface LeaveRequestServiceInterface
     public function allRequests(array $filters, int $perPage = 15): LengthAwarePaginator;
 
     public function cancel(int $leaveRequestId, Employee $employee): LeaveRequest;
+
+    public function hasUnseenPending(): bool;
+
+    public function markPendingSeen(): void;
 }

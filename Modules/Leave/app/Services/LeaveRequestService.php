@@ -242,4 +242,30 @@ class LeaveRequestService implements LeaveRequestServiceInterface
             'status' => 'cancelled',
         ]);
     }
+
+    public function hasUnseenPending(): bool
+    {
+        $latestPendingId = LeaveRequest::query()
+            ->where('status', 'pending')
+            ->latest('id')
+            ->value('id');
+
+        if (! $latestPendingId) {
+            return false;
+        }
+
+        $lastSeenId = session('last_seen_leave_id', 0);
+
+        return $latestPendingId > $lastSeenId;
+    }
+
+    public function markPendingSeen(): void
+    {
+        $latestPendingId = LeaveRequest::query()
+            ->where('status', 'pending')
+            ->latest('id')
+            ->value('id');
+
+        session(['last_seen_leave_id' => $latestPendingId ?? session('last_seen_leave_id', 0)]);
+    }
 }

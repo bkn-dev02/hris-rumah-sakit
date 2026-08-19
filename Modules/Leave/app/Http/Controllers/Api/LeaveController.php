@@ -4,11 +4,13 @@ namespace Modules\Leave\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Modules\Leave\Contracts\Services\LeaveRequestServiceInterface;
 use Modules\Leave\DTOs\LeaveRequestData;
 use Modules\Leave\Http\Requests\Api\StoreLeaveRequestRequest;
 use Modules\Shared\Traits\ApiResponse;
+use Modules\Leave\Models\LeaveRequest;
 
 class LeaveController extends Controller
 {
@@ -84,7 +86,7 @@ class LeaveController extends Controller
         ]);
     }
 
-    protected function transformLeaveRequest(\Modules\Leave\Models\LeaveRequest $leaveRequest): array
+    protected function transformLeaveRequest(LeaveRequest $leaveRequest): array
     {
         return [
             'id' => $leaveRequest->id,
@@ -132,6 +134,12 @@ class LeaveController extends Controller
 
     public function store(StoreLeaveRequestRequest $request)
     {
+        Log::info('Debug attachment (mobile test)', [
+            'has_file' => $request->hasFile('attachment'),
+            'all_files' => $request->allFiles(),
+            'content_type' => $request->header('Content-Type'),
+        ]);
+
         $employee = $this->resolveEmployee($request);
 
         $attachmentPath = $request->hasFile('attachment')
