@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Leave\Contracts\Repositories\LeaveRequestRepositoryInterface;
 use Modules\Leave\Models\LeaveRequest;
 use Modules\Leave\Models\LeaveRequestApproval;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class LeaveRequestRepository implements LeaveRequestRepositoryInterface
 {
@@ -96,7 +97,7 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
         return $leaveRequest->fresh('approvals.approver');
     }
 
-    public function paginateAll(array $filters, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function paginateAll(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         return LeaveRequest::query()
             ->with(['employee', 'leaveType', 'approvals.approver'])

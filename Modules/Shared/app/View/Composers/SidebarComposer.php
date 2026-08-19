@@ -98,16 +98,16 @@ class SidebarComposer
                 ],
             ],
             [
-                'label' => 'Manajemen Cuti & Izin',
+                'label' => 'Manajemen Cuti',
                 'icon'  => 'fa-solid fa-calendar-days',
                 'route' => 'leave.index',
-                'active' => ['leave.*'],
+                'active' => ['leave.index'],
                 'children' => [
                     [
                         'label' => 'Pengajuan Cuti',
                         'icon'  => 'fa-solid fa-file-signature',
-                        'route' => 'leave.index',
-                        'active' => ['leave.index'],
+                        'route' => 'leave.requests.index',
+                        'active' => ['leave.requests.index'],
                         'permission' => 'leave-requests.view',
                     ],
                     [
@@ -116,20 +116,6 @@ class SidebarComposer
                         'route' => 'leave.leave-types.index',
                         'active' => ['leave.leave-types.*'],
                         'permission' => 'leave-types.manage',
-                    ],
-                    [
-                        'label' => 'Approval Atasan',
-                        'icon'  => 'fa-solid fa-user-check',
-                        'route' => 'leave.approvals.supervisor',
-                        'active' => ['leave.approvals.supervisor'],
-                        'permission' => 'leave-requests.approve-supervisor',
-                    ],
-                    [
-                        'label' => 'Approval HRD',
-                        'icon'  => 'fa-solid fa-user-shield',
-                        'route' => 'leave.approvals.hr',
-                        'active' => ['leave.approvals.hr'],
-                        'permission' => 'leave-requests.approve-hr',
                     ],
                 ],
             ],

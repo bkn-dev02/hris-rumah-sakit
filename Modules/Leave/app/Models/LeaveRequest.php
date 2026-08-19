@@ -62,8 +62,17 @@ class LeaveRequest extends Model
             'rejected' => 'Ditolak',
             'cancelled' => 'Dibatalkan',
             default => $this->currentApproval()
-                ? 'Menunggu persetujuan ' . $this->currentApproval()->approver->name
+                ? 'Menunggu persetujuan ' . $this->approverLabel($this->currentApproval()->approver)
                 : 'Menunggu persetujuan',
         };
+    }
+
+    protected function approverLabel(?Employee $approver): string
+    {
+        $position = $approver->currentPosition()?->name;
+        $department = $approver->currentDepartment()?->name;
+        $roleLabel = trim("{$position} {$department}");
+
+        return $roleLabel !== '' ? "{$roleLabel} — {$approver->name}" : $approver->name;
     }
 }

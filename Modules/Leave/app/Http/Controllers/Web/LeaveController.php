@@ -27,6 +27,7 @@ class LeaveController extends Controller
 
         $leaveRequests = $this->leaveRequestService->allRequests($filters);
         $leaveTypes = $this->leaveTypeRepository->allActive();
+        $this->leaveRequestService->markPendingSeen();
 
         return view('leave::index', compact('leaveRequests', 'leaveTypes'));
     }
