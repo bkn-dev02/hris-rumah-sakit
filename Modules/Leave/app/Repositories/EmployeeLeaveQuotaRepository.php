@@ -13,6 +13,7 @@ class EmployeeLeaveQuotaRepository implements EmployeeLeaveQuotaRepositoryInterf
         return EmployeeLeaveQuota::query()
             ->where('employee_id', $employeeId)
             ->where('year', $year)
+            ->with('leaveType')
             ->get()
             ->keyBy('leave_type_id');
     }

@@ -87,9 +87,12 @@ class AttendanceRepository implements AttendanceRepositoryInterface
 
     public function findOpenForEmployee(int $employeeId): ?Attendance
     {
+        $minimumWorkDate = now()->subDay()->toDateString();
+
         return $this->model
             ->with(['shift', 'checkIn', 'checkOut'])
             ->where('employee_id', $employeeId)
+            ->whereDate('work_date', '>=', $minimumWorkDate)
             ->whereNull('check_out_id')
             ->orderByDesc('work_date')
             ->first();

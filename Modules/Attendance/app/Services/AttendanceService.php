@@ -112,6 +112,7 @@ class AttendanceService implements AttendanceServiceInterface
     protected function toDisplayArray(Attendance $attendance): array
     {
         [$badgeLabel, $badgeColor] = match (true) {
+            $attendance->status?->code === 'CUTI' => [$attendance->status->name, 'sky'],
             is_null($attendance->check_out_id) => ['Belum Check Out', 'amber'],
             is_null($attendance->attendance_status_id) => ['Perlu Review', 'slate'],
             $attendance->status->code === 'TERLAMBAT' => [$attendance->status->name, 'rose'],
@@ -270,12 +271,7 @@ class AttendanceService implements AttendanceServiceInterface
         $checkInTime = $attendance->checkIn->checked_at;
         $checkOutTime = $attendance->checkOut->checked_at;
 
-        $shiftStart = Carbon::parse("{$workDate} {$shift->start_time->format('H:i')}");
-        $shiftEnd = Carbon::parse("{$workDate} {$shift->end_time->format('H:i')}");
-
-        if ($shiftEnd->lessThanOrEqualTo($shiftStart)) {
-            $shiftEnd->addDay();
-        }
+        [$shiftStart, $shiftEnd] = $this->shiftWindow($shift, $workDate);
 
         $lateThreshold = $shiftStart->copy()->addMinutes(self::DEFAULT_LATE_TOLERANCE_MINUTES);
         $earlyLeaveThreshold = $shiftEnd->copy()->subMinutes(self::DEFAULT_EARLY_LEAVE_TOLERANCE_MINUTES);
@@ -306,6 +302,18 @@ class AttendanceService implements AttendanceServiceInterface
             'attendance_status_id'  => $status->id,
             'determination_type'    => 'auto',
         ]);
+    }
+
+    protected function shiftWindow($shift, string $workDate): array
+    {
+        $shiftStart = Carbon::parse("{$workDate} {$shift->start_time->format('H:i')}");
+        $shiftEnd = Carbon::parse("{$workDate} {$shift->end_time->format('H:i')}");
+
+        if ($shiftEnd->lessThanOrEqualTo($shiftStart)) {
+            $shiftEnd->addDay();
+        }
+
+        return [$shiftStart, $shiftEnd];
     }
 
     public function todaySummary(): array

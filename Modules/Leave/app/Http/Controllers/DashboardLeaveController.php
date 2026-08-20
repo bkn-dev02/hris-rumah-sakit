@@ -3,12 +3,17 @@
 namespace Modules\Leave\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Modules\Leave\Models\LeaveRequest;
 
 class DashboardLeaveController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $statuses = ['pending', 'approved', 'rejected', 'cancelled'];
+        $activeStatus = $request->string('status')->toString();
+        $activeStatus = in_array($activeStatus, $statuses, true) ? $activeStatus : 'all';
+
         $totalPending = LeaveRequest::query()->where('status', 'pending')->count();
         $totalApprovedThisMonth = LeaveRequest::query()
             ->where('status', 'approved')
@@ -23,9 +28,18 @@ class DashboardLeaveController extends Controller
 
         $recentRequests = LeaveRequest::query()
             ->with(['employee', 'leaveType'])
+            ->when($activeStatus !== 'all', fn($query) => $query->where('status', $activeStatus))
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();
+
+        $statusCounts = LeaveRequest::query()
+            ->selectRaw('status, count(*) as total')
+            ->whereIn('status', $statuses)
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $statusCounts['all'] = LeaveRequest::query()->count();
 
         $byType = LeaveRequest::query()
             ->join('leave_types', 'leave_types.id', '=', 'leave_requests.leave_type_id')
@@ -58,6 +72,8 @@ class DashboardLeaveController extends Controller
             'totalApprovedThisMonth',
             'totalRejectedThisMonth',
             'recentRequests',
+            'activeStatus',
+            'statusCounts',
             'byType',
             'topEmployees',
             'monthlyLabels',

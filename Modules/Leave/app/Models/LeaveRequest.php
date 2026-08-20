@@ -21,6 +21,7 @@ class LeaveRequest extends Model
         'reason',
         'attachment',
         'status',
+        'adjustment_note',
     ];
 
     protected $casts = [

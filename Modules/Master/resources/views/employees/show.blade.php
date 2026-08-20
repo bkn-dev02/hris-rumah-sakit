@@ -331,5 +331,131 @@ $workDuration->d ? $workDuration->d . ' hari' : null,
         </div>
 
     </div>
+
+    {{-- Kuota Cuti --}}
+    <div class="mt-6 overflow-hidden rounded-xl border border-sky-200 bg-white shadow-md">
+        <div class="border-b border-sky-100 bg-sky-50 px-6 py-5">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-900 text-white shadow-sm">
+                    <i class="fa-solid fa-umbrella-beach"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-800">Kuota Cuti {{ $quotaYear }}</h3>
+                    <p class="text-sm text-slate-500">Cuti yang sudah di-assign, dipakai, dan tersisa</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto p-4 sm:p-6">
+            @if ($leaveQuotas->isNotEmpty())
+            <table class="w-full min-w-[620px] text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
+                        <th class="px-3 py-3 font-semibold">Jenis Cuti</th>
+                        <th class="px-3 py-3 text-center font-semibold">Hak Cuti</th>
+                        <th class="px-3 py-3 text-center font-semibold">Sudah Dipakai</th>
+                        <th class="px-3 py-3 text-center font-semibold">Sisa</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach ($leaveQuotas as $quota)
+                    <tr class="transition hover:bg-sky-50/60">
+                        <td class="px-3 py-3 font-medium text-slate-700">
+                            {{ $quota['leave_type']?->name ?? 'Jenis cuti tidak ditemukan' }}
+                        </td>
+                        <td class="px-3 py-3 text-center text-slate-600">
+                            {{ $quota['quota_days'] }} hari
+                        </td>
+                        <td class="px-3 py-3 text-center text-slate-600">
+                            {{ $quota['used_days'] }} hari
+                        </td>
+                        <td class="px-3 py-3 text-center">
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
+                                {{ $quota['remaining_days'] > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
+                                {{ $quota['remaining_days'] }} hari
+                            </span>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <div class="rounded-xl border border-dashed border-sky-200 bg-sky-50 p-8 text-center text-sm text-slate-500">
+                Belum ada kuota cuti yang di-assign untuk tahun {{ $quotaYear }}.
+            </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Riwayat Absensi --}}
+    <div class="mt-6 overflow-hidden rounded-xl border border-sky-200 bg-white shadow-md">
+        <div class="border-b border-sky-100 bg-sky-50 px-6 py-5">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-900 text-white shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-800">Riwayat Absensi</h3>
+                    <p class="text-sm text-slate-500">Seluruh data absensi pegawai</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto p-4 sm:p-6">
+            @if ($attendances->isNotEmpty())
+            <table class="w-full min-w-[720px] text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
+                        <th class="px-3 py-3 font-semibold">Tanggal</th>
+                        <th class="px-3 py-3 font-semibold">Shift</th>
+                        <th class="px-3 py-3 font-semibold">Check In</th>
+                        <th class="px-3 py-3 font-semibold">Check Out</th>
+                        <th class="px-3 py-3 font-semibold">Status</th>
+                        <th class="px-3 py-3 font-semibold">Sumber</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach ($attendances as $attendance)
+                    @php
+                    $attendanceStatus = $attendance->status;
+                    $statusColor = match ($attendanceStatus?->code) {
+                    'CUTI', 'LEAVE' => 'amber',
+                    'HADIR' => 'emerald',
+                    'TERLAMBAT', 'PULANG_CEPAT' => 'rose',
+                    default => 'slate',
+                    };
+                    @endphp
+                    <tr class="transition hover:bg-sky-50/60">
+                        <td class="whitespace-nowrap px-3 py-3 font-medium text-slate-700">
+                            {{ $attendance->work_date?->format('d M Y') ?? '-' }}
+                        </td>
+                        <td class="px-3 py-3 text-slate-600">
+                            {{ $attendance->shift?->name ?? '-' }}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                            {{ $attendance->checkIn?->checked_at?->format('d M Y H:i') ?? '-' }}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                            {{ $attendance->checkOut?->checked_at?->format('d M Y H:i') ?? '-' }}
+                        </td>
+                        <td class="px-3 py-3">
+                            <span class="inline-flex items-center rounded-full bg-{{ $statusColor }}-50 px-2.5 py-1 text-xs font-semibold text-{{ $statusColor }}-700">
+                                {{ $attendanceStatus?->name ?? 'Belum ditentukan' }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-3 text-slate-600">
+                            {{ ucfirst($attendance->source ?? '-') }}
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <div class="rounded-xl border border-dashed border-sky-200 bg-sky-50 p-8 text-center text-sm text-slate-500">
+                Belum ada riwayat absensi.
+            </div>
+            @endif
+        </div>
+    </div>
 </div>
 @endsection
