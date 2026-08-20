@@ -18,7 +18,7 @@
         </a>
         <div>
             <h1 class="text-md md:text-lg font-bold text-sky-800">{{ $attendance->employee->name }}</h1>
-            <p class="text-xs md:text-sm text-sky-500">{{ $attendance->work_date->format('d M Y') }} &middot; {{ $attendance->shift->name }}</p>
+            <p class="text-xs md:text-sm text-sky-500">{{ $attendance->work_date->format('d M Y') }} &middot; {{ $attendance->shift->name ?? 'Tidak ada shift'}}</p>
         </div>
     </div>
 

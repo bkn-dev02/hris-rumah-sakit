@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Attendance\Models\Attendance;
 use Modules\Attendance\Models\AttendanceLocation;
 use Modules\Security\Models\User;
 use Modules\Master\Models\EmploymentStatus;
@@ -181,6 +182,11 @@ class Employee extends Model
     public function attendanceLocation(): BelongsTo
     {
         return $this->belongsTo(AttendanceLocation::class, 'attendance_location_id');
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
     }
 
     public function directSupervisor(): ?Employee

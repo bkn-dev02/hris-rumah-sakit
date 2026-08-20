@@ -40,10 +40,40 @@
         </div>
     </div>
 
+    @php
+    $statusTabs = [
+    'all' => 'Semua',
+    'pending' => 'Menunggu',
+    'approved' => 'Disetujui',
+    'rejected' => 'Ditolak',
+    'cancelled' => 'Dibatalkan',
+    ];
+    @endphp
+
+    <div class="mb-6 overflow-x-auto rounded-xl border border-sky-200 bg-white p-2 shadow-sm">
+        <nav class="flex min-w-max gap-1" aria-label="Filter status pengajuan cuti">
+            @foreach ($statusTabs as $status => $label)
+            <a href="{{ $status === 'all' ? route('leave.index') : route('leave.index', ['status' => $status]) }}"
+                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition
+                    {{ $activeStatus === $status
+                        ? 'bg-sky-950 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-sky-50 hover:text-sky-950' }}">
+                {{ $label }}
+                <span class="rounded-full px-2 py-0.5 text-xs
+                    {{ $activeStatus === $status ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500' }}">
+                    {{ $statusCounts[$status] ?? 0 }}
+                </span>
+            </a>
+            @endforeach
+        </nav>
+    </div>
+
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-6">
         <div class="lg:col-span-2 rounded-xl border border-sky-200 bg-white p-5 shadow-sm">
             <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-bold text-sky-950">Pengajuan Terbaru</h2>
+                <h2 class="text-sm font-bold text-sky-950">
+                    {{ $activeStatus === 'all' ? 'Pengajuan Terbaru' : 'Pengajuan ' . $statusTabs[$activeStatus] }}
+                </h2>
                 <a href="{{ route('leave.requests.index') }}" class="text-xs font-medium text-sky-700 hover:underline">
                     Lihat Semua
                 </a>

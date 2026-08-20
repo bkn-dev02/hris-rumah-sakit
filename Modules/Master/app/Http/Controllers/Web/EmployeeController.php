@@ -66,8 +66,29 @@ class EmployeeController extends Controller
     public function show(string $employee)
     {
         $employee = $this->employeeService->findBySlug($employee);
+        $quotaYear = now()->year;
+        $leaveQuotas = $this->employeeLeaveQuotaRepository
+            ->forEmployeeYear($employee->id, $quotaYear)
+            ->map(function ($quota) use ($employee, $quotaYear) {
+                $usedDays = $this->leaveRequestRepository->usedDaysByEmployeeAndType(
+                    $employee->id,
+                    $quota->leave_type_id,
+                    $quotaYear,
+                );
 
-        return view('master::employees.show', compact('employee'));
+                return [
+                    'leave_type' => $quota->leaveType,
+                    'quota_days' => $quota->quota_days,
+                    'used_days' => $usedDays,
+                    'remaining_days' => max(0, $quota->quota_days - $usedDays),
+                ];
+            });
+        $attendances = $employee->attendances()
+            ->with(['shift', 'status', 'checkIn', 'checkOut'])
+            ->latest('work_date')
+            ->get();
+
+        return view('master::employees.show', compact('employee', 'attendances', 'leaveQuotas', 'quotaYear'));
     }
 
     public function edit(Request $request, string $employee)

@@ -18,6 +18,41 @@
         </div>
     </div>
 
+    @php
+    $statusTabs = [
+    'all' => 'Semua',
+    'pending' => 'Menunggu',
+    'approved' => 'Disetujui',
+    'rejected' => 'Ditolak',
+    'cancelled' => 'Dibatalkan',
+    ];
+    $activeStatus = request('status', 'all');
+    @endphp
+
+    <div class="mb-5 overflow-x-auto rounded-xl border border-sky-200 bg-white p-2 shadow-sm">
+        <nav class="flex min-w-max gap-1" aria-label="Filter status pengajuan cuti">
+            @foreach ($statusTabs as $status => $label)
+            @php
+            $tabQuery = request()->except(['status', 'page']);
+            if ($status !== 'all') {
+            $tabQuery['status'] = $status;
+            }
+            @endphp
+            <a href="{{ route('leave.requests.index', $tabQuery) }}"
+                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition
+                    {{ $activeStatus === $status
+                        ? 'bg-sky-950 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-sky-50 hover:text-sky-950' }}">
+                {{ $label }}
+                <span class="rounded-full px-2 py-0.5 text-xs
+                    {{ $activeStatus === $status ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500' }}">
+                    {{ $statusCounts[$status] ?? 0 }}
+                </span>
+            </a>
+            @endforeach
+        </nav>
+    </div>
+
     {{-- Filter --}}
     <form method="GET"
         class="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

@@ -24,6 +24,8 @@ Route::middleware(['auth', 'verified'])
         });
 
         Route::get('/{leaveRequest}', [LeaveController::class, 'show'])->name('show');
+        Route::get('/{leaveRequest}/attachment/download', [LeaveController::class, 'downloadAttachment'])
+            ->name('attachment.download');
         Route::post('/{leaveRequest}/decide', [LeaveController::class, 'decide'])
             ->name('decide');
     });

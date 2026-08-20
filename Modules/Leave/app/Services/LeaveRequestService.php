@@ -5,6 +5,7 @@ namespace Modules\Leave\Services;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Modules\Attendance\Models\Attendance;
 use Modules\Attendance\Models\AttendanceStatus;
 use Modules\Leave\Contracts\Repositories\LeaveRequestRepositoryInterface;
@@ -22,6 +23,7 @@ class LeaveRequestService implements LeaveRequestServiceInterface
         protected LeaveRequestRepositoryInterface $leaveRequestRepository,
         protected LeaveTypeRepositoryInterface $leaveTypeRepository,
         protected ApprovalChainBuilder $approvalChainBuilder,
+        protected LeaveAttendanceService $leaveAttendanceService,
     ) {}
 
     public function getLeaveTypesWithQuota(Employee $employee): Collection
@@ -140,32 +142,34 @@ class LeaveRequestService implements LeaveRequestServiceInterface
 
     public function decide(int $leaveRequestId, Employee $approver, bool $approve, ?string $note = null): LeaveRequest
     {
-        $leaveRequest = $this->leaveRequestRepository->find($leaveRequestId);
+        return DB::transaction(function () use ($leaveRequestId, $approver, $approve, $note) {
+            $leaveRequest = $this->leaveRequestRepository->find($leaveRequestId);
 
-        if (! $leaveRequest || $leaveRequest->status !== 'pending') {
-            throw new RuntimeException('Pengajuan cuti tidak ditemukan atau sudah diproses.');
-        }
+            if (! $leaveRequest || $leaveRequest->status !== 'pending') {
+                throw new RuntimeException('Pengajuan cuti sudah diproses.');
+            }
 
-        $currentStep = $leaveRequest->currentApproval();
+            $currentStep = $leaveRequest->currentApproval();
 
-        if (! $currentStep || $currentStep->approver_employee_id !== $approver->id) {
-            throw new RuntimeException('Belum giliran Anda untuk memutuskan pengajuan ini.');
-        }
+            if (! $currentStep || $currentStep->approver_employee_id !== $approver->id) {
+                throw new RuntimeException('Belum giliran Anda untuk memutuskan pengajuan ini.');
+            }
 
-        $currentStep->update([
-            'status' => $approve ? 'approved' : 'rejected',
-            'decided_at' => now(),
-            'note' => $note,
-        ]);
+            $currentStep->update([
+                'status' => $approve ? 'approved' : 'rejected',
+                'decided_at' => now(),
+                'note' => $note,
+            ]);
 
-        if (! $approve) {
-            $leaveRequest->update(['status' => 'rejected']);
-        } elseif ($leaveRequest->approvals()->where('status', 'pending')->doesntExist()) {
-            $leaveRequest->update(['status' => 'approved']);
-            $this->createApprovedLeaveAttendance($leaveRequest);
-        }
+            if (! $approve) {
+                $leaveRequest->update(['status' => 'rejected']);
+            } elseif ($leaveRequest->approvals()->where('status', 'pending')->doesntExist()) {
+                $leaveRequest->update(['status' => 'approved']);
+                $this->leaveAttendanceService->applyForApprovedLeaveRequest($leaveRequest);
+            }
 
-        return $leaveRequest->fresh('approvals.approver');
+            return $leaveRequest->fresh(['approvals.approver']);
+        });
     }
 
     protected function createApprovedLeaveAttendance(LeaveRequest $leaveRequest): void
@@ -178,29 +182,48 @@ class LeaveRequestService implements LeaveRequestServiceInterface
 
         $status = $this->resolveLeaveAttendanceStatus();
 
+        $holidays = Holiday::query()
+            ->whereBetween('date', [
+                $leaveRequest->start_date->toDateString(),
+                $leaveRequest->end_date->toDateString(),
+            ])
+            ->pluck('date')
+            ->map(fn($date) => $date->toDateString())
+            ->all();
+
         $dates = CarbonPeriod::create($leaveRequest->start_date, $leaveRequest->end_date);
 
         foreach ($dates as $date) {
             $workDate = $date->toDateString();
+
+            if ($date->isWeekend() || in_array($workDate, $holidays, true)) {
+                continue;
+            }
+
             $shift = $employee->activeShiftFor($workDate) ?? $employee->currentShift();
 
             if (! $shift) {
                 continue;
             }
 
-            Attendance::query()->updateOrCreate(
-                [
-                    'employee_id' => $employee->id,
-                    'work_date' => $workDate,
-                ],
-                [
-                    'shift_id' => $shift->id,
-                    'attendance_status_id' => $status->id,
-                    'determination_type' => 'manual',
-                    'source' => 'manual',
-                    'notes' => 'Cuti disetujui: ' . ($leaveRequest->leaveType->name ?? 'Cuti'),
-                ]
-            );
+            $attendanceExists = Attendance::query()
+                ->where('employee_id', $employee->id)
+                ->whereDate('work_date', $workDate)
+                ->exists();
+
+            if ($attendanceExists) {
+                continue;
+            }
+
+            Attendance::query()->create([
+                'employee_id' => $employee->id,
+                'work_date' => $workDate,
+                'shift_id' => $shift->id,
+                'attendance_status_id' => $status->id,
+                'determination_type' => 'manual',
+                'source' => 'manual',
+                'notes' => 'Cuti disetujui: ' . ($leaveRequest->leaveType->name ?? 'Cuti'),
+            ]);
         }
     }
 
