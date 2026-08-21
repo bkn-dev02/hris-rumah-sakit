@@ -9,8 +9,8 @@
     <link
         rel="icon"
         type="image/png"
-        href="{{ asset('images/logo.jpeg') }}">
-    <title>@yield('title', config('app.name')) - RS Kasih Insani</title>
+        href="{{ asset('images/logo.png') }}">
+    <title>@yield('title', config('app.name')) - RSU Kasih Insani</title>
 
     @vite([
     'resources/css/app.css',

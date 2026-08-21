@@ -1,4 +1,3 @@
-```blade
 @extends('shared::layouts.app')
 
 @section('title', 'Security Module')

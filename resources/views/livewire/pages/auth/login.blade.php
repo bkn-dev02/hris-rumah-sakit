@@ -23,18 +23,40 @@ $login = function () {
 };
 
 ?>
+
 {{-- Login Card --}}
-<div class="rounded-2xl bg-white p-6 sm:p-8">
+<div class="rounded-xl bg-white p-6 sm:p-8">
 
     {{-- Heading --}}
-    <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold tracking-tight text-sky-900">
-            HRIS
-        </h1>
+    <div class="flex flex-col items-center text-center">
+        <div class="h-28 w-28 flex justify-center items-center rounded-full shadow-sky-300 shadow-lg p-2">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-full w-full object-fit">
+        </div>
 
-        <p class="mt-1 text-sm text-sky-600">
-            Human Resource Information System
-        </p>
+        <h1 class="font-['Fraunces'] mt-4 text-xl font-semibold leading-snug text-sky-800 sm:text-2xl">
+            Absensi Rumah Sakit Umum<br>Kasih Insani
+        </h1>
+    </div>
+
+    <div class="relative mx-auto mt-6 h-14 w-full max-w-[220px] overflow-hidden">
+        <svg viewBox="0 0 220 60" class="h-full w-full" fill="none">
+
+            <path
+                d="M0 30 H70 L82 8 L94 50 L106 30 L116 38 L124 30 H220"
+                stroke="#7dc9fc"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                opacity="0.15" />
+            <path
+                d="M0 30 H70 L82 8 L94 50 L106 30 L116 38 L124 30 H220"
+                stroke="#38bdf8"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="pulse-line" />
+
+        </svg>
     </div>
 
     {{-- Session Status --}}
@@ -44,36 +66,33 @@ $login = function () {
 
     {{-- Login Form --}}
     <form wire:submit="login" class="space-y-5">
-
-        {{-- Username / Email --}}
         <div>
             <x-input-label
                 for="login"
-                value="Username atau Email"
-                class="mb-1.5 block text-sm font-medium text-slate-700" />
+                value="Username"
+                class="mb-1.5 block text-sm font-medium text-sky-400" />
 
             <x-text-input
                 wire:model="form.login"
                 id="login"
-                class="block w-full rounded-lg border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm transition focus:border-slate-500 focus:ring-slate-500"
+                class="block w-full rounded-lg border-sky-300 bg-white px-4 py-2.5 text-sm text-sky-600 shadow-sm transition"
                 type="text"
                 name="login"
                 required
                 autofocus
                 autocomplete="username"
-                placeholder="Masukkan username atau email" />
+                placeholder="Masukkan username" />
 
             <x-input-error
                 :messages="$errors->get('form.login')"
                 class="mt-2" />
         </div>
 
-        {{-- Password --}}
         <div>
             <x-input-label
                 for="password"
                 value="Password"
-                class="mb-1.5 block text-sm font-medium text-slate-700" />
+                class="mb-1.5 block text-sm font-medium text-sky-400" />
 
             <x-text-input
                 wire:model="form.password"
@@ -148,5 +167,19 @@ $login = function () {
         </button>
 
     </form>
+
+    {{-- Register --}}
+    <p class="mt-7 text-center text-sm text-slate-500">
+        Belum punya akun?
+        @if (Route::has('register'))
+        <a href="{{ route('register') }}" class="font-semibold text-sky-700 transition hover:text-sky-950">
+            Daftar di sini
+        </a>
+        @else
+        <span class="cursor-not-allowed font-semibold text-slate-300" title="Fitur registrasi segera hadir">
+            Daftar di sini
+        </span>
+        @endif
+    </p>
 
 </div>

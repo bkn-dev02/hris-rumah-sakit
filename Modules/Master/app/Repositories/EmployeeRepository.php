@@ -21,6 +21,19 @@ class EmployeeRepository implements EmployeeRepositoryInterface
         return $this->model->with('employmentStatus')->orderBy('name')->get();
     }
 
+    public function getActiveInactiveCounts(): array
+    {
+        $active = $this->model->where('is_active', true)->count();
+        $inactive = $this->model->where('is_active', false)->count();
+        $total = $active + $inactive;
+
+        return [
+            'active' => $active,
+            'inactive' => $inactive,
+            'total' => $total,
+        ];
+    }
+
     public function paginate(int $perPage = 10, bool $trashed = false): LengthAwarePaginator
     {
         return $this->model

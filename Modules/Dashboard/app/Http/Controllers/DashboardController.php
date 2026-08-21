@@ -14,21 +14,18 @@ class DashboardController extends Controller
         protected AttendanceServiceInterface $attendanceService
     ) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $summary = $this->attendanceService->todaySummary();
 
         $stats = [
-            'total' => (int) ($summary['total'] ?? 1248),
-            'present' => (int) ($summary['present'] ?? 1085),
-            'late' => (int) ($this->lateTodayCount() ?? 87),
-            'absent' => (int) ($summary['absent'] ?? 76),
-            'leave' => (int) ($summary['on_leave'] ?? 32),
-            'overtime' => 24,
-            'pending' => 18,
+            'total' => (int) ($summary['total'] ?? 0),
+            'aktif' => (int) ($summary['aktif'] ?? 0),
+            'nonaktif' => (int) ($summary['nonaktif'] ?? 0),
+            'present' => (int) ($summary['present'] ?? 0),
+            'late' => (int) ($this->lateTodayCount() ?? 0),
+            'absent' => (int) ($summary['absent'] ?? 0),
+            'leave' => (int) ($summary['on_leave'] ?? 0),
         ];
 
         $stats['present_pct'] = $stats['total'] > 0 ? round(($stats['present'] / $stats['total']) * 100) : 0;
@@ -97,43 +94,4 @@ class DashboardController extends Controller
 
         return $late > 0 ? $late : null;
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('dashboard::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('dashboard::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('dashboard::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }

@@ -321,12 +321,22 @@ class AttendanceService implements AttendanceServiceInterface
         $today = Carbon::today()->toDateString();
 
         return Cache::remember("attendance_summary:{$today}", now()->addMinutes(10), function () use ($today) {
-            $totalEmployees = $this->employeeService->getAll()->count();
+            $statusCounts = $this->employeeService->getEmployeeStatusCounts();
+            $totalEmployees = $statusCounts['total'];
+            $activeEmployees =  $statusCounts['active'];
+            $inactiveEmployees = $statusCounts['inactive'];
             $present = $this->attendanceRepository->countCheckedInForDate($today);
             $onLeave = $this->exceptionRepository->countApprovedForDate($today);
             $absent = max($totalEmployees - $present - $onLeave, 0);
 
-            return ['total' => $totalEmployees, 'present' => $present, 'on_leave' => $onLeave, 'absent' => $absent,];
+            return [
+                'total' => $totalEmployees,
+                'aktif' => $activeEmployees,
+                'nonaktif' => $inactiveEmployees,
+                'present' => $present,
+                'on_leave' => $onLeave,
+                'absent' => $absent,
+            ];
         });
     }
 
