@@ -23,6 +23,11 @@ class EmployeeService implements EmployeeServiceInterface
         return $this->employeeRepository->all();
     }
 
+    public function getEmployeeStatusCounts(): array
+    {
+        return $this->employeeRepository->getActiveInactiveCounts();
+    }
+
     public function paginate(int $perPage = 10, bool $trashed = false): LengthAwarePaginator
     {
         return $this->employeeRepository->paginate($perPage, $trashed);
