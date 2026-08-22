@@ -2,8 +2,8 @@
 
     <!-- Left: Brand -->
     <div class="h-full flex justify-center items-center gap-4">
-        <img src="{{ asset('images/logo.jpeg') }}" alt="Logo" class="h-10 w-10 rounded-full object-cover border border-emerald-600 shadow-sm">
-        <span class="font-bold text-xs md:text-sm lg:text-lg italic">HRIS Rumah Sakit</span>
+        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-10 rounded-full object-cover border border-emerald-600 shadow-sm">
+        <span class="font-bold text-xs md:text-sm lg:text-lg italic">Rumah Sakit Umum Kasih Insani</span>
     </div>
 
     <!-- RIGHT: Actions -->

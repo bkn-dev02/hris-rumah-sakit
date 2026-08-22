@@ -27,4 +27,6 @@ interface EmployeeRepositoryInterface
     public function restore(string $slug): bool;
 
     public function forceDelete(Employee $employee): bool;
+
+    public function getDepartmentDistribution(): array;
 }

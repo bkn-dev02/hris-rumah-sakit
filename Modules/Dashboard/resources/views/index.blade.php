@@ -4,14 +4,14 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="min-h-screen bg-slate-50">
+    <div class="bg-slate-50">
         <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <h1 class="text-2xl font-bold tracking-tight text-sky-950">
                 Dashboard
             </h1>
         </div>
 
-        <div class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 
             {{-- Total Employees --}}
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -19,7 +19,7 @@
 
                     <div>
                         <p class="text-sm font-medium text-slate-500">
-                            Total Pegawai
+                            Total Pegawai Terdaftar
                         </p>
 
                         <h3 class="mt-2 text-3xl font-bold text-sky-950">
@@ -77,7 +77,51 @@
             </div>
         </div>
 
-        <div class="mb-8 grid grid-cols-1 gap-5 md:grid-cols-3">
+        @if ($pendingLeaveCount > 0 || $pendingEmergencyCount > 0)
+        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-amber-900">
+                            Ada yang perlu perhatian Anda
+                        </h3>
+                        <p class="mt-0.5 text-sm text-amber-700">
+                            @if ($pendingLeaveCount > 0 && $pendingEmergencyCount > 0)
+                            {{ $pendingLeaveCount }} pengajuan cuti dan {{ $pendingEmergencyCount }} presensi darurat menunggu persetujuan.
+                            @elseif ($pendingLeaveCount > 0)
+                            {{ $pendingLeaveCount }} pengajuan cuti menunggu persetujuan.
+                            @else
+                            {{ $pendingEmergencyCount }} presensi darurat menunggu persetujuan.
+                            @endif
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    @if ($pendingLeaveCount > 0)
+                    <a href="{{ route('leave.requests.index') }}"
+                        class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-700">
+                        <i class="fa-solid fa-calendar-check text-xs"></i>
+                        Lihat Cuti ({{ $pendingLeaveCount }})
+                    </a>
+                    @endif
+
+                    @if ($pendingEmergencyCount > 0)
+                    <a href="{{ route('attendance.emergency.index') }}"
+                        class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-700">
+                        <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                        Lihat Darurat ({{ $pendingEmergencyCount }})
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <div class="mb-8 grid grid-cols-1 gap-5 md:grid-cols-4">
 
             {{-- Leave --}}
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -156,7 +200,6 @@
                 </div>
             </div>
 
-
             {{-- Absent --}}
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-start justify-between">
@@ -189,64 +232,71 @@
     </div>
 
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {{-- Quick Actions --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-100 px-6 py-5">
+                <h2 class="font-semibold text-sky-950">
+                    Menu Akses Cepat
+                </h2>
+                <p class="mt-1 text-xs text-slate-500">
+                    Pintasan ke fitur yang sering digunakan
+                </p>
+            </div>
 
-        {{-- Attendance Overview --}}
+            <div class="grid grid-cols-2 gap-4 p-6 sm:grid-cols-4">
+                @forelse ($quickAccessMenus as $menu)
+                <a href="{{ route($menu['route']) }}"
+                    class="group flex flex-col items-center gap-2 rounded-xl border border-slate-100 p-4 text-center transition hover:border-sky-200 hover:bg-sky-50/50 hover:shadow-sm">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl {{ $menu['color'] }} transition group-hover:scale-105">
+                        <i class="fa-solid {{ $menu['icon'] }}"></i>
+                    </div>
+                    <span class="text-xs font-medium text-slate-700">
+                        {{ $menu['label'] }}
+                    </span>
+                </a>
+                @empty
+                <div class="col-span-full py-6 text-center text-sm text-slate-400">
+                    Tidak ada menu akses cepat yang tersedia untuk akun Anda.
+                </div>
+                @endforelse
+            </div>
+        </div>
+
         <div class="xl:col-span-2 rounded-xl border border-slate-200 bg-white shadow-sm">
-
             <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-
                 <div>
                     <h2 class="font-semibold text-sky-950">
                         Ringkasan Kehadiran
                     </h2>
-
                     <p class="mt-1 text-xs text-slate-500">
                         Statistik kehadiran pegawai dalam 7 hari terakhir
                     </p>
                 </div>
-
-                <button
-                    type="button"
-                    class="text-sm font-medium text-sky-900 hover:text-sky-950">
-                    Lihat Detail
-                    <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
-                </button>
-
             </div>
 
             <div class="p-6">
-
-                {{-- Fake Chart --}}
                 <div class="flex h-64 items-end gap-3 border-b border-l border-slate-200 px-4 pb-0">
-
                     @foreach($chartData as $item)
-
                     <div class="group flex h-full flex-1 flex-col items-center justify-end gap-2">
-
                         <span class="text-xs font-medium text-slate-500 opacity-0 transition group-hover:opacity-100">
                             {{ $item['value'] }}
                         </span>
-
                         <div
                             class="w-full max-w-10 rounded-t-md bg-sky-200 transition-all duration-300 group-hover:bg-sky-950"
                             style="height: {{ $item['height'] }}"></div>
-
                         <span class="translate-y-6 text-xs text-slate-500">
                             {{ $item['day'] }}
                         </span>
-
                     </div>
-
                     @endforeach
 
                 </div>
-
             </div>
-
         </div>
+    </div>
 
+    <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
 
-        {{-- Employee Distribution --}}
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
 
             <div class="border-b border-slate-100 px-6 py-5">
@@ -263,13 +313,7 @@
 
             <div class="space-y-5 p-6">
 
-                @foreach([
-                ['name' => 'Keperawatan', 'total' => '420', 'percent' => '72%'],
-                ['name' => 'Medis', 'total' => '280', 'percent' => '55%'],
-                ['name' => 'Administrasi', 'total' => '210', 'percent' => '42%'],
-                ['name' => 'Farmasi', 'total' => '145', 'percent' => '30%'],
-                ['name' => 'Penunjang', 'total' => '193', 'percent' => '38%'],
-                ] as $item)
+                @forelse ($departmentDistribution as $item)
 
                 <div>
 
@@ -295,75 +339,30 @@
 
                 </div>
 
-                @endforeach
+                @empty
+                <p class="text-sm text-slate-400 text-center py-6">Belum ada data departemen.</p>
+                @endforelse
 
             </div>
 
         </div>
 
-    </div>
-
-
-    {{-- ============================================
-        BOTTOM CONTENT
-    ============================================= --}}
-    <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-
-        {{-- Recent Activities --}}
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-
             <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-
                 <div>
                     <h2 class="font-semibold text-sky-950">
                         Aktivitas Terbaru
                     </h2>
-
                     <p class="mt-1 text-xs text-slate-500">
                         Aktivitas terbaru dalam sistem
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    class="text-sm font-medium text-sky-900 hover:text-sky-950">
-                    Lihat Semua
-                </button>
-
             </div>
 
             <div class="divide-y divide-slate-100">
 
-                @foreach([
-                [
-                'icon' => 'fa-user-plus',
-                'color' => 'bg-sky-100 text-sky-950',
-                'title' => 'Pegawai baru ditambahkan',
-                'description' => 'Siti Rahma bergabung sebagai Perawat',
-                'time' => '10 menit lalu'
-                ],
-                [
-                'icon' => 'fa-calendar-check',
-                'color' => 'bg-emerald-100 text-emerald-700',
-                'title' => 'Pengajuan cuti disetujui',
-                'description' => 'Pengajuan cuti oleh Budi Santoso',
-                'time' => '35 menit lalu'
-                ],
-                [
-                'icon' => 'fa-clock',
-                'color' => 'bg-amber-100 text-amber-700',
-                'title' => 'Pengajuan lembur baru',
-                'description' => 'Pengajuan lembur Unit Keperawatan',
-                'time' => '1 jam lalu'
-                ],
-                [
-                'icon' => 'fa-pen-to-square',
-                'color' => 'bg-slate-100 text-slate-700',
-                'title' => 'Data pegawai diperbarui',
-                'description' => 'Data jabatan pegawai diperbarui',
-                'time' => '2 jam lalu'
-                ],
-                ] as $activity)
+                @forelse ($recentActivities as $activity)
 
                 <div class="flex items-center gap-4 px-6 py-4">
 
@@ -389,106 +388,11 @@
 
                 </div>
 
-                @endforeach
-
-            </div>
-
-        </div>
-
-
-        {{-- Quick Actions --}}
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-
-            <div class="border-b border-slate-100 px-6 py-5">
-
-                <h2 class="font-semibold text-sky-950">
-                    Akses Cepat
-                </h2>
-
-                <p class="mt-1 text-xs text-slate-500">
-                    Akses fitur administrasi yang sering digunakan
-                </p>
-
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 p-6 sm:grid-cols-3">
-
-                <a
-                    href="#"
-                    class="group rounded-xl border border-slate-200 p-4 transition hover:border-sky-200 hover:bg-sky-50">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-200 text-sky-950">
-                        <i class="fa-solid fa-user-plus"></i>
-                    </div>
-
-                    <p class="mt-3 text-sm font-semibold text-slate-700 group-hover:text-sky-950">
-                        Tambah Pegawai
-                    </p>
-                </a>
-
-
-                <a
-                    href="#"
-                    class="group rounded-xl border border-slate-200 p-4 transition hover:border-sky-200 hover:bg-sky-50">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-200 text-sky-950">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-
-                    <p class="mt-3 text-sm font-semibold text-slate-700 group-hover:text-sky-950">
-                        Kehadiran
-                    </p>
-                </a>
-
-
-                <a
-                    href="#"
-                    class="group rounded-xl border border-slate-200 p-4 transition hover:border-sky-200 hover:bg-sky-50">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-200 text-sky-950">
-                        <i class="fa-solid fa-file-lines"></i>
-                    </div>
-
-                    <p class="mt-3 text-sm font-semibold text-slate-700 group-hover:text-sky-950">
-                        Laporan
-                    </p>
-                </a>
-
-
-                <a
-                    href="#"
-                    class="group rounded-xl border border-slate-200 p-4 transition hover:border-sky-200 hover:bg-sky-50">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-200 text-sky-950">
-                        <i class="fa-solid fa-user-shield"></i>
-                    </div>
-
-                    <p class="mt-3 text-sm font-semibold text-slate-700 group-hover:text-sky-950">
-                        Pengguna
-                    </p>
-                </a>
-
-
-                <a
-                    href="#"
-                    class="group rounded-xl border border-slate-200 p-4 transition hover:border-sky-200 hover:bg-sky-50">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-200 text-sky-950">
-                        <i class="fa-solid fa-building"></i>
-                    </div>
-
-                    <p class="mt-3 text-sm font-semibold text-slate-700 group-hover:text-sky-950">
-                        Organisasi
-                    </p>
-                </a>
-
-
-                <a
-                    href="#"
-                    class="group rounded-xl border border-slate-200 p-4 transition hover:border-sky-200 hover:bg-sky-50">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-200 text-sky-950">
-                        <i class="fa-solid fa-gear"></i>
-                    </div>
-
-                    <p class="mt-3 text-sm font-semibold text-slate-700 group-hover:text-sky-950">
-                        Pengaturan
-                    </p>
-                </a>
+                @empty
+                <div class="px-6 py-10 text-center text-sm text-slate-400">
+                    Belum ada aktivitas terbaru.
+                </div>
+                @endforelse
 
             </div>
 
