@@ -23,8 +23,8 @@ class EmployeeRepository implements EmployeeRepositoryInterface
 
     public function getActiveInactiveCounts(): array
     {
-        $active = $this->model->where('is_active', true)->count();
-        $inactive = $this->model->where('is_active', false)->count();
+        $active = $this->model->withTrashed()->where('is_active', true)->count();
+        $inactive = $this->model->withTrashed()->where('is_active', false)->count();
         $total = $active + $inactive;
 
         return [
@@ -74,6 +74,8 @@ class EmployeeRepository implements EmployeeRepositoryInterface
 
     public function delete(Employee $employee): bool
     {
+        $employee->update(['is_active' => false]);
+
         return (bool) $employee->delete();
     }
 
@@ -85,11 +87,32 @@ class EmployeeRepository implements EmployeeRepositoryInterface
             return false;
         }
 
-        return (bool) $employee->restore();
+        $restored = (bool) $employee->restore();
+
+        if ($restored) {
+            $employee->update(['is_active' => true]);
+        }
+
+        return $restored;
     }
 
     public function forceDelete(Employee $employee): bool
     {
         return (bool) $employee->forceDelete();
+    }
+
+    public function getDepartmentDistribution(): array
+    {
+        $employees = $this->model->where('is_active', true)->get();
+        $total = $employees->count();
+
+        $grouped = $employees->groupBy(
+            fn($employee) => $employee->currentDepartment()?->name ?? 'Belum Ditempatkan'
+        );
+
+        return $grouped->map(fn($group, $name) => ['name' => $name, 'total' => $group->count(), 'percent' => $total > 0 ? round(($group->count() / $total) * 100) . '%' : '0%',])
+            ->sortByDesc('total')
+            ->values()
+            ->all();
     }
 }

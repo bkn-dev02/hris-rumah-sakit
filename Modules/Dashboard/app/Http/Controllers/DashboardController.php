@@ -7,11 +7,16 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Modules\Attendance\Contracts\Services\AttendanceServiceInterface;
 use Modules\Attendance\Models\Attendance;
+use Modules\Master\Contracts\Services\EmployeeServiceInterface;
+use Modules\Master\Models\Employee;
+use Modules\Leave\Models\LeaveRequest;
+use Modules\Attendance\Models\CheckIn;
 
 class DashboardController extends Controller
 {
     public function __construct(
-        protected AttendanceServiceInterface $attendanceService
+        protected AttendanceServiceInterface $attendanceService,
+        protected EmployeeServiceInterface $employeeService,
     ) {}
 
     public function index()
@@ -34,7 +39,30 @@ class DashboardController extends Controller
 
         $chartData = $this->buildChartData();
 
-        return view('dashboard::index', compact('stats', 'chartData'));
+        $departmentDistribution = $this->employeeService->getDepartmentDistribution();
+
+        $recentActivities = $this->buildRecentActivities();
+
+        $quickAccessMenus = $this->buildQuickAccessMenus();
+
+        $pendingLeaveCount = \Modules\Leave\Models\LeaveRequest::query()
+            ->where('status', 'pending')
+            ->count();
+
+        $pendingEmergencyCount = \Modules\Attendance\Models\CheckIn::query()
+            ->where('type', 'emergency')
+            ->where('emergency_status', 'pending')
+            ->count();
+
+        return view('dashboard::index', compact(
+            'stats',
+            'chartData',
+            'departmentDistribution',
+            'recentActivities',
+            'quickAccessMenus',
+            'pendingLeaveCount',
+            'pendingEmergencyCount'
+        ));
     }
 
     protected function buildChartData(): array
@@ -93,5 +121,146 @@ class DashboardController extends Controller
             ->count();
 
         return $late > 0 ? $late : null;
+    }
+
+    protected function buildRecentActivities(int $limit = 10): array
+    {
+        $activities = collect();
+
+        Employee::query()
+            ->latest('created_at')
+            ->limit(5)
+            ->get()
+            ->each(function ($employee) use ($activities) {
+                $activities->push([
+                    'icon' => 'fa-user-plus',
+                    'color' => 'bg-sky-100 text-sky-950',
+                    'title' => 'Pegawai baru ditambahkan',
+                    'description' => "{$employee->name} bergabung sebagai {$employee->currentPosition()?->name}",
+                    'timestamp' => $employee->created_at,
+                ]);
+            });
+
+        LeaveRequest::query()
+            ->with('employee')
+            ->whereIn('status', ['approved', 'rejected'])
+            ->latest('updated_at')
+            ->limit(5)
+            ->get()
+            ->each(function ($leave) use ($activities) {
+                $isApproved = $leave->status === 'approved';
+                $activities->push([
+                    'icon' => $isApproved ? 'fa-calendar-check' : 'fa-calendar-xmark',
+                    'color' => $isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700',
+                    'title' => $isApproved ? 'Pengajuan cuti disetujui' : 'Pengajuan cuti ditolak',
+                    'description' => "Pengajuan cuti oleh {$leave->employee->name}",
+                    'timestamp' => $leave->updated_at,
+                ]);
+            });
+
+        CheckIn::query()
+            ->with('employee')
+            ->where('type', 'emergency')
+            ->latest('updated_at')
+            ->limit(5)
+            ->get()
+            ->each(function ($checkIn) use ($activities) {
+                $isPending = $checkIn->emergency_status === 'pending';
+                $isApproved = $checkIn->emergency_status === 'approved';
+
+                $activities->push([
+                    'icon' => 'fa-triangle-exclamation',
+                    'color' => $isPending
+                        ? 'bg-amber-100 text-amber-700'
+                        : ($isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'),
+                    'title' => $isPending
+                        ? 'Presensi darurat diajukan'
+                        : ($isApproved ? 'Presensi darurat disetujui' : 'Presensi darurat ditolak'),
+                    'description' => "Presensi darurat oleh {$checkIn->employee->name}",
+                    'timestamp' => $checkIn->updated_at,
+                ]);
+            });
+
+        return $activities
+            ->sortByDesc('timestamp')
+            ->take($limit)
+            ->map(fn($a) => [
+                'icon' => $a['icon'],
+                'color' => $a['color'],
+                'title' => $a['title'],
+                'description' => $a['description'],
+                'time' => $a['timestamp']->diffForHumans(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    protected function buildQuickAccessMenus(): array
+    {
+        $user = auth()->user();
+
+        $menus = [
+            [
+                'label' => 'Tambah Pegawai',
+                'icon' => 'fa-user-plus',
+                'color' => 'bg-sky-100 text-sky-950',
+                'route' => 'master.employees.create',
+                'permission' => 'employees.create',
+            ],
+            [
+                'label' => 'Approval Cuti',
+                'icon' => 'fa-calendar-check',
+                'color' => 'bg-emerald-100 text-emerald-700',
+                'route' => 'leave.requests.index',
+                'permission' => 'leave-requests.view',
+            ],
+            [
+                'label' => 'Presensi Darurat',
+                'icon' => 'fa-triangle-exclamation',
+                'color' => 'bg-amber-100 text-amber-700',
+                'route' => 'attendance.emergency.index',
+                'permission' => 'emergency-attendance.approve',
+            ],
+            [
+                'label' => 'Rekap Absensi',
+                'icon' => 'fa-clipboard-list',
+                'color' => 'bg-indigo-100 text-indigo-700',
+                'route' => 'attendance.attendances.index',
+                'permission' => 'attendances.view',
+            ],
+            [
+                'label' => 'Jenis Cuti',
+                'icon' => 'fa-list-ul',
+                'color' => 'bg-purple-100 text-purple-700',
+                'route' => 'leave.leave-types.index',
+                'permission' => 'leave-types.manage',
+            ],
+            [
+                'label' => 'Lokasi Absensi',
+                'icon' => 'fa-location-dot',
+                'color' => 'bg-rose-100 text-rose-700',
+                'route' => 'attendance.locations.index',
+                'permission' => 'attendance-locations.view',
+            ],
+            [
+                'label' => 'Manajemen User',
+                'icon' => 'fa-user-gear',
+                'color' => 'bg-slate-100 text-slate-700',
+                'route' => 'security.users.index',
+                'permission' => 'users.view',
+            ],
+            [
+                'label' => 'Manajemen Role',
+                'icon' => 'fa-shield-halved',
+                'color' => 'bg-cyan-100 text-cyan-700',
+                'route' => 'security.roles.index',
+                'permission' => 'roles.view',
+            ],
+        ];
+
+        return collect($menus)
+            ->filter(fn($menu) => $user->hasPermission($menu['permission']) && \Illuminate\Support\Facades\Route::has($menu['route']))
+            ->values()
+            ->all();
     }
 }

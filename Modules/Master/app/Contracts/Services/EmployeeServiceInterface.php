@@ -24,4 +24,6 @@ interface EmployeeServiceInterface
     public function restore(string $slug): bool;
 
     public function forceDelete(string $slug): bool;
+
+    public function getDepartmentDistribution(): array;
 }

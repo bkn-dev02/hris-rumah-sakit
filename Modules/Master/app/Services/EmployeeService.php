@@ -115,4 +115,9 @@ class EmployeeService implements EmployeeServiceInterface
 
         return $slug;
     }
+
+    public function getDepartmentDistribution(): array
+    {
+        return $this->employeeRepository->getDepartmentDistribution();
+    }
 }
