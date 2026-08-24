@@ -98,6 +98,7 @@ class ProfileController extends Controller
             'gender'             => $employee->gender,
             'place_of_birth'     => $employee->place_of_birth,
             'date_of_birth'      => optional($employee->date_of_birth)->format('Y-m-d'),
+            'profession' => $employee->profession,
             'national_id_number' => $employee->national_id_number,
             'address'            => $employee->address,
             'phone'              => $employee->phone,

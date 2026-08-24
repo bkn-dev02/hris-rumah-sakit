@@ -16,8 +16,6 @@ class StoreShiftVersionRequest extends FormRequest
         return [
             'code' => ['required', 'string', 'max:50'],
             'name' => ['required', 'string', 'max:100'],
-            'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i'],
             'effective_date' => ['required', 'date'],
         ];
     }

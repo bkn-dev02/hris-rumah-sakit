@@ -5,10 +5,10 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
     <div class="flex items-center gap-4">
-        <a href="{{ route('master.positions.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-blue-100 bg-blue-900 hover:bg-blue-800 transition duration-200 translate-x-0 hover:-translate-x-1">
-            <i class="fa fa-arrow-left text-md text-blue-50"></i>
+        <a href="{{ route('master.positions.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-sky-100 bg-sky-900 hover:bg-sky-800 transition duration-200 translate-x-0 hover:-translate-x-1">
+            <i class="fa fa-arrow-left text-md text-sky-50"></i>
         </a>
-        <h1 class="text-xl font-semibold text-blue-800">Tambah Posisi</h1>
+        <h1 class="text-xl font-semibold text-sky-800">Tambah Posisi</h1>
     </div>
     <form method="POST" action="{{ route('master.positions.store') }}" class="mt-6 rounded-lg border border-slate-200 bg-white p-6">
         @csrf
