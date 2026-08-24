@@ -26,8 +26,6 @@ class Shift extends Model
             'effective_date' => 'date',
             'end_date' => 'date',
             'is_active' => 'boolean',
-            'start_time' => 'datetime:H:i',
-            'end_time' => 'datetime:H:i',
         ];
     }
 
