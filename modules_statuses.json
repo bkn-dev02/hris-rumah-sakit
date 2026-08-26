@@ -9,5 +9,6 @@
     "Report": true,
     "Performance": true,
     "Training": true,
-    "Asset": true
+    "Asset": true,
+    "Schedule": true
 }

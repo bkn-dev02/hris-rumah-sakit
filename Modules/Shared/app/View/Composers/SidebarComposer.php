@@ -98,6 +98,13 @@ class SidebarComposer
                 ],
             ],
             [
+                'label' => 'Schedule',
+                'icon'  => 'fa-solid fa-calendar-week',
+                'route' => 'schedule.index',
+                'active' => ['schedule.index'],
+                'permission' => 'schedule.view',
+            ],
+            [
                 'label' => 'Manajemen Cuti',
                 'icon'  => 'fa-solid fa-calendar-days',
                 'route' => 'leave.index',
