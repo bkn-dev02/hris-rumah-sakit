@@ -3,6 +3,7 @@
 namespace Modules\Security\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -89,6 +90,12 @@ class ProfileController extends Controller
 
     private function formatEmployee($user, $employee): array
     {
+        $today = now()->toDateString();
+        $tomorrow = now()->addDay()->toDateString();
+
+        $shiftToday = $employee->activeShiftFor($today);
+        $shiftTomorrow = $employee->activeShiftFor($tomorrow);
+
         return [
             'id'                 => $employee->id,
             'username'           => $user->username,
@@ -109,7 +116,24 @@ class ProfileController extends Controller
             'hire_date'          => optional($employee->hire_date)->format('Y-m-d'),
             'employment_status' => $employee->employmentStatus?->name,
             'position' => $employee->currentPosition()?->name,
+            'department' => $employee->currentDepartment()?->name,
+            'shift_today_name' => $shiftToday?->name,
+            'shift_today_time' => $this->formatShiftTime($shiftToday),
+            'shift_tomorrow_name' => $shiftTomorrow?->name,
+            'shift_tomorrow_time' => $this->formatShiftTime($shiftTomorrow),
             'is_active'          => (bool) $employee->is_active,
         ];
+    }
+
+    private function formatShiftTime($shift): ?string
+    {
+        if (! $shift || ! $shift->start_time || ! $shift->end_time) {
+            return null;
+        }
+
+        $start = \Carbon\Carbon::parse($shift->start_time)->format('H:i');
+        $end = \Carbon\Carbon::parse($shift->end_time)->format('H:i');
+
+        return "{$start} - {$end}";
     }
 }

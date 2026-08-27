@@ -9,6 +9,8 @@ use Modules\Master\Contracts\Services\EmployeeServiceInterface;
 use Modules\Master\Contracts\Services\EmployeeShiftScheduleServiceInterface;
 use Modules\Master\Contracts\Services\ShiftServiceInterface;
 use Modules\Master\DTOs\EmployeeShiftScheduleData;
+use Illuminate\Support\Facades\DB;
+use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
 
 class EmployeeShiftScheduleController extends Controller
 {
@@ -49,7 +51,18 @@ class EmployeeShiftScheduleController extends Controller
             'created_by'  => Auth::id(),
         ]);
 
-        $this->scheduleService->createSchedule($data);
+        DB::transaction(function () use ($data, $employee) {
+            $this->scheduleService->createSchedule($data);
+
+            app(ScheduleServiceInterface::class)->assign(
+                employeeId: $employee->id,
+                date: $data->startDate,
+                type: 'kerja',
+                shiftId: $data->shiftId,
+                createdByEmployeeId: Auth::user()->employee?->id,
+                syncToMaster: false,
+            );
+        });
 
         return redirect()
             ->route('master.employees.shift-schedules.index', $employee->slug)

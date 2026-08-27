@@ -13,15 +13,33 @@
         </div>
 
         <form method="GET" action="{{ route('schedule.index') }}" class="flex items-center gap-3 flex-wrap">
-            <select name="department_id" onchange="this.form.submit()"
-                class="rounded-lg border-0 text-sm text-sky-200 py-2 px-3 shadow-sm focus:ring-2 focus:ring-sky-400">
-                <option value="">Pilih Departemen</option>
-                @foreach ($departments as $department)
-                <option value="{{ $department->id }}" {{ $departmentId == $department->id ? 'selected' : '' }}>
-                    {{ $department->name }}
-                </option>
-                @endforeach
-            </select>
+            @if ($showFilter)
+                <select name="department_id"
+                    onchange="this.form.submit()"
+                    class="rounded-lg border-0 bg-sky-900 text-sky-100 py-2 px-3 shadow-sm
+                        focus:ring-2 focus:ring-sky-400">
+
+                    @if ($departmentsForFilter->count() > 1 || !$departmentId)
+                        <option value="" class="bg-white text-slate-800">
+                            Pilih Departemen
+                        </option>
+                    @endif
+
+                    @foreach ($departmentsForFilter as $department)
+                        <option
+                            value="{{ $department->id }}"
+                            class="bg-white text-slate-800"
+                            {{ $departmentId == $department->id ? 'selected' : '' }}
+                        >
+                            {{ $department->name }}
+                        </option>
+                    @endforeach
+                </select>
+            @else
+                <span class="text-sky-200 text-sm font-medium px-1">
+                    {{ $departmentsForFilter->first()->name ?? '' }}
+                </span>
+            @endif
 
             <div class="flex items-center gap-2">
                 <a href="{{ route('schedule.index', array_merge(request()->query(), ['start_date' => $startDate->copy()->subWeek()->toDateString()])) }}"
@@ -68,23 +86,26 @@
                     @foreach ($dates as $date)
                     <td class="px-2 py-2 text-center">
                         <div x-data="scheduleCell({
-                                            employeeId: {{ $employee->id }},
-                                            date: '{{ $date->toDateString() }}',
-                                            shifts: @js($shifts->map(fn ($s) => ['id' => $s->id, 'label' => strtoupper(substr($s->name, 0, 1)), 'name' => $s->name])),
-                                        })" class="relative inline-block">
+                                    employeeId: {{ $employee->id }},
+                                    date: '{{ $date->toDateString() }}',
+                                    shifts: @js($shifts->map(fn ($s) => ['id' => $s->id, 'label' => $s->initials, 'name' => $s->name])),
+                                    initial: @js($scheduleMap[$employee->id][$date->toDateString()] ?? null),
+                                })" class="relative inline-block">
 
-                            <button @click="open = !open"
-                                class="w-8 h-7 rounded-lg text-xs font-semibold shadow-sm hover:-translate-y-0.5 transition"
-                                :class="badgeClass()">
-                                <span x-text="label()"></span>
-                            </button>
+                        <button @click="toggle($event)"
+                            class="w-8 h-7 rounded-lg text-xs font-semibold shadow-sm hover:-translate-y-0.5 transition"
+                            :class="badgeClass()">
+                            <span x-text="label()"></span>
+                        </button>
 
+                        <template x-teleport="body">
                             <div x-show="open" @click.outside="open = false" x-cloak
-                                class="absolute z-20 mt-1 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg border border-slate-100 p-2 w-36">
+                                :style="`position:fixed; top:${popoverTop}px; left:${popoverLeft}px;`"
+                                class="z-50 bg-white rounded-xl shadow-lg border border-slate-100 p-2 w-36">
                                 <template x-for="shift in shifts" :key="shift.id">
                                     <button @click="assign('kerja', shift.id)"
                                         class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-sky-50 text-xs flex items-center gap-2">
-                                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                                        <span class="w-2 h-2 rounded-full" :class="shiftDotClass(shift.id)"></span>
                                         <span x-text="shift.name"></span>
                                     </button>
                                 </template>
@@ -94,7 +115,8 @@
                                     Libur
                                 </button>
                             </div>
-                        </div>
+                        </template>
+                    </div>
                     </td>
                     @endforeach
                 </tr>
@@ -105,25 +127,61 @@
     </div>
 
     {{-- Legend --}}
-    <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
-        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-500"></span> Shift kerja</span>
+    <div class="flex items-center gap-4 mt-3 text-xs text-slate-500 flex-wrap">
+        @foreach ($shifts as $shift)
+            <span class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full {{ ['bg-sky-500','bg-amber-500','bg-violet-500','bg-emerald-500','bg-rose-500','bg-indigo-500'][$shift->id % 6] }}"></span>
+                {{ $shift->name }} ({{ $shift->initials }}) · {{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }}–{{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}
+            </span>
+        @endforeach
         <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-300"></span> Libur</span>
     </div>
 </div>
 
 @push('scripts')
 <script>
-    function scheduleCell({
-        employeeId,
-        date,
-        shifts
-    }) {
+    const SHIFT_BADGE_COLORS = [
+        'bg-sky-100 text-sky-700',
+        'bg-amber-100 text-amber-700',
+        'bg-violet-100 text-violet-700',
+        'bg-emerald-100 text-emerald-700',
+        'bg-rose-100 text-rose-700',
+        'bg-indigo-100 text-indigo-700',
+    ];
+    const SHIFT_DOT_COLORS = [
+        'bg-sky-500', 'bg-amber-500', 'bg-violet-500',
+        'bg-emerald-500', 'bg-rose-500', 'bg-indigo-500',
+    ];
+
+    function shiftBadgeClass(shiftId) {
+        return SHIFT_BADGE_COLORS[shiftId % SHIFT_BADGE_COLORS.length];
+    }
+    function shiftDotClass(shiftId) {
+        return SHIFT_DOT_COLORS[shiftId % SHIFT_DOT_COLORS.length];
+    }
+
+    function scheduleCell({ employeeId, date, shifts, initial }) {
         return {
             open: false,
-            employeeId,
-            date,
-            shifts,
-            current: null,
+            popoverTop: 0,
+            popoverLeft: 0,
+            employeeId, date, shifts,
+            current: initial ? {
+                type: initial.type,
+                shiftId: initial.shift_id,
+                shiftLabel: initial.shift_label,
+            } : null,
+
+            toggle(event) {
+                if (this.open) {
+                    this.open = false;
+                    return;
+                }
+                const rect = event.currentTarget.getBoundingClientRect();
+                this.popoverTop = rect.bottom + 4;
+                this.popoverLeft = rect.left + rect.width / 2 - 72;
+                this.open = true;
+            },
 
             label() {
                 if (!this.current) return '-';
@@ -132,9 +190,8 @@
 
             badgeClass() {
                 if (!this.current) return 'bg-slate-100 text-slate-400';
-                return this.current.type === 'libur' ?
-                    'bg-slate-200 text-slate-600' :
-                    'bg-sky-100 text-sky-700';
+                if (this.current.type === 'libur') return 'bg-slate-200 text-slate-600';
+                return shiftBadgeClass(this.current.shiftId);
             },
 
             assign(type, shiftId) {
@@ -143,27 +200,23 @@
                 const shift = shiftId ? this.shifts.find(s => s.id === shiftId) : null;
 
                 fetch('{{ route('schedule.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            },
-                            body: JSON.stringify({
-                                employee_id: this.employeeId,
-                                date: this.date,
-                                type,
-                                shift_id: shiftId,
-                            }),
-                        })
-                    .then(res => res.json())
-                    .then(() => {
-                        this.current = {
-                            type,
-                            shiftId,
-                            shiftLabel: shift ? shift.label : null
-                        };
-                    })
-                    .catch(() => alert('Gagal menyimpan jadwal.'));
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        employee_id: this.employeeId,
+                        date: this.date,
+                        type,
+                        shift_id: shiftId,
+                    }),
+                })
+                .then(res => res.json())
+                .then(() => {
+                    this.current = { type, shiftId, shiftLabel: shift ? shift.label : null };
+                })
+                .catch(() => alert('Gagal menyimpan jadwal.'));
             },
         };
     }
