@@ -6,6 +6,9 @@ use Carbon\Carbon;
 use Modules\Schedule\Contracts\Repositories\ScheduleRepositoryInterface;
 use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
 use Modules\Schedule\Models\Schedule;
+use Modules\Master\Contracts\Services\EmployeeShiftScheduleServiceInterface;
+use Modules\Master\Models\Employee;
+use Modules\Master\DTOs\EmployeeShiftScheduleData;
 
 class ScheduleService implements ScheduleServiceInterface
 {
@@ -13,23 +16,55 @@ class ScheduleService implements ScheduleServiceInterface
         protected ScheduleRepositoryInterface $scheduleRepository
     ) {}
 
-    public function assign(int $employeeId, Carbon $date, string $type, ?int $shiftId, int $createdByEmployeeId): Schedule
+    public function assign(int $employeeId, Carbon $date, string $type, ?int $shiftId, ?int $createdByEmployeeId, bool $syncToMaster = true, ?int $actorUserId = null): Schedule
     {
-        $existing = $this->scheduleRepository->findByEmployeeAndDate($employeeId, $date);
+        return \Illuminate\Support\Facades\DB::transaction(function () use (
+            $employeeId,
+            $date,
+            $type,
+            $shiftId,
+            $createdByEmployeeId,
+            $syncToMaster,
+            $actorUserId
+        ) {
+            $existing = $this->scheduleRepository->findByEmployeeAndDate($employeeId, $date);
 
-        $data = [
-            'employee_id' => $employeeId,
-            'date' => $date,
-            'type' => $type,
-            'shift_id' => $type === 'libur' ? null : $shiftId,
-            'created_by' => $createdByEmployeeId,
-        ];
+            $data = [
+                'employee_id' => $employeeId,
+                'date' => $date,
+                'type' => $type,
+                'shift_id' => $type === 'libur' ? null : $shiftId,
+                'created_by' => $createdByEmployeeId,
+            ];
 
-        if ($existing) {
-            return $this->scheduleRepository->update($existing, $data);
+            $schedule = $existing
+                ? $this->scheduleRepository->update($existing, $data)
+                : $this->scheduleRepository->create($data);
+
+            if ($syncToMaster && $type === 'kerja' && $shiftId) {
+                $this->syncToMasterDefaultShift($employeeId, $date, $shiftId, $actorUserId);
+            }
+
+            return $schedule;
+        });
+    }
+
+    protected function syncToMasterDefaultShift(int $employeeId, Carbon $date, int $shiftId, ?int $actorUserId): void
+    {
+        $employee = Employee::find($employeeId);
+        $currentShift = $employee?->currentShift();
+
+        if ($currentShift?->id === $shiftId) {
+            return;
         }
 
-        return $this->scheduleRepository->create($data);
+        app(EmployeeShiftScheduleServiceInterface::class)
+            ->createSchedule(EmployeeShiftScheduleData::fromArray([
+                'employee_id' => $employeeId,
+                'shift_id' => $shiftId,
+                'start_date' => $date->toDateString(),
+                'created_by' => $actorUserId,
+            ]));
     }
 
     public function resolveEffectiveShift(int $employeeId, Carbon $date): array
@@ -44,7 +79,6 @@ class ScheduleService implements ScheduleServiceInterface
             ];
         }
 
-        // No explicit schedule -> fallback to last assigned shift placement
         $lastSchedule = $this->scheduleRepository->findLatestBeforeDate($employeeId, $date);
 
         return [
@@ -96,7 +130,7 @@ class ScheduleService implements ScheduleServiceInterface
             $map[$schedule->employee_id][$schedule->date->toDateString()] = [
                 'type' => $schedule->type,
                 'shift_id' => $schedule->shift_id,
-                'shift_label' => $schedule->shift ? strtoupper(substr($schedule->shift->name, 0, 1)) : null,
+                'shift_label' => $schedule->shift?->initials,
             ];
         }
 

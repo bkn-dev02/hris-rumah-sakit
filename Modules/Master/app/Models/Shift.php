@@ -38,4 +38,15 @@ class Shift extends Model
     {
         return is_null($this->end_date);
     }
+
+    public function getInitialsAttribute(): string
+    {
+        $words = array_values(array_filter(preg_split('/\s+/', trim($this->name))));
+
+        if (count($words) <= 1) {
+            return strtoupper(substr($this->name, 0, 1));
+        }
+
+        return strtoupper(implode('', array_map(fn ($w) => substr($w, 0, 1), $words)));
+    }
 }

@@ -18,13 +18,45 @@ class ScheduleController extends Controller
 
     public function index(Request $request)
     {
-        $departmentId = $request->integer('department_id');
+        $actor = $request->user();
+
+        $isGlobalRole = $actor->roles()
+            ->whereIn('code', ['super-admin', 'hrd', 'direktur'])
+            ->exists();
+
+        $showFilter = true;
+        $departmentsForFilter = collect();
+        $departmentId = null;
+
+        if ($isGlobalRole) {
+            $departmentId = $request->integer('department_id');
+            $departmentsForFilter = Department::orderBy('name')->get();
+        } else {
+            $ownDepartment = $actor->employee?->currentDepartment();
+
+            if (!$ownDepartment) {
+                abort(403, 'Akun Anda tidak terhubung ke departemen manapun.');
+            }
+
+            $hasChildren = Department::where('parent_id', $ownDepartment->id)->exists();
+
+            if ($hasChildren) {
+                $departmentsForFilter = Department::where('id', $ownDepartment->id)
+                    ->orWhere('parent_id', $ownDepartment->id)
+                    ->orderBy('name')
+                    ->get();
+                $departmentId = $request->integer('department_id') ?: $ownDepartment->id;
+            } else {
+                $showFilter = false;
+                $departmentId = $ownDepartment->id;
+            }
+        }
+
         $startDate = $request->filled('start_date')
             ? Carbon::parse($request->input('start_date'))
             : Carbon::now()->startOfWeek();
         $endDate = $startDate->copy()->addDays(6);
 
-        $departments = Department::orderBy('name')->get();
         $shifts = Shift::orderBy('start_time')->get();
 
         $employees = collect();
@@ -51,7 +83,8 @@ class ScheduleController extends Controller
             'employees',
             'dates',
             'shifts',
-            'departments',
+            'departmentsForFilter',
+            'showFilter',
             'departmentId',
             'startDate',
             'endDate',
@@ -68,12 +101,26 @@ class ScheduleController extends Controller
             'shift_id' => ['nullable', 'required_if:type,kerja', 'exists:shifts,id'],
         ]);
 
+        $actor = $request->user();
+        $createdByEmployeeId = $actor->employee?->id;
+
+        // kalau user bukan pegawai, hanya yang memuliki role super admin yang boleh lanjut
+        $isSuperAdmin = $actor->roles()
+            ->where('code', 'super-admin')
+            ->where('is_active', true)
+            ->exists();
+
+        if (!$createdByEmployeeId && !$isSuperAdmin) {
+            abort(403, 'Akun Anda bukan Pegawai.');
+        }
+
         $schedule = $this->scheduleService->assign(
             employeeId: $validated['employee_id'],
             date: Carbon::parse($validated['date']),
             type: $validated['type'],
             shiftId: $validated['shift_id'] ?? null,
-            createdByEmployeeId: $request->user()->employee->id,
+            createdByEmployeeId: $createdByEmployeeId,
+            actorUserId: $actor->id,
         );
 
         return response()->json([

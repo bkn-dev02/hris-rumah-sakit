@@ -7,7 +7,7 @@ use Modules\Schedule\Models\Schedule;
 
 interface ScheduleServiceInterface
 {
-    public function assign(int $employeeId, Carbon $date, string $type, ?int $shiftId, int $createdByEmployeeId): Schedule;
+    public function assign(int $employeeId, Carbon $date, string $type, ?int $shiftId, ?int $createdByEmployeeId, bool $syncToMaster = true, ?int $actorUserId = null): Schedule;
 
     public function resolveEffectiveShift(int $employeeId, Carbon $date): array;
 
