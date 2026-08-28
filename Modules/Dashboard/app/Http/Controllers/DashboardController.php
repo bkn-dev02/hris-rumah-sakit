@@ -54,6 +54,10 @@ class DashboardController extends Controller
             ->where('emergency_status', 'pending')
             ->count();
 
+        $pendingSpCandidateCount = \Modules\Schedule\Models\SpCandidate::query()
+            ->whereIn('status', ['candidate', 'pending_decision'])
+            ->count();
+
         return view('dashboard::index', compact(
             'stats',
             'chartData',
@@ -61,7 +65,8 @@ class DashboardController extends Controller
             'recentActivities',
             'quickAccessMenus',
             'pendingLeaveCount',
-            'pendingEmergencyCount'
+            'pendingEmergencyCount',
+            'pendingSpCandidateCount',
         ));
     }
 
@@ -181,6 +186,28 @@ class DashboardController extends Controller
                 ]);
             });
 
+        \Modules\Schedule\Models\SpCandidate::query()
+            ->with('employee')
+            ->latest('updated_at')
+            ->limit(5)
+            ->get()
+            ->each(function ($candidate) use ($activities) {
+                $isIssued = $candidate->status === 'resolved_issued';
+                $isCancelled = in_array($candidate->status, ['cancelled_manual', 'cancelled_late_checkin_decision']);
+
+                $activities->push([
+                    'icon' => $isIssued ? 'fa-file-signature' : ($isCancelled ? 'fa-circle-check' : 'fa-triangle-exclamation'),
+                    'color' => $isIssued
+                        ? 'bg-rose-100 text-rose-700'
+                        : ($isCancelled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'),
+                    'title' => $isIssued
+                        ? 'Surat SP diterbitkan'
+                        : ($isCancelled ? 'SP Candidate dibatalkan' : 'SP Candidate baru terdeteksi'),
+                    'description' => "SP Candidate untuk {$candidate->employee->name}",
+                    'timestamp' => $candidate->updated_at,
+                ]);
+            });
+
         return $activities
             ->sortByDesc('timestamp')
             ->take($limit)
@@ -255,6 +282,13 @@ class DashboardController extends Controller
                 'color' => 'bg-cyan-100 text-cyan-700',
                 'route' => 'security.roles.index',
                 'permission' => 'roles.view',
+            ],
+            [
+                'label' => 'SP Candidate',
+                'icon' => 'fa-triangle-exclamation',
+                'color' => 'bg-amber-100 text-amber-700',
+                'route' => 'schedule.sp-candidates.index',
+                'permission' => 'sp-candidates.view',
             ],
         ];
 

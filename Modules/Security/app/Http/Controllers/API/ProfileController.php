@@ -3,13 +3,17 @@
 namespace Modules\Security\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
+use Modules\Master\Models\Shift;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected ScheduleServiceInterface $scheduleService
+    ) {}
 
     public function show(Request $request)
     {
@@ -90,11 +94,8 @@ class ProfileController extends Controller
 
     private function formatEmployee($user, $employee): array
     {
-        $today = now()->toDateString();
-        $tomorrow = now()->addDay()->toDateString();
-
-        $shiftToday = $employee->activeShiftFor($today);
-        $shiftTomorrow = $employee->activeShiftFor($tomorrow);
+        $today = now()->startOfDay();
+        $tomorrow = now()->addDay()->startOfDay();
 
         return [
             'id'                 => $employee->id,
@@ -105,7 +106,7 @@ class ProfileController extends Controller
             'gender'             => $employee->gender,
             'place_of_birth'     => $employee->place_of_birth,
             'date_of_birth'      => optional($employee->date_of_birth)->format('Y-m-d'),
-            'profession' => $employee->profession,
+            'profession'         => $employee->profession,
             'national_id_number' => $employee->national_id_number,
             'address'            => $employee->address,
             'phone'              => $employee->phone,
@@ -114,14 +115,41 @@ class ProfileController extends Controller
             'education_major'    => $employee->education_major,
             'photo_url'          => $employee->photo ? Storage::disk('public')->url($employee->photo) : null,
             'hire_date'          => optional($employee->hire_date)->format('Y-m-d'),
-            'employment_status' => $employee->employmentStatus?->name,
-            'position' => $employee->currentPosition()?->name,
-            'department' => $employee->currentDepartment()?->name,
-            'shift_today_name' => $shiftToday?->name,
-            'shift_today_time' => $this->formatShiftTime($shiftToday),
-            'shift_tomorrow_name' => $shiftTomorrow?->name,
-            'shift_tomorrow_time' => $this->formatShiftTime($shiftTomorrow),
+            'employment_status'  => $employee->employmentStatus?->name,
+            'position'           => $employee->currentPosition()?->name,
+            'department'         => $employee->currentDepartment()?->name,
+            'schedule_today'     => $this->formatScheduleStatus($employee->id, $today),
+            'schedule_tomorrow'  => $this->formatScheduleStatus($employee->id, $tomorrow),
             'is_active'          => (bool) $employee->is_active,
+        ];
+    }
+
+    private function formatScheduleStatus(int $employeeId, \Carbon\Carbon $date): array
+    {
+        $resolved = $this->scheduleService->resolveDisplayStatus($employeeId, $date);
+
+        if ($resolved['is_libur']) {
+            return [
+                'is_libur' => true,
+                'shift_name' => null,
+                'shift_time' => null,
+            ];
+        }
+
+        if ($resolved['is_undetermined']) {
+            return [
+                'is_libur' => false,
+                'shift_name' => null,
+                'shift_time' => null,
+            ];
+        }
+
+        $shift = $resolved['shift_id'] ? Shift::find($resolved['shift_id']) : null;
+
+        return [
+            'is_libur' => false,
+            'shift_name' => $shift?->name,
+            'shift_time' => $this->formatShiftTime($shift),
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace Modules\Schedule\Providers;
 
+use Modules\Schedule\Console\Commands\CheckScheduleCompliance;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Modules\Schedule\Contracts\Repositories\ScheduleRepositoryInterface;
 use Modules\Schedule\Contracts\Repositories\SpCandidateRepositoryInterface;
@@ -27,6 +28,10 @@ class ScheduleServiceProvider extends ModuleServiceProvider
     protected array $providers = [
         EventServiceProvider::class,
         RouteServiceProvider::class,
+    ];
+
+    protected array $commands = [
+        CheckScheduleCompliance::class,
     ];
 
     public function register(): void

@@ -2,9 +2,9 @@
 
 namespace Modules\Schedule\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
 
 class ScheduleController extends Controller
@@ -13,17 +13,29 @@ class ScheduleController extends Controller
         protected ScheduleServiceInterface $scheduleService
     ) {}
 
-    public function myResolvedShift(Request $request)
+    public function myMonth(Request $request)
     {
-        $date = $request->filled('date')
-            ? Carbon::parse($request->input('date'))
-            : Carbon::today();
+        $employee = $request->user()->employee;
 
-        $resolved = $this->scheduleService->resolveEffectiveShift(
-            $request->user()->employee->id,
-            $date
-        );
+        if (! $employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda tidak terhubung dengan data pegawai.',
+            ], 422);
+        }
 
-        return response()->json(['data' => $resolved]);
+        $year = $request->integer('year') ?: now()->year;
+        $month = $request->integer('month') ?: now()->month;
+
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+
+        $schedule = $this->scheduleService->getEmployeeSchedule($employee->id, $startDate, $endDate);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal ditemukan.',
+            'data' => $schedule,
+        ]);
     }
 }
