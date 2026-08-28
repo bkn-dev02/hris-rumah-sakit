@@ -68,4 +68,12 @@ class ScheduleRepository implements ScheduleRepositoryInterface
             ->with('shift')
             ->get();
     }
+
+    public function getForEmployeeAndDateRange(int $employeeId, Carbon $startDate, Carbon $endDate)
+    {
+        return Schedule::where('employee_id', $employeeId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('shift')
+            ->get();
+    }
 }

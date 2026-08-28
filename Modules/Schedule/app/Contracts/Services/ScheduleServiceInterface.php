@@ -16,4 +16,8 @@ interface ScheduleServiceInterface
     public function getMonthlyGrid(int $departmentId, int $year, int $month): array;
 
     public function getScheduleMapForGrid(array $employeeIds, Carbon $startDate, Carbon $endDate): array;
+
+    public function getEmployeeSchedule(int $employeeId, Carbon $startDate, Carbon $endDate): array;
+
+    public function resolveDisplayStatus(int $employeeId, Carbon $date): array;
 }

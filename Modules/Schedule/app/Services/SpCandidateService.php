@@ -10,6 +10,7 @@ use Modules\Schedule\Contracts\Repositories\ManualConfirmationRepositoryInterfac
 use Modules\Schedule\Contracts\Repositories\SpCandidateRepositoryInterface;
 use Modules\Schedule\Contracts\Services\SpCandidateServiceInterface;
 use Modules\Schedule\Models\SpCandidate;
+use Override;
 
 class SpCandidateService implements SpCandidateServiceInterface
 {
@@ -136,5 +137,20 @@ class SpCandidateService implements SpCandidateServiceInterface
                 $this->spCandidateRepository->update($spCandidate, ['status' => 'cancelled_manual']);
             }
         }
+    }
+
+    public function getForDepartment(int $departmentId, ?string $status = null)
+    {
+        return $this->spCandidateRepository->getForDepartment($departmentId, $status);
+    }
+
+    public function getAll(?string $status = null)
+    {
+        return $this->spCandidateRepository->getAll($status);
+    }
+
+    public function find(int $id): ?SpCandidate
+    {
+        return $this->spCandidateRepository->find($id);
     }
 }

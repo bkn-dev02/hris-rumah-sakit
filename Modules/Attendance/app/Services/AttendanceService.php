@@ -62,8 +62,22 @@ class AttendanceService implements AttendanceServiceInterface
             Cache::forget("attendance:summary:{$workDate->toDateString()}");
             Cache::forget("attendance:recent:{$workDate->toDateString()}:10");
 
+            $this->notifyScheduleModuleOfLateCheckin($employeeId, $workDate, $schedule->shift_id);
+
             return $attendance;
         });
+    }
+
+    protected function notifyScheduleModuleOfLateCheckin(int $employeeId, Carbon $workDate, int $shiftId): void
+    {
+        try {
+            app(\Modules\Schedule\Contracts\Services\SpCandidateServiceInterface::class)
+                ->handleLateCheckin($employeeId, $workDate, $shiftId, Carbon::now());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning(
+                "Gagal sync SP Candidate saat check-in pegawai {$employeeId}: {$e->getMessage()}"
+            );
+        }
     }
 
     public function checkOut(int $employeeId, int $checkOutId): Attendance

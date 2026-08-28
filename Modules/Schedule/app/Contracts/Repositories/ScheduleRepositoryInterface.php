@@ -28,4 +28,6 @@ interface ScheduleRepositoryInterface
     public function getForMonth(int $departmentId, int $year, int $month);
 
     public function getForEmployeesAndDateRange(array $employeeIds, Carbon $startDate, Carbon $endDate);
+
+    public function getForEmployeeAndDateRange(int $employeeId, Carbon $startDate, Carbon $endDate);
 }

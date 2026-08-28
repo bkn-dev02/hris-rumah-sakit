@@ -98,11 +98,26 @@ class SidebarComposer
                 ],
             ],
             [
-                'label' => 'Schedule',
+                'label' => 'Jadwal & SP',
                 'icon'  => 'fa-solid fa-calendar-week',
                 'route' => 'schedule.index',
-                'active' => ['schedule.index'],
-                'permission' => 'schedule.view',
+                'active' => ['schedule.index', 'schedule.sp-candidates.*'],
+                'children' => [
+                    [
+                        'label' => 'Jadwal Mingguan',
+                        'icon'  => 'fa-solid fa-table-cells',
+                        'route' => 'schedule.index',
+                        'active' => ['schedule.index'],
+                        'permission' => 'schedule.view',
+                    ],
+                    [
+                        'label' => 'SP Candidate',
+                        'icon'  => 'fa-solid fa-triangle-exclamation',
+                        'route' => 'schedule.sp-candidates.index',
+                        'active' => ['schedule.sp-candidates.*'],
+                        'permission' => 'sp-candidates.view',
+                    ],
+                ],
             ],
             [
                 'label' => 'Manajemen Cuti',

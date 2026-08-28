@@ -30,4 +30,10 @@ interface SpCandidateServiceInterface
      * Record a manual confirmation (before or after an SpCandidate exists) that cancels/prevents SP.
      */
     public function recordManualConfirmation(int $employeeId, Carbon $date, int $shiftId, string $note, int $confirmedByEmployeeId, ?int $spCandidateId = null): void;
+
+    public function getForDepartment(int $departmentId, ?string $status = null);
+
+    public function getAll(?string $status = null);
+
+    public function find(int $id): ?SpCandidate;
 }

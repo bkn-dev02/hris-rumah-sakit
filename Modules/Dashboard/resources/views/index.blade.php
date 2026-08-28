@@ -77,7 +77,7 @@
             </div>
         </div>
 
-        @if ($pendingLeaveCount > 0 || $pendingEmergencyCount > 0)
+        @if ($pendingLeaveCount > 0 || $pendingEmergencyCount > 0 || $pendingSpCandidateCount > 0)
         <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-3">
@@ -89,13 +89,13 @@
                             Ada yang perlu perhatian Anda
                         </h3>
                         <p class="mt-0.5 text-sm text-amber-700">
-                            @if ($pendingLeaveCount > 0 && $pendingEmergencyCount > 0)
-                            {{ $pendingLeaveCount }} pengajuan cuti dan {{ $pendingEmergencyCount }} presensi darurat menunggu persetujuan.
-                            @elseif ($pendingLeaveCount > 0)
-                            {{ $pendingLeaveCount }} pengajuan cuti menunggu persetujuan.
-                            @else
-                            {{ $pendingEmergencyCount }} presensi darurat menunggu persetujuan.
-                            @endif
+                            @php
+                            $parts = [];
+                            if ($pendingLeaveCount > 0) $parts[] = "{$pendingLeaveCount} pengajuan cuti";
+                            if ($pendingEmergencyCount > 0) $parts[] = "{$pendingEmergencyCount} presensi darurat";
+                            if ($pendingSpCandidateCount > 0) $parts[] = "{$pendingSpCandidateCount} SP Candidate";
+                            @endphp
+                            {{ implode(', ', $parts) }} menunggu {{ count($parts) > 1 ? 'perhatian' : 'persetujuan' }}.
                         </p>
                     </div>
                 </div>
@@ -114,6 +114,14 @@
                         class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-700">
                         <i class="fa-solid fa-triangle-exclamation text-xs"></i>
                         Lihat Darurat ({{ $pendingEmergencyCount }})
+                    </a>
+                    @endif
+
+                    @if ($pendingSpCandidateCount > 0)
+                    <a href="{{ route('schedule.sp-candidates.index') }}"
+                        class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-700">
+                        <i class="fa-solid fa-file-signature text-xs"></i>
+                        Lihat SP Candidate ({{ $pendingSpCandidateCount }})
                     </a>
                     @endif
                 </div>

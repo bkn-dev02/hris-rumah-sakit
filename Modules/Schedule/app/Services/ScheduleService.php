@@ -136,4 +136,77 @@ class ScheduleService implements ScheduleServiceInterface
 
         return $map;
     }
+
+    public function getEmployeeSchedule(int $employeeId, Carbon $startDate, Carbon $endDate): array
+    {
+        $schedules = $this->scheduleRepository
+            ->getForEmployeeAndDateRange($employeeId, $startDate, $endDate)
+            ->keyBy(fn($s) => $s->date->toDateString());
+
+        $result = [];
+        $cursor = $startDate->copy();
+
+        while ($cursor->lte($endDate)) {
+            $key = $cursor->toDateString();
+            $schedule = $schedules->get($key);
+
+            if (! $schedule) {
+                $result[] = [
+                    'date' => $key,
+                    'is_libur' => false,
+                    'shift' => null,
+                ];
+            } elseif ($schedule->isLibur()) {
+                $result[] = [
+                    'date' => $key,
+                    'is_libur' => true,
+                    'shift' => null,
+                ];
+            } else {
+                $result[] = [
+                    'date' => $key,
+                    'is_libur' => false,
+                    'shift' => $this->formatShiftForSchedule($schedule->shift),
+                ];
+            }
+
+            $cursor->addDay();
+        }
+
+        return $result;
+    }
+
+    protected function formatShiftForSchedule(?\Modules\Master\Models\Shift $shift): ?array
+    {
+        if (! $shift) {
+            return null;
+        }
+
+        return [
+            'id' => $shift->id,
+            'code' => $shift->code,
+            'name' => $shift->name,
+            'start_time' => $shift->start_time ? \Carbon\Carbon::parse($shift->start_time)->format('H:i') : null,
+            'end_time' => $shift->end_time ? \Carbon\Carbon::parse($shift->end_time)->format('H:i') : null,
+        ];
+    }
+
+    public function resolveDisplayStatus(int $employeeId, Carbon $date): array
+    {
+        $schedule = $this->scheduleRepository->findByEmployeeAndDate($employeeId, $date);
+
+        if (! $schedule) {
+            return [
+                'is_libur' => false,
+                'is_undetermined' => true,
+                'shift_id' => null,
+            ];
+        }
+
+        return [
+            'is_libur' => $schedule->isLibur(),
+            'is_undetermined' => false,
+            'shift_id' => $schedule->shift_id,
+        ];
+    }
 }
