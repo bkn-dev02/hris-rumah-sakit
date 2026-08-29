@@ -20,10 +20,8 @@ class SpCandidateController extends Controller
             ->whereIn('code', ['super-admin', 'hrd', 'direktur'])
             ->exists();
 
-        $status = $request->input('status');
-
         if ($isGlobalRole) {
-            $candidates = $this->spCandidateService->getAll($status);
+            $allCandidates = $this->spCandidateService->getAll();
         } else {
             $ownDepartment = $actor->employee?->currentDepartment();
 
@@ -31,10 +29,33 @@ class SpCandidateController extends Controller
                 abort(403, 'Akun Anda tidak terhubung ke departemen manapun.');
             }
 
-            $candidates = $this->spCandidateService->getForDepartment($ownDepartment->id, $status);
+            $allCandidates = $this->spCandidateService->getForDepartment($ownDepartment->id);
         }
 
-        return view('schedule::sp-candidates.index', compact('candidates', 'status'));
+        $allCandidates->load('spLetter');
+
+        $grouped = [
+            'action' => $allCandidates->whereIn('status', ['candidate', 'pending_decision'])->values(),
+            'issued' => $allCandidates->where('status', 'resolved_issued')->sortByDesc('updated_at')->values(),
+            'cancelled' => $allCandidates->whereIn('status', ['cancelled_manual', 'cancelled_late_checkin_decision'])->sortByDesc('updated_at')->values(),
+        ];
+
+        $tab = $request->input('tab', 'action');
+        if (!in_array($tab, ['action', 'issued', 'cancelled'])) {
+            $tab = 'action';
+        }
+
+        $counts = [
+            'action' => $grouped['action']->count(),
+            'issued' => $grouped['issued']->count(),
+            'cancelled' => $grouped['cancelled']->count(),
+        ];
+
+        return view('schedule::sp-candidates.index', [
+            'candidates' => $grouped[$tab],
+            'counts' => $counts,
+            'tab' => $tab,
+        ]);
     }
 
     public function show(int $spCandidate)

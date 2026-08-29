@@ -18,6 +18,9 @@ use Modules\Master\Contracts\Services\EmployeeServiceInterface;
 use Modules\Attendance\Exceptions\AttendanceException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
+use Modules\Schedule\Contracts\Services\SpCandidateServiceInterface;
+use Illuminate\Support\Facades\Log;
+use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
 
 class AttendanceService implements AttendanceServiceInterface
 {
@@ -45,9 +48,12 @@ class AttendanceService implements AttendanceServiceInterface
                 throw new AttendanceException('Data absensi untuk hari ini sudah ada.');
             }
 
+            $resolved = app(ScheduleServiceInterface::class)
+                ->resolveEffectiveShift($employeeId, $workDate);
+
             $schedule = $this->shiftScheduleService->current($employeeId);
 
-            if (!$schedule) {
+            if (!$resolved['shift_id']) {
                 throw new AttendanceException('Anda belum memiliki jadwal shift aktif. Hubungi admin.');
             }
 
@@ -71,10 +77,10 @@ class AttendanceService implements AttendanceServiceInterface
     protected function notifyScheduleModuleOfLateCheckin(int $employeeId, Carbon $workDate, int $shiftId): void
     {
         try {
-            app(\Modules\Schedule\Contracts\Services\SpCandidateServiceInterface::class)
+            app(SpCandidateServiceInterface::class)
                 ->handleLateCheckin($employeeId, $workDate, $shiftId, Carbon::now());
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning(
+            Log::warning(
                 "Gagal sync SP Candidate saat check-in pegawai {$employeeId}: {$e->getMessage()}"
             );
         }
@@ -398,5 +404,10 @@ class AttendanceService implements AttendanceServiceInterface
             'check_out_photo_url' => $attendance->checkOut?->photo ? asset('storage/' . $attendance->checkOut->photo) : null,
             'attendance_status'   => $attendance->status->name ?? null,
         ];
+    }
+
+    public function getCheckInTimesForEmployeesToday(array $employeeIds): array
+    {
+        return $this->attendanceRepository->getCheckInTimesForEmployeesToday($employeeIds);
     }
 }

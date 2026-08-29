@@ -4,6 +4,7 @@ namespace Modules\Schedule\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Modules\Schedule\Contracts\Repositories\SpCandidateRepositoryInterface;
 use Modules\Schedule\Contracts\Repositories\SpLetterRepositoryInterface;
 use Modules\Schedule\Contracts\Services\SpLetterServiceInterface;
@@ -45,5 +46,26 @@ class SpLetterService implements SpLetterServiceInterface
     public function getHistoryForEmployee(int $employeeId): array
     {
         return $this->spLetterRepository->getHistoryForEmployee($employeeId)->toArray();
+    }
+
+    public function getMyLetters(int $employeeId): array
+    {
+        return $this->spLetterRepository->getForEmployee($employeeId)->toArray();
+    }
+
+    public function getMyLetterDetail(int $employeeId, int $letterId): SpLetter
+    {
+        $letter = $this->spLetterRepository->find($letterId);
+
+        if (!$letter || $letter->employee_id !== $employeeId) {
+            throw new ModelNotFoundException('Surat SP tidak ditemukan.');
+        }
+
+        return $this->spLetterRepository->markViewed($letter);
+    }
+
+    public function unreadCount(int $employeeId): int
+    {
+        return $this->spLetterRepository->unreadCountForEmployee($employeeId);
     }
 }

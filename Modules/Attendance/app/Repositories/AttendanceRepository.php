@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Repositories;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Attendance\Contracts\Repositories\AttendanceRepositoryInterface;
@@ -113,5 +114,17 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
+    }
+
+    public function getCheckInTimesForEmployeesToday(array $employeeIds): array
+    {
+        return Attendance::whereIn('employee_id', $employeeIds)
+            ->whereDate('work_date', Carbon::today())
+            ->with('checkIn')
+            ->get()
+            ->mapWithKeys(fn($attendance) => [
+                $attendance->employee_id => $attendance->checkIn?->checked_at?->format('H:i'),
+            ])
+            ->toArray();
     }
 }

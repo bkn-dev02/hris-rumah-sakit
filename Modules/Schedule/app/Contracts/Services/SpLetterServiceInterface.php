@@ -17,4 +17,10 @@ interface SpLetterServiceInterface
      * Get SP history/count for an employee (for the dashboard "SP ke berapa" display).
      */
     public function getHistoryForEmployee(int $employeeId): array;
+
+    public function getMyLetters(int $employeeId): array;
+
+    public function getMyLetterDetail(int $employeeId, int $letterId): SpLetter;
+
+    public function unreadCount(int $employeeId): int;
 }

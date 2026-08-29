@@ -21,6 +21,7 @@ class SpLetter extends Model
         'sp_number',
         'issued_by',
         'issued_at',
+        'viewed_at',
     ];
 
     // protected static function newFactory(): SpLetterFactory
@@ -30,6 +31,7 @@ class SpLetter extends Model
 
     protected $casts = [
         'issued_at' => 'datetime',
+        'viewed_at' => 'datetime',
     ];
 
     public function spCandidate()

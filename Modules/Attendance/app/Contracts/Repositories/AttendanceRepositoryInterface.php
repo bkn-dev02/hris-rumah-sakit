@@ -29,4 +29,6 @@ interface AttendanceRepositoryInterface
     public function countCheckedInForDate(string $date): int;
 
     public function recentForDate(string $date, int $limit = 10): Collection;
+
+    public function getCheckInTimesForEmployeesToday(array $employeeIds): array;
 }
