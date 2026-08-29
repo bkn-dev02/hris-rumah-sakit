@@ -117,6 +117,13 @@ class SidebarComposer
                         'active' => ['schedule.sp-candidates.*'],
                         'permission' => 'sp-candidates.view',
                     ],
+                    [
+                        'label' => 'Review Bulanan',
+                        'icon'  => 'fa-solid fa-calendar-days',
+                        'route' => 'schedule.monthly-grid.index',
+                        'active' => ['schedule.monthly-grid.*'],
+                        'permission' => 'schedule.view',
+                    ],
                 ],
             ],
             [

@@ -117,7 +117,7 @@
     </div>
 
     {{-- Attendance List --}}
-    <div class="space-y-2 bg-sky-100 mt-4 p-4 rounded-lg">
+    <!-- <div class="space-y-2 bg-sky-100 mt-4 p-4 rounded-lg">
         <div class="hidden lg:grid lg:grid-cols-12 lg:items-center rounded-lg bg-gradient-to-r from-sky-950 to-sky-800 px-6 py-4 shadow-md">
 
             <div class="col-span-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
@@ -233,6 +233,85 @@
         </div>
         @endforelse
 
+    </div> -->
+
+    {{-- Pegawai Bertugas Hari Ini --}}
+    <div class="space-y-2 bg-sky-100 mt-4 p-4 rounded-lg">
+        <div class="flex items-center justify-between rounded-lg bg-gradient-to-r from-sky-950 to-sky-800 px-6 py-4 shadow-md flex-wrap gap-3">
+            <div class="flex items-center gap-2 text-white">
+                <i class="fa-solid fa-users"></i>
+                <span class="font-semibold">Pegawai Bertugas Hari Ini</span>
+            </div>
+
+            @if ($showFilter)
+            <form method="GET">
+                <select name="department_id" onchange="this.form.submit()"
+                    class="rounded-lg border-0 text-sm py-2 px-3 shadow-sm focus:ring-2 focus:ring-sky-400">
+                    @if ($departmentsForFilter->count() > 1 || !$departmentId)
+                    <option value="">Pilih Departemen</option>
+                    @endif
+                    @foreach ($departmentsForFilter as $department)
+                    <option value="{{ $department->id }}" {{ $departmentId == $department->id ? 'selected' : '' }}>
+                        {{ $department->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </form>
+            @elseif ($departmentsForFilter->isNotEmpty())
+            <span class="text-sky-200 text-sm font-medium">{{ $departmentsForFilter->first()->name }}</span>
+            @endif
+        </div>
+
+        @if (!$departmentId)
+        <div class="rounded-xl border border-sky-200 bg-white p-10 text-center text-sm text-slate-400">
+            <i class="fa-solid fa-building text-2xl mb-2 block"></i>
+            Pilih departemen untuk melihat pegawai bertugas hari ini.
+        </div>
+        @elseif ($expectedToday->isEmpty())
+        <div class="rounded-xl border border-sky-200 bg-white p-10 text-center text-sm text-slate-400">
+            <i class="fa-solid fa-calendar-xmark text-2xl mb-2 block"></i>
+            Tidak ada pegawai yang dijadwalkan hari ini.
+        </div>
+        @else
+        <div class="space-y-4">
+            @foreach ($expectedToday as $group)
+            <div>
+                <div class="flex items-center justify-between mb-2 px-1">
+                    <span class="text-xs font-bold uppercase text-sky-950">
+                        {{ $group['shift']->name }} ({{ \Carbon\Carbon::parse($group['shift']->start_time)->format('H:i') }})
+                    </span>
+                    <span class="text-xs text-slate-500">
+                        {{ $group['checked_in_count'] }}/{{ $group['employees']->count() }} hadir
+                    </span>
+                </div>
+                <div class="space-y-2">
+                    @foreach ($group['employees'] as $entry)
+                    <div class="rounded-xl border border-sky-200 bg-white p-3 shadow-sm transition hover:border-sky-300 hover:shadow-md flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-sky-950 text-xs font-bold">
+                                {{ collect(explode(' ', $entry['employee']->name))->map(fn($w) => $w[0] ?? '')->take(2)->implode('') }}
+                            </div>
+                            <p class="font-semibold text-sky-950 text-sm">{{ $entry['employee']->name }}</p>
+                        </div>
+
+                        @if ($entry['checked_in_at'])
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            Hadir {{ $entry['checked_in_at'] }}
+                        </span>
+                        @else
+                        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                            <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                            Belum Hadir
+                        </span>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 
 </div>

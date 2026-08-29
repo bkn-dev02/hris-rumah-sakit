@@ -28,4 +28,27 @@ class SpLetterRepository implements SpLetterRepositoryInterface
     {
         return SpLetter::find($id);
     }
+
+    public function getForEmployee(int $employeeId)
+    {
+        return SpLetter::where('employee_id', $employeeId)
+            ->orderByDesc('issued_at')
+            ->get();
+    }
+
+    public function markViewed(SpLetter $letter): SpLetter
+    {
+        if (!$letter->viewed_at) {
+            $letter->update(['viewed_at' => now()]);
+        }
+
+        return $letter->fresh();
+    }
+
+    public function unreadCountForEmployee(int $employeeId): int
+    {
+        return SpLetter::where('employee_id', $employeeId)
+            ->whereNull('viewed_at')
+            ->count();
+    }
 }

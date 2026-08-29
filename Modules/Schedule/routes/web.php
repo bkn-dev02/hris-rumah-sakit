@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Schedule\Http\Controllers\Web\ScheduleController;
 use Modules\Schedule\Http\Controllers\Web\SpCandidateController;
 use Modules\Schedule\Http\Controllers\Web\SpLetterController;
+use Modules\Schedule\Http\Controllers\Web\MonthlyGridController;
 
 Route::prefix('schedule')->name('schedule.')->middleware(['auth'])->group(function () {
     Route::get('/', [ScheduleController::class, 'index'])
@@ -34,5 +35,11 @@ Route::prefix('schedule')->name('schedule.')->middleware(['auth'])->group(functi
         Route::post('/{spCandidate}/issue', [SpLetterController::class, 'store'])
             ->name('issue')
             ->middleware('permission:sp-letters.issue');
+    });
+
+    Route::prefix('monthly-grid')->name('monthly-grid.')->group(function () {
+        Route::get('/', [MonthlyGridController::class, 'index'])
+            ->name('index')
+            ->middleware('permission:schedule.view');
     });
 });
