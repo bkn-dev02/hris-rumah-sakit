@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Detail SP Candidate')
 
@@ -85,7 +85,7 @@
             <div class="text-sm font-medium text-slate-600">
                 Surat SP ke-{{ $candidate->spLetter->sp_number }}
             </div>
-            <a href="{{ $fileUrl }}" target="_blank" class="text-xs text-sky-700 hover:underline flex items-center gap-1">
+            <a href="{{ $fileUrl }}" target="_blank" class="text-xs text-[#2a684f] hover:underline flex items-center gap-1">
                 <i class="fas fa-arrow-up-right-from-square"></i> Buka di tab baru
             </a>
         </div>
@@ -109,8 +109,8 @@
         <form method="POST" action="{{ route('schedule.sp-candidates.issue', $candidate->id) }}" enctype="multipart/form-data">
             @csrf
             <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required
-                class="text-sm w-full mb-3 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-sky-50 file:text-sky-700">
-            <button class="px-4 py-2 rounded-lg bg-sky-800 text-white text-sm font-medium hover:-translate-y-0.5 transition">
+                class="text-sm w-full mb-3 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#f8fbf8] file:text-[#2a684f]">
+            <button class="px-4 py-2 rounded-lg bg-[#2a684f] text-white text-sm font-medium hover:-translate-y-0.5 transition">
                 Terbitkan SP
             </button>
         </form>
@@ -125,7 +125,7 @@
             @csrf
             <textarea name="note" required placeholder="Tambahkan keterangan..."
                 class="w-full text-sm rounded-lg border-slate-200 mb-3" rows="3"></textarea>
-            <button class="px-4 py-2 rounded-lg bg-sky-800 text-white text-sm font-medium hover:-translate-y-0.5 transition">
+            <button class="px-4 py-2 rounded-lg bg-[#2a684f] text-white text-sm font-medium hover:-translate-y-0.5 transition">
                 Simpan Konfirmasi
             </button>
         </form>

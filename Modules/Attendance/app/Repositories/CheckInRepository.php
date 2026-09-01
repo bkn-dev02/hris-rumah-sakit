@@ -72,7 +72,9 @@ class CheckInRepository implements CheckInRepositoryInterface
                     $q2->active()->where('department_id', $departmentId);
                 });
             })
-            ->with(['employee', 'employee.placements' => fn($q) => $q->active()->with('department')])
+            ->with([
+                'employee' => fn($q) => $q->withTrashed()->with(['placements' => fn($q2) => $q2->active()->with('department')]),
+            ])
             ->latest('checked_at')
             ->paginate($perPage)
             ->withQueryString();

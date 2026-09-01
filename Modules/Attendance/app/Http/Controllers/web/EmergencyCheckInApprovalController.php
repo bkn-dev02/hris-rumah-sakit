@@ -163,6 +163,8 @@ class EmergencyCheckInApprovalController extends Controller
             abort(404);
         }
 
+        $checkIn->load(['employee' => fn($q) => $q->withTrashed()]);
+
         return view('attendance::emergency.show', compact('checkIn'));
     }
 }

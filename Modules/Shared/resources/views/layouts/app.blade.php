@@ -21,7 +21,7 @@
 </head>
 
 <body class="bg-slate-50">
-    <div class="min-h-screen">
+    <div class="min-h-screen" x-data="{ mobileSidebarOpen: false }">
         @include('shared::partials.header')
         <div class="flex flex-col lg:flex-row min-h-screen mt-16 w-full">
             <aside class="w-full lg:w-64 shrink-0">

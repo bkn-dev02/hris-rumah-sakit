@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Profil Saya')
 
@@ -10,10 +10,10 @@
     @endif
 
     <div class="flex items-center gap-4">
-        <a href="{{ route('security.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-blue-100 bg-sky-900 hover:bg-sky-950 transition duration-200 translate-x-0 hover:-translate-x-1">
-            <i class="fa fa-arrow-left text-md text-sky-50"></i>
+        <a href="{{ route('security.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-[#dfeee1] bg-[#173f34] hover:bg-[#1f4d3d] transition duration-200 translate-x-0 hover:-translate-x-1">
+            <i class="fa fa-arrow-left text-md text-[#edf5ee]"></i>
         </a>
-        <h1 class="text-xl font-semibold text-sky-950">Profil Saya</h1>
+        <h1 class="text-xl font-semibold text-[#173f34]">Profil Saya</h1>
     </div>
 
     {{-- Info Akun --}}
@@ -61,7 +61,7 @@
             <div class="sm:col-span-2">
                 <label class="mb-1 block text-sm font-medium text-slate-700">Password Saat Ini</label>
                 <input type="password" name="current_password"
-                    class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-700">
+                    class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-[#2a684f] focus:outline-none focus:ring-1 focus:ring-[#dfeee1]">
                 @error('current_password') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
             @endunless
@@ -69,18 +69,18 @@
             <div>
                 <label class="mb-1 block text-sm font-medium text-slate-700">Password Baru</label>
                 <input type="password" name="password"
-                    class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-700">
+                    class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-[#2a684f] focus:outline-none focus:ring-1 focus:ring-[#dfeee1]">
                 @error('password') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
                 <label class="mb-1 block text-sm font-medium text-slate-700">Konfirmasi Password Baru</label>
                 <input type="password" name="password_confirmation"
-                    class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-sky-700 focus:outline-none focus:ring-1 focus:ring-sky-700">
+                    class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-[#2a684f] focus:outline-none focus:ring-1 focus:ring-[#dfeee1]">
             </div>
 
             <div class="sm:col-span-2">
-                <button type="submit" class="bg-sky-950 hover:bg-sky-900 text-white px-5 py-2 rounded-full text-sm font-medium transition duration-200">
+                <button type="submit" class="bg-[#1f4d3d] hover:bg-[#173f34] text-white px-5 py-2 rounded-full text-sm font-medium transition duration-200">
                     Simpan Password Baru
                 </button>
             </div>

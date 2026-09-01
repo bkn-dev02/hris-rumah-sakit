@@ -39,4 +39,6 @@ interface AttendanceServiceInterface
     public function checkOut(int $employeeId, int $checkOutId): Attendance;
 
     public function getCheckInTimesForEmployeesToday(array $employeeIds): array;
+
+    public function getMonthlyPersonalSummary(int $employeeId, int $year, int $month): array;
 }

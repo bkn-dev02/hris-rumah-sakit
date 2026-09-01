@@ -1,14 +1,14 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Edit Posisi')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
     <div class="flex items-center gap-4">
-        <a href="{{ route('master.positions.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-sky-100 bg-sky-900 hover:bg-sky-800 transition duration-200 translate-x-0 hover:-translate-x-1">
-            <i class="fa fa-arrow-left text-md text-sky-50"></i>
+        <a href="{{ route('master.positions.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-[#dfeee1] bg-[#173f34] hover:bg-[#173f34] transition duration-200 translate-x-0 hover:-translate-x-1">
+            <i class="fa fa-arrow-left text-md text-[#edf5ee]"></i>
         </a>
-        <h1 class="text-xl font-semibold text-sky-800">Edit position</h1>
+        <h1 class="text-xl font-semibold text-[#1f4d3d]">Edit position</h1>
     </div>
 
     <form method="POST" action="{{ route('master.positions.update', $position->id) }}" class="mt-6 rounded-lg border border-slate-200 bg-white p-6">

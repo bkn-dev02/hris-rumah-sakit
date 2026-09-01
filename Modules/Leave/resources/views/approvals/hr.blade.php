@@ -1,11 +1,11 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
-@section('title', 'Approval Cuti — HRD')
+@section('title', 'Approval Cuti â€” HRD')
 
 @section('content')
 <div class="max-w-5xl mx-auto px-6 py-8">
-    <div class="mb-6 rounded-xl bg-sky-100 px-5 py-4 shadow-sm">
-        <h1 class="text-xl font-bold text-sky-950">Approval Cuti (HRD)</h1>
+    <div class="mb-6 rounded-xl bg-[#edf5ee] px-5 py-4 shadow-sm">
+        <h1 class="text-xl font-bold text-[#173f34]">Approval Cuti (HRD)</h1>
         <p class="mt-0.5 text-xs text-slate-500">Pengajuan cuti yang sudah disetujui atasan, menunggu keputusan final HRD</p>
     </div>
 
@@ -23,10 +23,10 @@
 
     <div class="space-y-3">
         @forelse ($leaveRequests as $leaveRequest)
-        <div class="rounded-xl border border-sky-200 bg-white p-5 shadow-sm">
+        <div class="rounded-xl border border-[#dfeee1] bg-white p-5 shadow-sm">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p class="font-semibold text-sky-950">{{ $leaveRequest->employee->name }}</p>
+                    <p class="font-semibold text-[#173f34]">{{ $leaveRequest->employee->name }}</p>
                     <p class="text-sm text-slate-600">{{ $leaveRequest->leaveType->name }}</p>
                     <p class="text-xs text-slate-400">
                         {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}
@@ -36,7 +36,7 @@
                     @if ($leaveRequest->supervisor)
                     <p class="mt-1 text-xs text-slate-400">
                         Disetujui atasan: {{ $leaveRequest->supervisor->name }}
-                        @if ($leaveRequest->supervisor_note) — "{{ $leaveRequest->supervisor_note }}" @endif
+                        @if ($leaveRequest->supervisor_note) â€” "{{ $leaveRequest->supervisor_note }}" @endif
                     </p>
                     @endif
                 </div>
@@ -60,7 +60,7 @@
             </div>
         </div>
         @empty
-        <div class="rounded-xl border border-sky-200 bg-white p-10 text-center text-sm text-slate-500 shadow-sm">
+        <div class="rounded-xl border border-[#dfeee1] bg-white p-10 text-center text-sm text-slate-500 shadow-sm">
             Tidak ada pengajuan cuti yang menunggu keputusan HRD.
         </div>
         @endforelse

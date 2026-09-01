@@ -5,6 +5,8 @@ namespace Modules\Dashboard\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Modules\Attendance\Contracts\Services\AttendanceServiceInterface;
 use Modules\Attendance\Models\Attendance;
 use Modules\Master\Contracts\Services\EmployeeServiceInterface;
@@ -19,8 +21,18 @@ class DashboardController extends Controller
         protected EmployeeServiceInterface $employeeService,
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
+        $actor = $request->user();
+
+        $isElevated = $actor->roles()
+            ->whereIn('code', ['super-admin', 'admin', 'hrd', 'direktur', 'kepala-unit'])
+            ->exists();
+
+        if (!$isElevated && $actor->employee) {
+            return $this->personalDashboard($actor->employee);
+        }
+
         $summary = $this->attendanceService->todaySummary();
 
         $stats = [
@@ -68,6 +80,19 @@ class DashboardController extends Controller
             'pendingEmergencyCount',
             'pendingSpCandidateCount',
         ));
+    }
+
+    protected function personalDashboard(Employee $employee)
+    {
+        $today = $this->attendanceService->todayForDisplay($employee->id);
+        $monthSummary = $this->attendanceService->getMonthlyPersonalSummary($employee->id, now()->year, now()->month);
+
+        return view('dashboard::personal', [
+            'employee' => $employee,
+            'today' => $today,
+            'monthSummary' => $monthSummary,
+            'monthLabel' => now()->translatedFormat('F Y'),
+        ]);
     }
 
     protected function buildChartData(): array
@@ -147,7 +172,7 @@ class DashboardController extends Controller
             });
 
         LeaveRequest::query()
-            ->with('employee')
+            ->with(['employee' => fn($q) => $q->withTrashed()])
             ->whereIn('status', ['approved', 'rejected'])
             ->latest('updated_at')
             ->limit(5)
@@ -164,7 +189,7 @@ class DashboardController extends Controller
             });
 
         CheckIn::query()
-            ->with('employee')
+            ->with(['employee' => fn($q) => $q->withTrashed()])
             ->where('type', 'emergency')
             ->latest('updated_at')
             ->limit(5)
@@ -187,7 +212,7 @@ class DashboardController extends Controller
             });
 
         \Modules\Schedule\Models\SpCandidate::query()
-            ->with('employee')
+            ->with(['employee' => fn($q) => $q->withTrashed()])
             ->latest('updated_at')
             ->limit(5)
             ->get()
@@ -224,7 +249,8 @@ class DashboardController extends Controller
 
     protected function buildQuickAccessMenus(): array
     {
-        $user = auth()->user();
+        /** @var \Modules\Security\Models\User $user */
+        $user = Auth::user();
 
         $menus = [
             [
@@ -293,7 +319,7 @@ class DashboardController extends Controller
         ];
 
         return collect($menus)
-            ->filter(fn($menu) => $user->hasPermission($menu['permission']) && \Illuminate\Support\Facades\Route::has($menu['route']))
+            ->filter(fn($menu) => $user->hasPermission($menu['permission']) && Route::has($menu['route']))
             ->values()
             ->all();
     }

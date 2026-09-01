@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Permission Management')
 
@@ -14,12 +14,12 @@
 
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="{{ route('security.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-blue-100 bg-blue-900 hover:bg-blue-800 transition duration-200 translate-x-0 hover:-translate-x-1">
-                <i class="fa fa-arrow-left text-md text-blue-50"></i>
+            <a href="{{ route('security.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-[#dfeee1] bg-[#1f4d3d] hover:bg-[#2a684f] transition duration-200 translate-x-0 hover:-translate-x-1">
+                <i class="fa fa-arrow-left text-md text-[#edf5ee]"></i>
             </a>
-            <h1 class="text-xl font-semibold text-blue-800">Permission Management</h1>
+            <h1 class="text-xl font-semibold text-[#1f4d3d]">Permission Management</h1>
         </div>
-        <a href="{{ route('security.permissions.create') }}" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200">
+        <a href="{{ route('security.permissions.create') }}" class="bg-[#1f4d3d] hover:bg-[#2a684f] text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200">
             <i class="fa fa-plus text-sm"></i> Tambah Permission
         </a>
     </div>
@@ -27,7 +27,7 @@
     <form method="GET" class="mt-6 flex items-end gap-3">
         <div>
             <label class="mb-1 block text-xs font-medium text-slate-500">Filter Module</label>
-            <select name="module" onchange="this.form.submit()" class="rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <select name="module" onchange="this.form.submit()" class="rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-[#2a684f] focus:outline-none focus:ring-1 focus:ring-[#dfeee1]">
                 <option value="">Semua Module</option>
                 @foreach($modules as $module)
                 <option value="{{ $module }}" @selected(request('module')===$module)>{{ $module }}</option>
@@ -35,7 +35,7 @@
             </select>
         </div>
         @if(request('module'))
-        <a href="{{ route('security.permissions.index') }}" class="text-sm text-slate-500 hover:text-blue-600">Reset</a>
+        <a href="{{ route('security.permissions.index') }}" class="text-sm text-slate-500 hover:text-[#2a684f]">Reset</a>
         @endif
     </form>
 
@@ -63,7 +63,7 @@
             </span>
             <span></span>
             <div class="grid grid-cols-2 gap-2 w-full">
-                <a href="{{ route('security.permissions.edit', $permission->id) }}" class="bg-blue-900 hover:bg-blue-800 text-white rounded-full px-3 py-1 transition duration-200 flex items-center justify-center gap-1 hover:-translate-y-1 hover:shadow-lg">
+                <a href="{{ route('security.permissions.edit', $permission->id) }}" class="bg-[#1f4d3d] hover:bg-[#2a684f] text-white rounded-full px-3 py-1 transition duration-200 flex items-center justify-center gap-1 hover:-translate-y-1 hover:shadow-lg">
                     <i class="fa fa-pen text-sm"></i> Edit
                 </a>
                 <form method="POST" action="{{ route('security.permissions.destroy', $permission->id) }}" onsubmit="return confirm('Hapus permission ini? Pastikan tidak ada route yang masih memakainya.')">

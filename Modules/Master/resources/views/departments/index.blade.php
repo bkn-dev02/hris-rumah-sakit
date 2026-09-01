@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Department')
 
@@ -19,28 +19,28 @@
 
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-4">
-            <a href="{{ route('master.index') }}" class="w-10 h-10 flex items-center justify-center rounded-full bg-sky-900 hover:bg-sky-950 transition duration-200 translate-x-0 hover:-translate-x-1">
-                <i class="fa fa-arrow-left text-md text-sky-200"></i>
+            <a href="{{ route('master.index') }}" class="w-10 h-10 flex items-center justify-center rounded-full bg-[#173f34] hover:bg-[#1f4d3d] transition duration-200 translate-x-0 hover:-translate-x-1">
+                <i class="fa fa-arrow-left text-md text-[#dfeee1]"></i>
             </a>
-            <h1 class="text-lg font-bold text-sky-800">Manajemen Department</h1>
+            <h1 class="text-lg font-bold text-[#1f4d3d]">Manajemen Department</h1>
         </div>
         <div class="flex items-center gap-4">
             <a href="{{ route('master.departments.create') }}">
                 <x-shared::button variant="primary" icon="fa-solid fa-plus">
-                    <span class="text-sky-200">Tambah Department</span>
+                    <span class="text-[#dfeee1]">Tambah Department</span>
                 </x-shared::button>
             </a>
             <a href="{{ route('master.departments.tree') }}">
                 <x-shared::button variant="primary" icon="fa fa-sitemap text-sm">
-                    <span class="text-sky-200">Lihat Struktur</span>
+                    <span class="text-[#dfeee1]">Lihat Struktur</span>
                 </x-shared::button>
             </a>
         </div>
     </div>
 
-    <div class="mt-6 overflow-hidden rounded-lg border border-sky-200 bg-white">
+    <div class="mt-6 overflow-hidden rounded-lg border border-[#dfeee1] bg-white">
         <table class="w-full text-left text-sm">
-            <thead class="border-b border-sky-200 bg-sky-50 text-xs uppercase tracking-wide text-sky-900">
+            <thead class="border-b border-[#dfeee1] bg-[#f8fbf8] text-xs uppercase tracking-wide text-[#1f4d3d]">
                 <tr>
                     <th class="px-4 py-3">Nama</th>
                     <th class="px-4 py-3">Kode</th>
@@ -51,12 +51,12 @@
             </thead>
             <tbody class="divide-y divide-sky-100">
                 @forelse($departments as $department)
-                <tr class="hover:bg-sky-50">
-                    <td class="px-4 py-3 font-medium text-sky-800">{{ $department->name }}</td>
+                <tr class="hover:bg-[#f8fbf8]">
+                    <td class="px-4 py-3 font-medium text-[#1f4d3d]">{{ $department->name }}</td>
                     <td class="px-4 py-3">
-                        <code class="rounded bg-sky-100 px-1.5 py-0.5 text-xs text-sky-600">{{ $department->code }}</code>
+                        <code class="rounded bg-[#edf5ee] px-1.5 py-0.5 text-xs text-[#2a684f]">{{ $department->code }}</code>
                     </td>
-                    <td class="px-4 py-3 text-sky-500">{{ $department->parent?->name ?? '-' }}</td>
+                    <td class="px-4 py-3 text-[#2a684f]">{{ $department->parent?->name ?? '-' }}</td>
                     <td class="px-4 py-3">
                         @if($department->is_active)
                         <x-shared::badge variant="success" dot>Aktif</x-shared::badge>
@@ -66,13 +66,13 @@
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex justify-end gap-2">
-                            <a href="{{ route('master.departments.edit', $department->id) }}" class="rounded-lg p-2 text-sky-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                            <a href="{{ route('master.departments.edit', $department->id) }}" class="rounded-lg p-2 text-[#2a684f] hover:bg-[#edf5ee] hover:text-[#2a684f]" title="Edit">
                                 <i class="fa-solid fa-pen"></i>
                             </a>
                             <form method="POST" action="{{ route('master.departments.destroy', $department->id) }}" onsubmit="return confirm('Hapus department ini?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="rounded-lg p-2 text-sky-400 hover:bg-red-50 hover:text-red-600" title="Hapus">
+                                <button type="submit" class="rounded-lg p-2 text-[#2a684f] hover:bg-red-50 hover:text-red-600" title="Hapus">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </form>
@@ -81,7 +81,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-4 py-10 text-center text-sm text-sky-400">Belum ada department.</td>
+                    <td colspan="5" class="px-4 py-10 text-center text-sm text-[#2a684f]">Belum ada department.</td>
                 </tr>
                 @endforelse
             </tbody>

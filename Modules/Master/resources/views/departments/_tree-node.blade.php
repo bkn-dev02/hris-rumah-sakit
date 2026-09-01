@@ -1,4 +1,4 @@
-<li>
+﻿<li>
     <div class="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-slate-50" style="padding-left: {{ $depth * 24 + 12 }}px">
         <div class="flex items-center gap-2">
             <i class="fa {{ $department->children->isNotEmpty() ? 'fa-folder text-amber-500' : 'fa-folder-open text-slate-300' }} text-sm"></i>
@@ -8,7 +8,7 @@
             <x-shared::badge variant="secondary" size="sm">Nonaktif</x-shared::badge>
             @endunless
         </div>
-        <a href="{{ route('master.departments.edit', $department->id) }}" class="text-xs text-blue-600 hover:underline">Edit</a>
+        <a href="{{ route('master.departments.edit', $department->id) }}" class="text-xs text-[#2a684f] hover:underline">Edit</a>
     </div>
 
     @if($department->children->isNotEmpty())

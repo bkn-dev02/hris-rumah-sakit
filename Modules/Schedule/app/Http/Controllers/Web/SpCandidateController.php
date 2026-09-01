@@ -32,7 +32,7 @@ class SpCandidateController extends Controller
             $allCandidates = $this->spCandidateService->getForDepartment($ownDepartment->id);
         }
 
-        $allCandidates->load('spLetter');
+        $allCandidates->load(['spLetter', 'employee' => fn ($q) => $q->withTrashed()]);
 
         $grouped = [
             'action' => $allCandidates->whereIn('status', ['candidate', 'pending_decision'])->values(),
@@ -66,7 +66,7 @@ class SpCandidateController extends Controller
             abort(404);
         }
 
-        $candidate->load('spLetter');
+        $candidate->load(['spLetter', 'employee' => fn ($q) => $q->withTrashed()]);
 
         return view('schedule::sp-candidates.show', compact('candidate'));
     }

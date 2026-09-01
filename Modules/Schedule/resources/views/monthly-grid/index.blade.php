@@ -1,20 +1,20 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Review Jadwal Bulanan')
 
 @section('content')
 <div class="max-w-full px-6 py-8">
 
-    <div class="bg-gradient-to-r from-sky-950 to-sky-800 rounded-t-2xl px-6 py-4 flex items-center justify-between flex-wrap gap-3 shadow-md">
+    <div class="bg-gradient-to-r from-[#173f34] to-[#2a684f] rounded-t-2xl px-6 py-4 flex items-center justify-between flex-wrap gap-3 shadow-md">
         <div class="flex items-center gap-3">
-            <i class="fas fa-calendar-days text-sky-300"></i>
+            <i class="fas fa-calendar-days text-[#dfeee1]"></i>
             <h1 class="text-white font-semibold text-lg">Review Jadwal Bulanan</h1>
         </div>
 
         <form method="GET" class="flex items-center gap-3 flex-wrap">
             @if ($showFilter)
             <select name="department_id" onchange="this.form.submit()"
-                class="rounded-lg border-0 text-sm py-2 px-3 shadow-sm focus:ring-2 focus:ring-sky-400">
+                class="rounded-lg border-0 text-sm py-2 px-3 shadow-sm focus:ring-2 focus:ring-[#dfeee1]">
                 @if ($departmentsForFilter->count() > 1 || !$departmentId)
                 <option value="">Pilih Departemen</option>
                 @endif
@@ -25,7 +25,7 @@
                 @endforeach
             </select>
             @else
-            <span class="text-sky-200 text-sm font-medium px-1">
+            <span class="text-[#dfeee1] text-sm font-medium px-1">
                 {{ $departmentsForFilter->first()->name ?? '' }}
             </span>
             <input type="hidden" name="department_id" value="{{ $departmentId }}">
@@ -72,7 +72,7 @@
             </thead>
             <tbody>
                 @foreach ($employees as $employee)
-                <tr class="border-b border-slate-50 hover:bg-sky-50/40 transition">
+                <tr class="border-b border-slate-50 hover:bg-[#f8fbf8]/40 transition">
                     <td class="px-4 py-2 font-medium text-slate-700 whitespace-nowrap sticky left-0 bg-white">
                         {{ $employee->name }}
                     </td>

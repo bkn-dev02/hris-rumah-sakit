@@ -410,4 +410,55 @@ class AttendanceService implements AttendanceServiceInterface
     {
         return $this->attendanceRepository->getCheckInTimesForEmployeesToday($employeeIds);
     }
+
+    public function getMonthlyPersonalSummary(int $employeeId, int $year, int $month): array
+    {
+        $start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $monthEnd = $start->copy()->endOfMonth();
+        $end = Carbon::today()->lt($monthEnd) ? Carbon::today() : $monthEnd;
+
+        $counts = ['hadir' => 0, 'terlambat' => 0, 'cuti' => 0, 'absen' => 0];
+
+        if ($end->lt($start)) {
+            return $counts;
+        }
+
+        $attendances = Attendance::where('employee_id', $employeeId)
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
+            ->with('status')
+            ->get()
+            ->keyBy(fn($a) => $a->work_date->toDateString());
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $dateStr = $date->toDateString();
+
+            if (\Modules\Leave\Models\Holiday::whereDate('date', $date)->exists()) {
+                continue;
+            }
+
+            $resolved = app(\Modules\Schedule\Contracts\Services\ScheduleServiceInterface::class)
+                ->resolveEffectiveShift($employeeId, $date->copy());
+
+            if ($resolved['is_libur'] || !$resolved['shift_id']) {
+                continue;
+            }
+
+            $attendance = $attendances->get($dateStr);
+
+            if (!$attendance) {
+                $counts['absen']++;
+                continue;
+            }
+
+            $code = $attendance->status->code ?? null;
+
+            match (true) {
+                $code === 'CUTI' => $counts['cuti']++,
+                $code === 'TERLAMBAT' => $counts['terlambat']++,
+                default => $counts['hadir']++,
+            };
+        }
+
+        return $counts;
+    }
 }

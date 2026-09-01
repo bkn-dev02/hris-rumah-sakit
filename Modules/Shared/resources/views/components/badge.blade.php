@@ -6,22 +6,22 @@
 
 @php
 $variants = [
-'primary' => 'bg-blue-50 text-blue-700',
-'secondary' => 'bg-slate-100 text-slate-700',
+'primary' => 'bg-[#edf5ee] text-[#1f4d3d]',
+'secondary' => 'bg-[#dfeee1] text-[#1f4d3d]',
 'success' => 'bg-emerald-50 text-emerald-700',
 'danger' => 'bg-red-50 text-red-700',
 'warning' => 'bg-amber-50 text-amber-700',
-'info' => 'bg-sky-50 text-sky-700',
+'info' => 'bg-[#edf5ee] text-[#1f4d3d]',
 'neutral' => 'bg-slate-100 text-slate-600',
 ];
 
 $dotColors = [
-'primary' => 'bg-blue-600',
-'secondary' => 'bg-slate-500',
+'primary' => 'bg-[#1f4d3d]',
+'secondary' => 'bg-[#2a684f]',
 'success' => 'bg-emerald-600',
 'danger' => 'bg-red-600',
 'warning' => 'bg-amber-600',
-'info' => 'bg-sky-600',
+'info' => 'bg-[#2a684f]',
 'neutral' => 'bg-slate-400',
 ];
 
