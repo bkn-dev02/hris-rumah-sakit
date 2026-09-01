@@ -55,4 +55,9 @@ class CheckIn extends Model
     {
         return $query->where('type', 'emergency')->where('emergency_status', 'pending');
     }
+
+    public function emergencyDecidedBy(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\Modules\Master\Models\Employee::class, 'emergency_decided_by');
+    }
 }

@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])
             ->group(function () {
                 Route::get('/', 'index')->name('index')->middleware('permission:emergency-attendance.approve');
                 Route::post('/{id}/decide', 'decide')->name('decide')->middleware('permission:emergency-attendance.approve');
+                Route::get('/{id}', 'show')->name('show')->middleware('permission:emergency-attendance.approve');
             });
 
         // Master - Lokasi Absensi

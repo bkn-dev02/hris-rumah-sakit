@@ -33,4 +33,6 @@ interface CheckInServiceInterface
     public function findMyEmergency(int $id, int $employeeId): CheckIn;
 
     public function myEmergencyHistory(int $employeeId): Collection;
+
+    public function getEmergencyHistory(?int $departmentId, ?string $status, int $perPage = 15);
 }
