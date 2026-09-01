@@ -133,4 +133,9 @@ class CheckInService implements CheckInServiceInterface
     {
         return $this->repository->allByEmployeeAndType($employeeId, 'emergency');
     }
+
+    public function getEmergencyHistory(?int $departmentId, ?string $status, int $perPage = 15)
+    {
+        return $this->repository->getEmergencyHistory($departmentId, $status, $perPage);
+    }
 }

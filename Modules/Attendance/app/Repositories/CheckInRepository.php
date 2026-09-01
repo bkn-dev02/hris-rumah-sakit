@@ -61,4 +61,20 @@ class CheckInRepository implements CheckInRepositoryInterface
             ->orderByDesc('checked_at')
             ->get();
     }
+
+    public function getEmergencyHistory(?int $departmentId, ?string $status, int $perPage = 15)
+    {
+        return CheckIn::query()
+            ->where('type', 'emergency')
+            ->when($status, fn($q) => $q->where('emergency_status', $status))
+            ->when($departmentId, function ($q) use ($departmentId) {
+                $q->whereHas('employee.placements', function ($q2) use ($departmentId) {
+                    $q2->active()->where('department_id', $departmentId);
+                });
+            })
+            ->with(['employee', 'employee.placements' => fn($q) => $q->active()->with('department')])
+            ->latest('checked_at')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
 }

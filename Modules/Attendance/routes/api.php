@@ -25,7 +25,7 @@ Route::prefix('v1')
             Route::get('/exception-requests/history', [AttendanceExceptionRequestController::class, 'history']);
             Route::post('/emergency-check-in', [EmergencyCheckInController::class, 'store']);
             Route::get('/emergency-check-in/today', [EmergencyCheckInController::class, 'today']);
-            Route::get('/emergency-check-in/{id}', [EmergencyCheckInController::class, 'show']);
             Route::get('/emergency-check-in/history', [EmergencyCheckInController::class, 'history']);
+            Route::get('/emergency-check-in/{id}', [EmergencyCheckInController::class, 'show']);
         });
     });
