@@ -1,15 +1,16 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
-use App\Livewire\Actions\Logout;
 
 Route::middleware('guest')->group(function () {
     Volt::route('register', 'pages.auth.register')
         ->name('register');
 
-    Volt::route('login', 'pages.auth.login')
+    Route::match(['get', 'post'], 'login', [LoginController::class, 'login'])
         ->name('login');
 
     Volt::route('forgot-password', 'pages.auth.forgot-password')

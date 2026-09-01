@@ -27,7 +27,7 @@ class DashboardLeaveController extends Controller
             ->count();
 
         $recentRequests = LeaveRequest::query()
-            ->with(['employee', 'leaveType'])
+            ->with(['employee' => fn($q) => $q->withTrashed(), 'leaveType'])
             ->when($activeStatus !== 'all', fn($query) => $query->where('status', $activeStatus))
             ->orderByDesc('created_at')
             ->limit(10)

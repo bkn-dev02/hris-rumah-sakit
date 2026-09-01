@@ -100,7 +100,7 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
     public function paginateAll(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         return LeaveRequest::query()
-            ->with(['employee', 'leaveType', 'approvals.approver'])
+            ->with(['employee' => fn($q) => $q->withTrashed(), 'leaveType', 'approvals.approver'])
             ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
             ->when($filters['leave_type_id'] ?? null, fn($q, $id) => $q->where('leave_type_id', $id))
             ->when($filters['year'] ?? null, fn($q, $year) => $q->whereYear('start_date', $year))

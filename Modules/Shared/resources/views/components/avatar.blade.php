@@ -1,4 +1,4 @@
-@props([
+﻿@props([
 'src' => null,
 'name' => null,
 'size' => 'md',
@@ -33,7 +33,7 @@ $initials = $name
         alt="{{ $name ?? 'Avatar' }}"
         class="{{ $sizes[$size] }} rounded-full object-cover">
     @else
-    <span class="{{ $sizes[$size] }} flex items-center justify-center rounded-full bg-blue-100 font-semibold uppercase text-blue-700">
+    <span class="{{ $sizes[$size] }} flex items-center justify-center rounded-full bg-[#edf5ee] font-semibold uppercase text-[#2a684f]">
         {{ $initials }}
     </span>
     @endif

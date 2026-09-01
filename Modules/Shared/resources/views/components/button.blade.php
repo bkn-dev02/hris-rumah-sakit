@@ -9,10 +9,10 @@
 
 @php
 $variants = [
-'primary' => 'bg-sky-900 hover:bg-sky-950 text-sky-200',
-'secondary' => 'bg-slate-100 text-slate-700 hover:bg-slate-200',
-'outline' => 'border border-sky-600 text-sky-900 hover:bg-sky-100',
-'ghost' => 'text-slate-600 hover:bg-slate-100',
+'primary' => 'bg-[#1f4d3d] hover:bg-[#173f34] text-[#edf5ee]',
+'secondary' => 'bg-[#edf5ee] text-[#1f4d3d] hover:bg-[#dfeee1]',
+'outline' => 'border border-[#2a684f] text-[#1f4d3d] hover:bg-[#edf5ee]',
+'ghost' => 'text-[#1f4d3d] hover:bg-[#edf5ee]',
 'danger' => 'bg-red-600 text-white hover:bg-red-700',
 'success' => 'bg-emerald-600 text-white hover:bg-emerald-700',
 ];

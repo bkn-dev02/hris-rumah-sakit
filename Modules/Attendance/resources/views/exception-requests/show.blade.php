@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Detail Pengajuan')
 
@@ -10,10 +10,10 @@
     @endif
 
     <div class="flex items-center gap-4">
-        <a href="{{ route('attendance.exception-requests.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-sky-100 bg-sky-900 hover:bg-sky-800 transition duration-200 translate-x-0 hover:-translate-x-1">
-            <i class="fa fa-arrow-left text-md text-sky-50"></i>
+        <a href="{{ route('attendance.exception-requests.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-[#dfeee1] bg-[#173f34] hover:bg-[#173f34] transition duration-200 translate-x-0 hover:-translate-x-1">
+            <i class="fa fa-arrow-left text-md text-[#edf5ee]"></i>
         </a>
-        <h1 class="text-xl font-semibold text-sky-800">Detail Pengajuan</h1>
+        <h1 class="text-xl font-semibold text-[#1f4d3d]">Detail Pengajuan</h1>
     </div>
 
     <div class="mt-6 bg-white shadow-md p-6">
@@ -44,7 +44,7 @@
             @if($exceptionRequest->attachment)
             <div class="sm:col-span-2">
                 <p class="text-xs text-slate-400">Lampiran</p>
-                <a href="{{ asset('storage/' . $exceptionRequest->attachment) }}" target="_blank" class="text-sm text-sky-600 hover:underline">Lihat Lampiran</a>
+                <a href="{{ asset('storage/' . $exceptionRequest->attachment) }}" target="_blank" class="text-sm text-[#2a684f] hover:underline">Lihat Lampiran</a>
             </div>
             @endif
             @if($exceptionRequest->approval_status !== 'pending')
@@ -78,7 +78,7 @@
         <form id="reject-form" method="POST" action="{{ route('attendance.exception-requests.reject', $exceptionRequest->id) }}" class="mt-4 hidden">
             @csrf
             <label class="mb-1 block text-sm font-medium text-slate-700">Alasan Penolakan</label>
-            <textarea name="rejection_reason" rows="2" class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500">{{ old('rejection_reason') }}</textarea>
+            <textarea name="rejection_reason" rows="2" class="w-full rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-[#2a684f] focus:outline-none focus:ring-1 focus:ring-[#dfeee1]">{{ old('rejection_reason') }}</textarea>
             @error('rejection_reason') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             <button type="submit" class="mt-2 bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200">Kirim Penolakan</button>
         </form>

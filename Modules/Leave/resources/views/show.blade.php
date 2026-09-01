@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Detail Pengajuan Cuti')
 
@@ -8,15 +8,15 @@
     {{-- Header --}}
     <div class="mb-6 flex items-center gap-3">
         <a href="{{ route('leave.index') }}"
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-950 text-white shadow-sm transition hover:bg-sky-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1f4d3d] text-white shadow-sm transition hover:bg-[#173f34] focus:outline-none focus:ring-2 focus:ring-[#dfeee1]/30">
             <i class="fa-solid fa-arrow-left text-sm"></i>
         </a>
 
         <div>
-            <h1 class="text-xl font-bold text-sky-950">
+            <h1 class="text-xl font-bold text-[#173f34]">
                 Detail Pengajuan Cuti
             </h1>
-            <p class="mt-0.5 text-xs text-sky-500">
+            <p class="mt-0.5 text-xs text-[#2a684f]">
                 Informasi lengkap pengajuan dan riwayat persetujuan
             </p>
         </div>
@@ -39,12 +39,12 @@
             {{-- Card Header --}}
             <div class="border-b border-slate-100 bg-slate-50/70 px-6 py-4">
                 <div class="flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf5ee] text-[#2a684f]">
                         <i class="fa-solid fa-file-lines text-sm"></i>
                     </div>
 
                     <div>
-                        <h2 class="text-sm font-semibold text-sky-950">
+                        <h2 class="text-sm font-semibold text-[#173f34]">
                             Informasi Pengajuan
                         </h2>
                         <p class="text-xs text-slate-500">
@@ -66,8 +66,8 @@
                     </div>
 
                     <div class="mt-1 sm:mt-0 sm:w-2/3">
-                        <p class="text-sm font-semibold text-sky-950">
-                            {{ $leaveRequest->employee->name }}
+                        <p class="text-sm font-semibold text-[#173f34]">
+                            {{ $leaveRequest->employee->name ?? 'Pegawai (nonaktif)'}}
                         </p>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                     <div class="mt-1 sm:mt-0 sm:w-2/3">
                         <p class="text-sm text-slate-700">
                             {{ $leaveRequest->start_date->format('d M Y') }}
-                            <span class="mx-1 text-slate-400">—</span>
+                            <span class="mx-1 text-slate-400">â€”</span>
                             {{ $leaveRequest->end_date->format('d M Y') }}
                         </p>
 
@@ -132,7 +132,7 @@
                     </div>
 
                     <div class="mt-1 sm:mt-0 sm:w-2/3">
-                        <span class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">
+                        <span class="inline-flex items-center rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-semibold text-[#2a684f]">
                             {{ $leaveRequest->statusLabel() }}
                         </span>
                     </div>
@@ -147,12 +147,12 @@
             {{-- Card Header --}}
             <div class="border-b border-slate-100 bg-slate-50/70 px-6 py-4">
                 <div class="flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf5ee] text-[#2a684f]">
                         <i class="fa-solid fa-list-check text-sm"></i>
                     </div>
 
                     <div>
-                        <h2 class="text-sm font-semibold text-sky-950">
+                        <h2 class="text-sm font-semibold text-[#173f34]">
                             Riwayat Persetujuan
                         </h2>
                         <p class="text-xs text-slate-500">
@@ -216,7 +216,7 @@
 
                                 @if ($approval->decided_at)
                                 <span class="ml-1 font-normal text-slate-400">
-                                    — {{ $approval->decided_at->format('d M Y H:i') }}
+                                    â€” {{ $approval->decided_at->format('d M Y H:i') }}
                                 </span>
                                 @endif
                                 @endif
@@ -253,18 +253,18 @@
     <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-2">
-                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf5ee] text-[#2a684f]">
                     <i class="fa-solid fa-paperclip text-sm"></i>
                 </div>
 
                 <div>
-                    <h2 class="text-sm font-semibold text-sky-950">Lampiran</h2>
+                    <h2 class="text-sm font-semibold text-[#173f34]">Lampiran</h2>
                     <p class="text-xs text-slate-500">Dokumen pendukung pengajuan cuti</p>
                 </div>
             </div>
 
             <a href="{{ route('leave.attachment.download', $leaveRequest) }}"
-                class="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-sky-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1f4d3d] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#173f34] focus:outline-none focus:ring-2 focus:ring-[#dfeee1]/30">
                 <i class="fa-solid fa-download text-xs"></i>
                 Download
             </a>
@@ -281,7 +281,7 @@
                 class="h-[32rem] w-full rounded-xl border border-slate-200 bg-slate-100"></iframe>
             @else
             <div class="flex min-h-48 flex-col items-center justify-center rounded-xl bg-slate-50 px-6 text-center">
-                <i class="fa-solid fa-file-word mb-3 text-4xl text-sky-600"></i>
+                <i class="fa-solid fa-file-word mb-3 text-4xl text-[#2a684f]"></i>
                 <p class="text-sm font-semibold text-slate-700">Preview belum tersedia untuk format ini</p>
                 <p class="mt-1 text-xs text-slate-500">Gunakan tombol Download untuk membuka dokumen.</p>
             </div>
@@ -329,7 +329,7 @@
                         name="note"
                         rows="3"
                         placeholder="Tambahkan catatan jika diperlukan..."
-                        class="w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"></textarea>
+                        class="w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#2a684f] focus:ring-2 focus:ring-[#dfeee1]/20"></textarea>
                 </div>
 
                 <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">

@@ -20,4 +20,6 @@ interface CheckInRepositoryInterface
     public function findTodayByEmployeeAndType(int $employeeId, string $type): ?CheckIn;
 
     public function allByEmployeeAndType(int $employeeId, string $type): Collection;
+
+    public function getEmergencyHistory(?int $departmentId, ?string $status, int $perPage = 15);
 }

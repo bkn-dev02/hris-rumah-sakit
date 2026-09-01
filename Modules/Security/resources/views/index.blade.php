@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Security Module')
 
@@ -14,7 +14,7 @@
             <div class="flex items-start gap-4">
 
                 {{-- Module Icon --}}
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700 ring-1 ring-sky-200">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#edf5ee] text-[#2a684f] ring-1 ring-[#dfeee1]">
 
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -46,11 +46,11 @@
                     {{-- Label --}}
                     <div class="mb-1 flex items-center gap-2">
 
-                        <span class="text-sm font-medium text-sky-700">
+                        <span class="text-sm font-medium text-[#2a684f]">
                             Kelola pengguna, peran, hak akses, serta keamanan aplikasi
                         </span>
 
-                        <span class="h-1 w-1 rounded-full bg-sky-400"></span>
+                        <span class="h-1 w-1 rounded-full bg-[#2a684f]"></span>
 
                     </div>
 
@@ -72,10 +72,10 @@
             ====================================================== --}}
             <a
                 href="{{ route('security.users.index') }}"
-                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100/50">
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#dfeee1] hover:shadow-xl hover:shadow-[#edf5ee]/50">
 
                 {{-- Decorative Background --}}
-                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky-50 transition-transform duration-500 group-hover:scale-150">
+                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#f8fbf8] transition-transform duration-500 group-hover:scale-150">
                 </div>
 
                 <div class="relative">
@@ -84,7 +84,7 @@
                     <div class="flex items-start justify-between">
 
                         {{-- Icon --}}
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100 transition-all duration-300 group-hover:bg-sky-700 group-hover:text-white group-hover:shadow-lg group-hover:shadow-sky-700/20">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f8fbf8] text-[#2a684f] ring-1 ring-[#dfeee1] transition-all duration-300 group-hover:bg-[#2a684f] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#173f34]/20">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +109,7 @@
                         </div>
 
                         {{-- Arrow --}}
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-sky-50 group-hover:text-sky-700">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-[#f8fbf8] group-hover:text-[#2a684f]">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +132,7 @@
                     {{-- Content --}}
                     <div class="mt-6">
 
-                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-sky-800">
+                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-[#1f4d3d]">
                             User Management
                         </h2>
 
@@ -146,7 +146,7 @@
 
 
                     {{-- Footer --}}
-                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-sky-700">
+                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-[#2a684f]">
 
                         <span>
                             Kelola pengguna
@@ -177,10 +177,10 @@
             ====================================================== --}}
             <a
                 href="{{ route('security.roles.index') }}"
-                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100/50">
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#dfeee1] hover:shadow-xl hover:shadow-[#edf5ee]/50">
 
                 {{-- Decorative Background --}}
-                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky-50 transition-transform duration-500 group-hover:scale-150">
+                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#f8fbf8] transition-transform duration-500 group-hover:scale-150">
                 </div>
 
                 <div class="relative">
@@ -188,7 +188,7 @@
                     {{-- Icon & Arrow --}}
                     <div class="flex items-start justify-between">
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100 transition-all duration-300 group-hover:bg-sky-700 group-hover:text-white group-hover:shadow-lg group-hover:shadow-sky-700/20">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f8fbf8] text-[#2a684f] ring-1 ring-[#dfeee1] transition-all duration-300 group-hover:bg-[#2a684f] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#173f34]/20">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -211,7 +211,7 @@
 
                         </div>
 
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-sky-50 group-hover:text-sky-700">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-[#f8fbf8] group-hover:text-[#2a684f]">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -234,7 +234,7 @@
                     {{-- Content --}}
                     <div class="mt-6">
 
-                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-sky-800">
+                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-[#1f4d3d]">
                             Role Management
                         </h2>
 
@@ -248,7 +248,7 @@
 
 
                     {{-- Footer --}}
-                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-sky-700">
+                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-[#2a684f]">
 
                         <span>
                             Kelola role
@@ -279,10 +279,10 @@
             ====================================================== --}}
             <a
                 href="{{ route('security.permissions.index') }}"
-                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100/50">
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#dfeee1] hover:shadow-xl hover:shadow-[#edf5ee]/50">
 
                 {{-- Decorative Background --}}
-                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky-50 transition-transform duration-500 group-hover:scale-150">
+                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#f8fbf8] transition-transform duration-500 group-hover:scale-150">
                 </div>
 
                 <div class="relative">
@@ -290,7 +290,7 @@
                     {{-- Icon & Arrow --}}
                     <div class="flex items-start justify-between">
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100 transition-all duration-300 group-hover:bg-sky-700 group-hover:text-white group-hover:shadow-lg group-hover:shadow-sky-700/20">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f8fbf8] text-[#2a684f] ring-1 ring-[#dfeee1] transition-all duration-300 group-hover:bg-[#2a684f] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#173f34]/20">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -311,7 +311,7 @@
 
                         </div>
 
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-sky-50 group-hover:text-sky-700">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-[#f8fbf8] group-hover:text-[#2a684f]">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -334,7 +334,7 @@
                     {{-- Content --}}
                     <div class="mt-6">
 
-                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-sky-800">
+                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-[#1f4d3d]">
                             Permission Management
                         </h2>
 
@@ -347,7 +347,7 @@
 
 
                     {{-- Footer --}}
-                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-sky-700">
+                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-[#2a684f]">
 
                         <span>
                             Kelola permission
@@ -375,10 +375,10 @@
             {{-- ===================================================== PROFILE SETTINGS ====================================================== --}}
             <a
                 href="{{ route('profile.show') }}"
-                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100/50">
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#dfeee1] hover:shadow-xl hover:shadow-[#edf5ee]/50">
 
                 {{-- Decorative Background --}}
-                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky-50 transition-transform duration-500 group-hover:scale-150">
+                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#f8fbf8] transition-transform duration-500 group-hover:scale-150">
                 </div>
 
                 <div class="relative">
@@ -387,7 +387,7 @@
                     <div class="flex items-start justify-between">
 
                         {{-- Icon --}}
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100 transition-all duration-300 group-hover:bg-sky-700 group-hover:text-white group-hover:shadow-lg group-hover:shadow-sky-700/20">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f8fbf8] text-[#2a684f] ring-1 ring-[#dfeee1] transition-all duration-300 group-hover:bg-[#2a684f] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#173f34]/20">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -412,7 +412,7 @@
                         </div>
 
                         {{-- Arrow --}}
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-sky-50 group-hover:text-sky-700">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-[#f8fbf8] group-hover:text-[#2a684f]">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -435,7 +435,7 @@
                     {{-- Content --}}
                     <div class="mt-6">
 
-                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-sky-800">
+                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-[#1f4d3d]">
                             Profile Settings
                         </h2>
 
@@ -448,7 +448,7 @@
 
 
                     {{-- Footer --}}
-                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-sky-700">
+                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-[#2a684f]">
 
                         <span>
                             Kelola profil
@@ -477,10 +477,10 @@
             {{-- ===================================================== LOGIN HISTORY ====================================================== --}}
             <a
                 href="{{ route('security.login-histories.index') }}"
-                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100/50">
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#dfeee1] hover:shadow-xl hover:shadow-[#edf5ee]/50">
 
                 {{-- Decorative Background --}}
-                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky-50 transition-transform duration-500 group-hover:scale-150">
+                <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#f8fbf8] transition-transform duration-500 group-hover:scale-150">
                 </div>
 
                 <div class="relative">
@@ -489,7 +489,7 @@
                     <div class="flex items-start justify-between">
 
                         {{-- Icon --}}
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100 transition-all duration-300 group-hover:bg-sky-700 group-hover:text-white group-hover:shadow-lg group-hover:shadow-sky-700/20">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f8fbf8] text-[#2a684f] ring-1 ring-[#dfeee1] transition-all duration-300 group-hover:bg-[#2a684f] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#173f34]/20">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -509,7 +509,7 @@
                         </div>
 
                         {{-- Arrow --}}
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-sky-50 group-hover:text-sky-700">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-[#f8fbf8] group-hover:text-[#2a684f]">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -532,7 +532,7 @@
                     {{-- Content --}}
                     <div class="mt-6">
 
-                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-sky-800">
+                        <h2 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-[#1f4d3d]">
                             Login History
                         </h2>
 
@@ -545,7 +545,7 @@
 
 
                     {{-- Footer --}}
-                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-sky-700">
+                    <div class="mt-6 flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors group-hover:text-[#2a684f]">
 
                         <span>
                             Lihat riwayat login

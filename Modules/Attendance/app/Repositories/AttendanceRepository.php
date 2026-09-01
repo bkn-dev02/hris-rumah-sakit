@@ -20,7 +20,13 @@ class AttendanceRepository implements AttendanceRepositoryInterface
     public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return $this->model
-            ->with(['employee.employmentStatus', 'shift', 'status', 'checkIn', 'checkOut'])
+            ->with([
+                'employee' => fn($q) => $q->withTrashed()->with('employmentStatus'),
+                'shift',
+                'status',
+                'checkIn',
+                'checkOut',
+            ])
             ->when($filters['employee_id'] ?? null, fn($query, $value) => $query->where('employee_id', $value))
             ->when($filters['status_id'] ?? null, function ($query, $value) {
                 if ($value === 'unresolved') {

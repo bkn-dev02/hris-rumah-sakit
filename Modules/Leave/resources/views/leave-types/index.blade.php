@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Jenis Cuti')
 
@@ -6,15 +6,15 @@
 <div class="max-w-7xl mx-auto px-6 py-8">
 
     {{-- Header --}}
-    <div class="mb-6 flex items-center justify-between rounded-xl bg-sky-100 px-5 py-4 shadow-sm">
+    <div class="mb-6 flex items-center justify-between rounded-xl bg-[#edf5ee] px-5 py-4 shadow-sm">
 
         <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sky-950 shadow-sm">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#173f34] shadow-sm">
                 <i class="fa-solid fa-calendar-days"></i>
             </div>
 
             <div>
-                <h1 class="text-xl font-bold text-sky-950">
+                <h1 class="text-xl font-bold text-[#173f34]">
                     Jenis Cuti
                 </h1>
                 <p class="mt-0.5 text-xs text-slate-500">
@@ -25,7 +25,7 @@
 
         <a
             href="{{ route('leave.leave-types.create') }}"
-            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-sky-950 via-sky-900 to-sky-800 px-4 py-2.5 text-sm font-medium text-white shadow-md transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-[#173f34] via-[#1f4d3d] to-[#2a684f] px-4 py-2.5 text-sm font-medium text-white shadow-md transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
 
             <i class="fa-solid fa-plus text-xs"></i>
             Tambah Jenis Cuti
@@ -68,10 +68,10 @@
 
 
     {{-- Table --}}
-    <div class="overflow-hidden rounded-2xl border border-sky-200 bg-sky-100 p-4 shadow-md">
+    <div class="overflow-hidden rounded-2xl border border-[#dfeee1] bg-[#edf5ee] p-4 shadow-md">
 
         {{-- Table Header --}}
-        <div class="hidden lg:grid lg:grid-cols-12 lg:items-center rounded-xl bg-gradient-to-r from-sky-950 to-sky-800 px-5 py-4 shadow-md">
+        <div class="hidden lg:grid lg:grid-cols-12 lg:items-center rounded-xl bg-gradient-to-r from-[#173f34] to-[#2a684f] px-5 py-4 shadow-md">
 
             <div class="col-span-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white">
                 <i class="fa-solid fa-hashtag"></i>
@@ -106,7 +106,7 @@
 
             @forelse ($leaveTypes as $leaveType)
 
-            <div class="rounded-xl border border-sky-200 bg-white p-4 shadow-sm transition duration-200 hover:border-sky-300 hover:shadow-md">
+            <div class="rounded-xl border border-[#dfeee1] bg-white p-4 shadow-sm transition duration-200 hover:border-[#dfeee1] hover:shadow-md">
 
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
 
@@ -116,7 +116,7 @@
                             Kode
                         </p>
 
-                        <span class="inline-flex items-center rounded-lg bg-sky-100 px-3 py-1.5 text-sm font-semibold text-sky-950">
+                        <span class="inline-flex items-center rounded-lg bg-[#edf5ee] px-3 py-1.5 text-sm font-semibold text-[#173f34]">
                             {{ $leaveType->code }}
                         </span>
                     </div>
@@ -128,7 +128,7 @@
                             Nama
                         </p>
 
-                        <p class="font-semibold text-sky-950">
+                        <p class="font-semibold text-[#173f34]">
                             {{ $leaveType->name }}
                         </p>
                     </div>
@@ -141,9 +141,9 @@
                         </p>
 
                         @if ($leaveType->requires_quota)
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-semibold text-[#1f4d3d]">
 
-                            <span class="h-1.5 w-1.5 rounded-full bg-sky-600"></span>
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#2a684f]"></span>
 
                             Ya
                         </span>
@@ -187,7 +187,7 @@
 
                         <a
                             href="{{ route('leave.leave-types.edit', $leaveType) }}"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-sky-100 px-3 py-2 text-xs font-semibold text-sky-900 transition duration-200 hover:bg-sky-200 hover:-translate-y-0.5">
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-[#edf5ee] px-3 py-2 text-xs font-semibold text-[#1f4d3d] transition duration-200 hover:bg-[#edf5ee] hover:-translate-y-0.5">
 
                             <i class="fa-solid fa-pen text-[11px]"></i>
                             Edit
@@ -222,9 +222,9 @@
 
             @empty
 
-            <div class="rounded-xl border border-sky-200 bg-white p-10 text-center shadow-sm">
+            <div class="rounded-xl border border-[#dfeee1] bg-white p-10 text-center shadow-sm">
 
-                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-sky-100 text-sky-800">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#edf5ee] text-[#1f4d3d]">
                     <i class="fa-solid fa-calendar-xmark text-xl"></i>
                 </div>
 

@@ -22,11 +22,12 @@
 </head>
 
 <body class="font-sans text-gray-900 antialiased">
-    <div class="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#eef5f2] px-4 py-8 sm:px-6 lg:px-8">
-        <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-sky-200/35 blur-3xl"></div>
-        <div class="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/80 bg-white/95 shadow-[0_24px_80px_rgba(22,101,73,0.14)] backdrop-blur sm:rounded-[2.25rem]">
-            {{ $slot }}
+    <div class="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#edf5ee] px-4 py-8 sm:px-6 lg:px-8">
+        <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#cfe6d7]/80 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-[#dfeee1]/80 blur-3xl"></div>
+        <div class="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/80 bg-white/95 shadow-[0_24px_80px_rgba(31,77,61,0.14)] backdrop-blur sm:rounded-[2.25rem]">
+            @yield('content')
+            {{ $slot ?? '' }}
         </div>
     </div>
 </body>

@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Lokasi Absensi')
 
@@ -14,18 +14,18 @@
 
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="{{ route('attendance.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-sky-100 bg-sky-900 hover:bg-sky-800 transition duration-200 translate-x-0 hover:-translate-x-1">
-                <i class="fa fa-arrow-left text-md text-sky-50"></i>
+            <a href="{{ route('attendance.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-[#dfeee1] bg-[#173f34] hover:bg-[#173f34] transition duration-200 translate-x-0 hover:-translate-x-1">
+                <i class="fa fa-arrow-left text-md text-[#edf5ee]"></i>
             </a>
-            <h1 class="text-xl font-semibold text-sky-800">Lokasi Absensi</h1>
+            <h1 class="text-xl font-semibold text-[#1f4d3d]">Lokasi Absensi</h1>
         </div>
-        <a href="{{ route('attendance.locations.create') }}" class="bg-sky-900 hover:bg-sky-800 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200">
+        <a href="{{ route('attendance.locations.create') }}" class="bg-[#173f34] hover:bg-[#173f34] text-white px-4 py-2 rounded-full text-sm font-medium transition duration-200">
             <i class="fa fa-plus text-sm"></i> Tambah Lokasi
         </a>
     </div>
 
     <div class="mt-6 bg-white shadow-md p-4">
-        <div class="border border-sky-200 rounded-md grid grid-cols-5 gap-4 p-4 text-sky-700 font-semibold text-sm">
+        <div class="border border-[#dfeee1] rounded-md grid grid-cols-5 gap-4 p-4 text-[#2a684f] font-semibold text-sm">
             <span>Nama</span>
             <span>Koordinat</span>
             <span>Radius</span>
@@ -34,9 +34,9 @@
         </div>
 
         @forelse($locations as $location)
-        <div class="border border-sky-200 rounded-md grid grid-cols-5 gap-4 p-4 items-center text-sky-700 text-sm">
-            <span class="font-medium text-sky-800">{{ $location->name }}</span>
-            <span class="text-sky-500">{{ $location->latitude }}, {{ $location->longitude }}</span>
+        <div class="border border-[#dfeee1] rounded-md grid grid-cols-5 gap-4 p-4 items-center text-[#2a684f] text-sm">
+            <span class="font-medium text-[#1f4d3d]">{{ $location->name }}</span>
+            <span class="text-[#2a684f]">{{ $location->latitude }}, {{ $location->longitude }}</span>
             <span>{{ $location->radius_meters }} m</span>
             <span>
                 @if($location->is_active)
@@ -46,7 +46,7 @@
                 @endif
             </span>
             <div class="grid grid-cols-2 gap-2 w-full">
-                <a href="{{ route('attendance.locations.edit', $location->id) }}" class="bg-sky-900 hover:bg-sky-800 text-white rounded-full px-3 py-1 transition duration-200 flex items-center justify-center gap-1 hover:-transky-y-1 hover:shadow-lg">
+                <a href="{{ route('attendance.locations.edit', $location->id) }}" class="bg-[#173f34] hover:bg-[#173f34] text-white rounded-full px-3 py-1 transition duration-200 flex items-center justify-center gap-1 hover:-transky-y-1 hover:shadow-lg">
                     <i class="fa fa-pen text-sm"></i> Edit
                 </a>
                 <form method="POST" action="{{ route('attendance.locations.destroy', $location->id) }}" onsubmit="return confirm('Hapus lokasi ini?')">
@@ -58,7 +58,7 @@
             </div>
         </div>
         @empty
-        <div class="border border-sky-200 rounded-md p-10 text-center text-sm text-sky-400">Belum ada lokasi absensi.</div>
+        <div class="border border-[#dfeee1] rounded-md p-10 text-center text-sm text-[#2a684f]">Belum ada lokasi absensi.</div>
         @endforelse
     </div>
 

@@ -1,11 +1,11 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'SP Candidate')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
 
-    <div class="bg-gradient-to-r from-sky-950 to-sky-800 rounded-t-2xl px-6 py-4 flex items-center gap-3 shadow-md">
+    <div class="bg-gradient-to-r from-[#173f34] to-[#2a684f] rounded-t-2xl px-6 py-4 flex items-center gap-3 shadow-md">
         <i class="fas fa-triangle-exclamation text-amber-300"></i>
         <h1 class="text-white font-semibold text-lg">SP Candidate</h1>
     </div>
@@ -25,7 +25,7 @@
             </a>
             <a href="{{ route('schedule.sp-candidates.index', ['tab' => 'issued']) }}"
                 class="px-4 py-3 text-sm font-medium flex items-center gap-2 border-b-2 transition
-                    {{ $tab === 'issued' ? 'border-sky-800 text-sky-800' : 'border-transparent text-slate-400 hover:text-slate-600' }}">
+                    {{ $tab === 'issued' ? 'border-[#173f34] text-[#1f4d3d]' : 'border-transparent text-slate-400 hover:text-slate-600' }}">
                 <i class="fas fa-file-signature text-xs"></i> SP Terbit
                 <span class="text-xs text-slate-400">{{ $counts['issued'] }}</span>
             </a>
@@ -57,7 +57,7 @@
             @if ($needsDecision->isNotEmpty())
             <div class="text-xs font-semibold text-violet-700 mb-2 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span>
-                MENUNGGU KEPUTUSAN ANDA — {{ $needsDecision->count() }}
+                MENUNGGU KEPUTUSAN ANDA â€” {{ $needsDecision->count() }}
             </div>
             <div class="space-y-2 mb-5">
                 @foreach ($needsDecision as $candidate)
@@ -70,7 +70,7 @@
                             <div>
                                 <div class="font-medium text-slate-700 text-sm">{{ $candidate->employee->name }}</div>
                                 <div class="text-xs text-slate-400">
-                                    {{ $candidate->department->name }} · {{ $candidate->date->translatedFormat('d M') }} · Terlambat check-in {{ $candidate->late_checkin_at?->format('H:i') }}
+                                    {{ $candidate->department->name }} Â· {{ $candidate->date->translatedFormat('d M') }} Â· Terlambat check-in {{ $candidate->late_checkin_at?->format('H:i') }}
                                 </div>
                             </div>
                         </div>
@@ -94,7 +94,7 @@
                     </div>
                     @else
                     <a href="{{ route('schedule.sp-candidates.show', $candidate->id) }}" class="text-xs text-violet-700 hover:underline">
-                        Lihat detail →
+                        Lihat detail â†’
                     </a>
                     @endif
                 </div>
@@ -105,7 +105,7 @@
             @if ($needsInfo->isNotEmpty())
             <div class="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                BELUM ADA KABAR — {{ $needsInfo->count() }}
+                BELUM ADA KABAR â€” {{ $needsInfo->count() }}
             </div>
             <div class="space-y-2">
                 @foreach ($needsInfo as $candidate)
@@ -118,7 +118,7 @@
                         <div>
                             <div class="font-medium text-slate-700 text-sm">{{ $candidate->employee->name }}</div>
                             <div class="text-xs text-slate-400">
-                                {{ $candidate->department->name }} · {{ $candidate->date->translatedFormat('d M') }} · {{ $candidate->shift->name }}
+                                {{ $candidate->department->name }} Â· {{ $candidate->date->translatedFormat('d M') }} Â· {{ $candidate->shift->name }}
                             </div>
                         </div>
                     </div>
@@ -135,14 +135,14 @@
                     class="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500">
-                            {{ collect(explode(' ', $candidate->employee->name))->map(fn($w) => $w[0] ?? '')->take(2)->implode('') }}
+                           {{ collect(explode(' ', $candidate->employee?->name ?? 'Pegawai'))->map(fn($w) => $w[0] ?? '')->take(2)->implode('') }}
                         </div>
                         <div>
-                            <div class="font-medium text-slate-600 text-sm">{{ $candidate->employee->name }}</div>
+                            <div class="font-medium text-slate-600 text-sm">{{ $candidate->employee?->name ?? 'Pegawai (nonaktif)' }}</div>
                             <div class="text-xs text-slate-400">
-                                {{ $candidate->department->name }} · {{ $candidate->date->translatedFormat('d M Y') }}
+                                {{ $candidate->department->name }} Â· {{ $candidate->date->translatedFormat('d M Y') }}
                                 @if ($tab === 'issued' && $candidate->spLetter)
-                                · SP ke-{{ $candidate->spLetter->sp_number }}
+                                Â· SP ke-{{ $candidate->spLetter->sp_number }}
                                 @endif
                             </div>
                         </div>

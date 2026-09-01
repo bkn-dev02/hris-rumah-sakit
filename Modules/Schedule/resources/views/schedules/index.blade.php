@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Jadwal Mingguan')
 
@@ -6,18 +6,18 @@
 <div class="max-w-7xl mx-auto px-6 py-8">
 
     {{-- Header --}}
-    <div class="bg-gradient-to-r from-sky-950 to-sky-800 rounded-t-2xl px-6 py-4 flex items-center justify-between flex-wrap gap-3 shadow-md">
+    <div class="bg-gradient-to-r from-[#173f34] to-[#2a684f] rounded-t-2xl px-6 py-4 flex items-center justify-between flex-wrap gap-3 shadow-md">
         <div class="flex items-center gap-3">
-            <i class="fas fa-calendar-week text-sky-300"></i>
-            <h1 class="text-sky-300 font-semibold text-lg">Jadwal Mingguan</h1>
+            <i class="fas fa-calendar-week text-[#dfeee1]"></i>
+            <h1 class="text-[#dfeee1] font-semibold text-lg">Jadwal Mingguan</h1>
         </div>
 
         <form method="GET" action="{{ route('schedule.index') }}" class="flex items-center gap-3 flex-wrap">
             @if ($showFilter)
                 <select name="department_id"
                     onchange="this.form.submit()"
-                    class="rounded-lg border-0 bg-sky-900 text-sky-100 py-2 px-3 shadow-sm
-                        focus:ring-2 focus:ring-sky-400">
+                    class="rounded-lg border-0 bg-[#173f34] text-[#edf5ee] py-2 px-3 shadow-sm
+                        focus:ring-2 focus:ring-[#dfeee1]">
 
                     @if ($departmentsForFilter->count() > 1 || !$departmentId)
                         <option value="" class="bg-white text-slate-800">
@@ -36,7 +36,7 @@
                     @endforeach
                 </select>
             @else
-                <span class="text-sky-200 text-sm font-medium px-1">
+                <span class="text-[#dfeee1] text-sm font-medium px-1">
                     {{ $departmentsForFilter->first()->name ?? '' }}
                 </span>
             @endif
@@ -47,7 +47,7 @@
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 <span class="text-white text-sm px-2">
-                    {{ $startDate->translatedFormat('d M') }} – {{ $endDate->translatedFormat('d M Y') }}
+                    {{ $startDate->translatedFormat('d M') }} â€“ {{ $endDate->translatedFormat('d M Y') }}
                 </span>
                 <a href="{{ route('schedule.index', array_merge(request()->query(), ['start_date' => $startDate->copy()->addWeek()->toDateString()])) }}"
                     class="text-white/80 hover:text-white transition">
@@ -79,7 +79,7 @@
             </thead>
             <tbody>
                 @foreach ($employees as $employee)
-                <tr class="border-b border-slate-50 hover:bg-sky-50/40 transition">
+                <tr class="border-b border-slate-50 hover:bg-[#f8fbf8]/40 transition">
                     <td class="px-4 py-3 font-medium text-slate-700 whitespace-nowrap sticky left-0 bg-white">
                         {{ $employee->name }}
                     </td>
@@ -104,7 +104,7 @@
                                 class="z-50 bg-white rounded-xl shadow-lg border border-slate-100 p-2 w-36">
                                 <template x-for="shift in shifts" :key="shift.id">
                                     <button @click="assign('kerja', shift.id)"
-                                        class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-sky-50 text-xs flex items-center gap-2">
+                                        class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-[#f8fbf8] text-xs flex items-center gap-2">
                                         <span class="w-2 h-2 rounded-full" :class="shiftDotClass(shift.id)"></span>
                                         <span x-text="shift.name"></span>
                                     </button>
@@ -130,8 +130,8 @@
     <div class="flex items-center gap-4 mt-3 text-xs text-slate-500 flex-wrap">
         @foreach ($shifts as $shift)
             <span class="flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full {{ ['bg-sky-500','bg-amber-500','bg-violet-500','bg-emerald-500','bg-rose-500','bg-indigo-500'][$shift->id % 6] }}"></span>
-                {{ $shift->name }} ({{ $shift->initials }}) · {{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }}–{{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}
+                <span class="w-2 h-2 rounded-full {{ ['bg-[#f8fbf8]0','bg-amber-500','bg-violet-500','bg-emerald-500','bg-rose-500','bg-[#edf5ee]0'][$shift->id % 6] }}"></span>
+                {{ $shift->name }} ({{ $shift->initials }}) <i class="fa-regular fa-clock text-xs text-slate-400"></i> ({{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }})
             </span>
         @endforeach
         <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-300"></span> Libur</span>
@@ -141,16 +141,16 @@
 @push('scripts')
 <script>
     const SHIFT_BADGE_COLORS = [
-        'bg-sky-100 text-sky-700',
+        'bg-[#edf5ee] text-[#2a684f]',
         'bg-amber-100 text-amber-700',
         'bg-violet-100 text-violet-700',
         'bg-emerald-100 text-emerald-700',
         'bg-rose-100 text-rose-700',
-        'bg-indigo-100 text-indigo-700',
+        'bg-[#edf5ee] text-[#1f4d3d]',
     ];
     const SHIFT_DOT_COLORS = [
-        'bg-sky-500', 'bg-amber-500', 'bg-violet-500',
-        'bg-emerald-500', 'bg-rose-500', 'bg-indigo-500',
+        'bg-[#f8fbf8]0', 'bg-amber-500', 'bg-violet-500',
+        'bg-emerald-500', 'bg-rose-500', 'bg-[#edf5ee]0',
     ];
 
     function shiftBadgeClass(shiftId) {

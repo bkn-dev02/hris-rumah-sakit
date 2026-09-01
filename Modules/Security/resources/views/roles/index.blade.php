@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Role Management')
 
@@ -23,13 +23,13 @@
         <div class="flex items-center gap-4">
             <a
                 href="{{ route('security.index') }}"
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-900 text-white shadow-sm shadow-sky-900/20 transition-all duration-200 hover:-translate-x-0.5 hover:bg-sky-800 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173f34] text-white shadow-sm shadow-[#173f34]/20 transition-all duration-200 hover:-translate-x-0.5 hover:bg-[#173f34] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
                 title="Kembali ke Security Module">
                 <i class="fa-solid fa-arrow-left text-sm"></i>
             </a>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-sky-800">Role Management</h1>
-                <p class="text-sm text-sky-500">Kelola role dan hak akses pengguna.</p>
+                <h1 class="text-xl font-bold tracking-tight text-[#1f4d3d]">Role Management</h1>
+                <p class="text-sm text-[#2a684f]">Kelola role dan hak akses pengguna.</p>
             </div>
         </div>
         <a href="{{ route('security.roles.create') }}">
@@ -74,7 +74,7 @@
                                 <i class="fa-solid fa-lock"></i>
                             </span>
                             @else
-                            <a href="{{ route('security.roles.edit', $role->id) }}" class="rounded-lg p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                            <a href="{{ route('security.roles.edit', $role->id) }}" class="rounded-lg p-2 text-slate-400 hover:bg-[#edf5ee] hover:text-[#2a684f]" title="Edit">
                                 <i class="fa-solid fa-pen"></i>
                             </a>
                             <form method="POST" action="{{ route('security.roles.destroy', $role->id) }}" onsubmit="return confirm('Hapus role ini?')">

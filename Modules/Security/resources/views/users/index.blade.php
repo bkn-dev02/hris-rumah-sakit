@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'User Management')
 
@@ -30,17 +30,17 @@
                     {{-- Back Button --}}
                     <a
                         href="{{ route('security.index') }}"
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-900 text-white shadow-sm shadow-sky-900/20 transition-all duration-200 hover:-translate-x-0.5 hover:bg-sky-800 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173f34] text-white shadow-sm shadow-[#173f34]/20 transition-all duration-200 hover:-translate-x-0.5 hover:bg-[#173f34] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
                         title="Kembali ke Security Module">
                         <i class="fa-solid fa-arrow-left text-sm"></i>
                     </a>
 
                     <div>
-                        <h1 class="text-xl font-bold tracking-tight text-sky-800">
+                        <h1 class="text-xl font-bold tracking-tight text-[#1f4d3d]">
                             User Management
                         </h1>
 
-                        <p class="mt-1 text-sm text-sky-500">
+                        <p class="mt-1 text-sm text-[#2a684f]">
                             Kelola akun pengguna, status akun, dan akses pengguna sistem HRIS.
                         </p>
 
@@ -77,8 +77,8 @@
                     href="{{ route('security.users.index') }}"
                     class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200
                     {{ !request('trashed')
-                        ? 'bg-sky-900 text-white shadow-sm'
-                        : 'text-slate-500 hover:bg-sky-50 hover:text-sky-800'
+                        ? 'bg-[#173f34] text-white shadow-sm'
+                        : 'text-slate-500 hover:bg-[#f8fbf8] hover:text-[#1f4d3d]'
                     }}">
 
                     <span
@@ -95,8 +95,8 @@
                     href="{{ route('security.users.index', ['trashed' => 1]) }}"
                     class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200
                     {{ request('trashed')
-                        ? 'bg-sky-900 text-white shadow-sm'
-                        : 'text-slate-500 hover:bg-sky-50 hover:text-sky-800'
+                        ? 'bg-[#173f34] text-white shadow-sm'
+                        : 'text-slate-500 hover:bg-[#f8fbf8] hover:text-[#1f4d3d]'
                     }}">
 
                     <span
@@ -151,7 +151,7 @@
 
                         @forelse($users as $user)
 
-                        <tr class="group transition-colors duration-200 hover:bg-sky-50/40">
+                        <tr class="group transition-colors duration-200 hover:bg-[#f8fbf8]/40">
 
 
                             {{-- User --}}
@@ -187,7 +187,7 @@
 
                                     @foreach($user->roles as $role)
 
-                                    <span class="inline-flex items-center rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-200">
+                                    <span class="inline-flex items-center rounded-lg bg-[#f8fbf8] px-2.5 py-1 text-xs font-medium text-[#2a684f] ring-1 ring-inset ring-[#dfeee1]">
                                         {{ $role->name }}
                                     </span>
 
@@ -283,7 +283,7 @@
                                     {{-- Edit --}}
                                     <a
                                         href="{{ route('security.users.edit', $user->slug) }}"
-                                        class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 hover:shadow-sm"
+                                        class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-all duration-200 hover:bg-[#f8fbf8] hover:text-[#2a684f] hover:shadow-sm"
                                         title="Edit User">
                                         <i class="fa-solid fa-pen text-sm"></i>
                                     </a>
@@ -323,7 +323,7 @@
 
                                 <div class="text-center">
 
-                                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+                                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f8fbf8] text-[#2a684f]">
 
                                         <i class="fa-solid fa-users text-xl"></i>
 
@@ -342,7 +342,7 @@
 
                                     <a
                                         href="{{ route('security.users.create') }}"
-                                        class="mt-5 inline-flex items-center gap-2 rounded-xl bg-sky-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-sky-800 hover:shadow-md">
+                                        class="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#173f34] px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#173f34] hover:shadow-md">
 
                                         <i class="fa-solid fa-plus text-xs"></i>
 

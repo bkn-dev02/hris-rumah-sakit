@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Tambah User')
 
@@ -7,11 +7,11 @@
     <div class="flex items-center gap-4">
         <a
             href="{{ route('security.users.index') }}"
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-900 text-white shadow-sm shadow-sky-900/20 transition-all duration-200 hover:-translate-x-0.5 hover:bg-sky-800 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173f34] text-white shadow-sm shadow-[#173f34]/20 transition-all duration-200 hover:-translate-x-0.5 hover:bg-[#173f34] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
             title="Kembali ke Security Module">
             <i class="fa-solid fa-arrow-left text-sm"></i>
         </a>
-        <h1 class="text-xl font-semibold text-sky-900">Tambah User</h1>
+        <h1 class="text-xl font-semibold text-[#1f4d3d]">Tambah User</h1>
     </div>
 
     <form method="POST" action="{{ route('security.users.store') }}" class="mt-6 rounded-lg border border-slate-200 bg-white p-6">

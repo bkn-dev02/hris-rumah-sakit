@@ -1,11 +1,11 @@
-@extends('shared::layouts.app')
+﻿@extends('shared::layouts.app')
 
 @section('title', 'Presensi Darurat')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
 
-    <div class="bg-gradient-to-r from-sky-950 to-sky-800 rounded-t-2xl px-6 py-4 flex items-center gap-3 shadow-md">
+    <div class="bg-gradient-to-r from-[#173f34] to-[#2a684f] rounded-t-2xl px-6 py-4 flex items-center gap-3 shadow-md">
         <i class="fas fa-triangle-exclamation text-amber-300"></i>
         <h1 class="text-white font-semibold text-lg">Presensi Darurat</h1>
     </div>
@@ -76,7 +76,7 @@
                         <span class="w-1.5 h-1.5 rounded-full {{ $meta['dot'] }}"></span>
                         {{ $meta['label'] }}
                     </span>
-                    <a href="{{ route('attendance.emergency.show', $checkIn->id) }}" class="text-xs text-sky-700 hover:underline">
+                    <a href="{{ route('attendance.emergency.show', $checkIn->id) }}" class="text-xs text-[#2a684f] hover:underline">
                         Lihat Detail
                     </a>
                     @endif
