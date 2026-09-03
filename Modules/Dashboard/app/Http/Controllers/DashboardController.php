@@ -13,6 +13,10 @@ use Modules\Master\Contracts\Services\EmployeeServiceInterface;
 use Modules\Master\Models\Employee;
 use Modules\Leave\Models\LeaveRequest;
 use Modules\Attendance\Models\CheckIn;
+use Modules\Schedule\Models\SpCandidate;
+use Modules\Master\Models\Shift;
+use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
+use Modules\Dashboard\Exceptions\EmployeeNotLinkedException;
 
 class DashboardController extends Controller
 {
@@ -25,12 +29,46 @@ class DashboardController extends Controller
     {
         $actor = $request->user();
 
+        $isPegawai = $actor->roles()
+            ->where('code', 'pegawai')
+            ->exists();
+
+        if ($isPegawai) {
+            if (!$actor->employee) {
+                $isDeactivated = Employee::onlyTrashed()
+                    ->where('user_id', $actor->id)
+                    ->exists();
+
+                if ($isDeactivated) {
+                    throw new EmployeeNotLinkedException(
+                        'Akun Anda telah dinonaktifkan. Jika ini keliru, silakan hubungi Admin atau HRD untuk mengaktifkan kembali.',
+                        'Akun Dinonaktifkan'
+                    );
+                }
+
+                throw new EmployeeNotLinkedException();
+            }
+
+            return $this->employeeDashboard($actor->employee);
+        }
+
+
         $isElevated = $actor->roles()
             ->whereIn('code', ['super-admin', 'admin', 'hrd', 'direktur', 'kepala-unit'])
             ->exists();
 
-        if (!$isElevated && $actor->employee) {
-            return $this->personalDashboard($actor->employee);
+        if (!$isElevated) {
+            $isPegawai = $actor->roles()
+                ->where('code', 'pegawai')
+                ->exists();
+
+            if ($isPegawai) {
+                return $this->employeeDashboard($actor->employee);
+            }
+
+            if ($actor->employee) {
+                return $this->personalDashboard($actor->employee);
+            }
         }
 
         $summary = $this->attendanceService->todaySummary();
@@ -57,16 +95,16 @@ class DashboardController extends Controller
 
         $quickAccessMenus = $this->buildQuickAccessMenus();
 
-        $pendingLeaveCount = \Modules\Leave\Models\LeaveRequest::query()
+        $pendingLeaveCount = LeaveRequest::query()
             ->where('status', 'pending')
             ->count();
 
-        $pendingEmergencyCount = \Modules\Attendance\Models\CheckIn::query()
+        $pendingEmergencyCount = CheckIn::query()
             ->where('type', 'emergency')
             ->where('emergency_status', 'pending')
             ->count();
 
-        $pendingSpCandidateCount = \Modules\Schedule\Models\SpCandidate::query()
+        $pendingSpCandidateCount = SpCandidate::query()
             ->whereIn('status', ['candidate', 'pending_decision'])
             ->count();
 
@@ -80,6 +118,55 @@ class DashboardController extends Controller
             'pendingEmergencyCount',
             'pendingSpCandidateCount',
         ));
+    }
+
+    protected function employeeDashboard($employee)
+    {
+        $today = Carbon::today();
+        $tomorrow = Carbon::tomorrow();
+
+        $attendance = $this->attendanceService->todayForDisplay($employee->id);
+
+        $monthlyStats = $this->attendanceService->getMonthlyPersonalSummary(
+            $employee->id,
+            $today->year,
+            $today->month
+        );
+
+        $todayShift = $this->resolveShiftInfo($employee->id, $today);
+        $tomorrowShift = $this->resolveShiftInfo($employee->id, $tomorrow);
+
+        return view('dashboard::employee.index', [
+            'employee' => $employee,
+            'attendance' => $attendance,
+            'monthlyStats' => $monthlyStats,
+            'todayShift' => $todayShift,
+            'tomorrowShift' => $tomorrowShift,
+        ]);
+    }
+
+    protected function resolveShiftInfo(int $employeeId, Carbon $date): array
+    {
+        $resolved = app(ScheduleServiceInterface::class)
+            ->resolveEffectiveShift($employeeId, $date->copy());
+
+        if (!empty($resolved['is_libur']) || !$resolved['shift_id']) {
+            return [
+                'is_libur'   => (bool) ($resolved['is_libur'] ?? false),
+                'name'       => null,
+                'start_time' => null,
+                'end_time'   => null,
+            ];
+        }
+
+        $shift = Shift::find($resolved['shift_id']);
+
+        return [
+            'is_libur'   => false,
+            'name'       => $shift?->name,
+            'start_time' => $shift?->start_time ? Carbon::parse($shift->start_time)->format('H:i') : null,
+            'end_time'   => $shift?->end_time ? Carbon::parse($shift->end_time)->format('H:i') : null,
+        ];
     }
 
     protected function personalDashboard(Employee $employee)
@@ -211,7 +298,7 @@ class DashboardController extends Controller
                 ]);
             });
 
-        \Modules\Schedule\Models\SpCandidate::query()
+        SpCandidate::query()
             ->with(['employee' => fn($q) => $q->withTrashed()])
             ->latest('updated_at')
             ->limit(5)
