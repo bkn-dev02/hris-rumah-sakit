@@ -7,6 +7,7 @@ use Modules\Attendance\Http\Controllers\Web\AttendanceLocationController;
 use Modules\Attendance\Http\Controllers\Web\AttendanceStatusController;
 use Modules\Attendance\Http\Controllers\Web\AttendanceDashboardController;
 use Modules\Attendance\Http\Controllers\Web\EmergencyCheckInApprovalController;
+use Modules\Attendance\Http\Controllers\Web\EmergencyCheckInController;
 
 Route::middleware(['auth', 'verified'])
     ->prefix('attendance')
@@ -45,6 +46,15 @@ Route::middleware(['auth', 'verified'])
                 Route::get('/', 'index')->name('index')->middleware('permission:emergency-attendance.approve');
                 Route::post('/{id}/decide', 'decide')->name('decide')->middleware('permission:emergency-attendance.approve');
                 Route::get('/{id}', 'show')->name('show')->middleware('permission:emergency-attendance.approve');
+            });
+
+        // Presensi Darurat - pengajuan oleh pegawai
+        Route::prefix('emergency-request')
+            ->name('emergency-request.')
+            ->controller(EmergencyCheckInController::class)
+            ->group(function () {
+                Route::get('/', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
             });
 
         // Master - Lokasi Absensi
