@@ -11,7 +11,7 @@ interface EmployeeServiceInterface
 {
     public function getAll(): Collection;
 
-    public function paginate(int $perPage = 10, bool $trashed = false): LengthAwarePaginator;
+    public function paginate(int $perPage = 10, bool $trashed = false, ?array $departmentIds = null): LengthAwarePaginator;
 
     public function findBySlug(string $slug, bool $withTrashed = false): Employee;
 

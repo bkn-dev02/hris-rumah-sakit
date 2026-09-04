@@ -60,6 +60,15 @@ class MonthlyGridController extends Controller
 
         $employees = collect();
         $scheduleMap = [];
+        $personalSchedule = [];
+
+        if ($actor->roles()->where('code', 'kepala_unit')->exists() && $actor->employee) {
+            $personalSchedule = $this->scheduleService->getEmployeeSchedule(
+                $actor->employee->id,
+                $startDate,
+                $endDate
+            );
+        }
 
         if ($departmentId) {
             $employees = Employee::whereHas('placements', function ($query) use ($departmentId) {
@@ -88,7 +97,26 @@ class MonthlyGridController extends Controller
             'showFilter',
             'departmentId',
             'monthDate',
-            'scheduleMap'
+            'scheduleMap',
+            'personalSchedule'
         ));
+    }
+
+    public function personal(Request $request)
+    {
+        $employee = $request->user()->employee;
+
+        if (!$employee) {
+            abort(403, 'Akun Anda tidak terhubung dengan data pegawai.');
+        }
+
+        $year = $request->integer('year') ?: now()->year;
+        $month = $request->integer('month') ?: now()->month;
+        $monthDate = Carbon::createFromDate($year, $month, 1);
+        $startDate = $monthDate->copy()->startOfMonth();
+        $endDate = $monthDate->copy()->endOfMonth();
+        $schedule = $this->scheduleService->getEmployeeSchedule($employee->id, $startDate, $endDate);
+
+        return view('schedule::monthly-grid.personal', compact('employee', 'monthDate', 'schedule'));
     }
 }

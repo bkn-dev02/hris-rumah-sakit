@@ -135,7 +135,7 @@
                     class="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500">
-                           {{ collect(explode(' ', $candidate->employee?->name ?? 'Pegawai'))->map(fn($w) => $w[0] ?? '')->take(2)->implode('') }}
+                            {{ collect(explode(' ', $candidate->employee?->name ?? 'Pegawai'))->map(fn($w) => $w[0] ?? '')->take(2)->implode('') }}
                         </div>
                         <div>
                             <div class="font-medium text-slate-600 text-sm">{{ $candidate->employee?->name ?? 'Pegawai (nonaktif)' }}</div>
@@ -154,5 +154,41 @@
             @endif
         </div>
     </div>
+
+    @if ($personalHistory->isNotEmpty())
+    <div class="mt-4 rounded-2xl border border-[#dfeee1] bg-white p-5 shadow-md">
+        <div class="mb-4 flex items-center gap-2">
+            <i class="fas fa-user-shield text-[#2a684f]"></i>
+            <div>
+                <h2 class="font-semibold text-[#173f34]">Riwayat SP Saya</h2>
+                <p class="mt-1 text-xs text-slate-500">Riwayat SP yang pernah diterbitkan atau diselesaikan untuk Anda</p>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            @foreach ($personalHistory as $candidate)
+            <a href="{{ route('schedule.sp-candidates.show', $candidate->id) }}" class="flex items-center justify-between rounded-xl border border-slate-100 p-3 transition hover:bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full {{ $candidate->status === 'resolved_issued' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600' }}">
+                        <i class="fas {{ $candidate->status === 'resolved_issued' ? 'fa-file-signature' : 'fa-circle-check' }} text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-700">{{ $candidate->date->translatedFormat('d M Y') }}</p>
+                        <p class="mt-0.5 text-xs text-slate-400">
+                            {{ $candidate->department?->name ?? '-' }}
+                            @if ($candidate->spLetter)
+                            · SP ke-{{ $candidate->spLetter->sp_number }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $candidate->status === 'resolved_issued' ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700' }}">
+                    {{ $candidate->status === 'resolved_issued' ? 'SP Terbit' : 'Dibatalkan' }}
+                </span>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

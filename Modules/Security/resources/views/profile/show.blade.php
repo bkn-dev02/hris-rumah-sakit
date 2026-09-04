@@ -10,7 +10,7 @@
     @endif
 
     <div class="flex items-center gap-4">
-        <a href="{{ route('security.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-[#dfeee1] bg-[#173f34] hover:bg-[#1f4d3d] transition duration-200 translate-x-0 hover:-translate-x-1">
+        <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('dashboard.index') }}" class="border w-10 h-10 flex items-center justify-center rounded-full border-[#dfeee1] bg-[#173f34] hover:bg-[#1f4d3d] transition duration-200 translate-x-0 hover:-translate-x-1">
             <i class="fa fa-arrow-left text-md text-[#edf5ee]"></i>
         </a>
         <h1 class="text-xl font-semibold text-[#173f34]">Profil Saya</h1>

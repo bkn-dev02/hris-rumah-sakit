@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Modules\Leave\Contracts\Repositories\LeaveTypeRepositoryInterface;
 use Modules\Leave\Contracts\Services\LeaveRequestServiceInterface;
 use Modules\Leave\Models\LeaveRequest;
+use Modules\Leave\DTOs\LeaveRequestData;
+use Modules\Leave\Http\Requests\StoreLeaveRequestRequest;
 
 class LeaveController extends Controller
 {
@@ -41,8 +43,55 @@ class LeaveController extends Controller
         return view('leave::index', compact('leaveRequests', 'leaveTypes', 'statusCounts'));
     }
 
+    public function create(Request $request)
+    {
+        $employee = $request->user()->employee;
+
+        abort_unless($employee, 403, 'Akun Anda tidak terhubung dengan data pegawai.');
+
+        $leaveTypes = $this->leaveRequestService->getLeaveTypesWithQuota($employee);
+
+        return view('leave::create', compact('employee', 'leaveTypes'));
+    }
+
+    public function store(StoreLeaveRequestRequest $request)
+    {
+        $employee = $request->user()->employee;
+
+        abort_unless($employee, 403, 'Akun Anda tidak terhubung dengan data pegawai.');
+
+        $attachmentPath = $request->hasFile('attachment')
+            ? $request->file('attachment')->store('leave/attachments', 'public')
+            : null;
+
+        try {
+            $this->leaveRequestService->submit(new LeaveRequestData(
+                employeeId: $employee->id,
+                leaveTypeId: $request->integer('leave_type_id'),
+                startDate: $request->string('start_date')->toString(),
+                endDate: $request->string('end_date')->toString(),
+                reason: $request->string('reason')->toString(),
+                attachment: $attachmentPath,
+            ));
+        } catch (\RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('leave.index')
+            ->with('success', 'Pengajuan cuti berhasil dikirim.');
+    }
+
     public function show(LeaveRequest $leaveRequest)
     {
+        $roleCodes = Auth::user()->roles()->pluck('code')->all();
+        $isEmployeeOnly = in_array('pegawai', $roleCodes, true)
+            && !array_intersect($roleCodes, ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit']);
+
+        if ($isEmployeeOnly && $leaveRequest->employee_id !== Auth::user()->employee?->id) {
+            abort(404);
+        }
+
         $leaveRequest->load(['employee', 'leaveType', 'approvals.approver']);
 
         $viewer = Auth::user()->employee;

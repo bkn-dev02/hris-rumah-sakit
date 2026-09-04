@@ -5,6 +5,7 @@ namespace Modules\Schedule\Http\Controllers\Web;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Schedule\Contracts\Services\SpCandidateServiceInterface;
+use Modules\Schedule\Models\SpCandidate;
 
 class SpCandidateController extends Controller
 {
@@ -32,7 +33,7 @@ class SpCandidateController extends Controller
             $allCandidates = $this->spCandidateService->getForDepartment($ownDepartment->id);
         }
 
-        $allCandidates->load(['spLetter', 'employee' => fn ($q) => $q->withTrashed()]);
+        $allCandidates->load(['spLetter', 'employee' => fn($q) => $q->withTrashed()]);
 
         $grouped = [
             'action' => $allCandidates->whereIn('status', ['candidate', 'pending_decision'])->values(),
@@ -51,10 +52,21 @@ class SpCandidateController extends Controller
             'cancelled' => $grouped['cancelled']->count(),
         ];
 
+        $personalHistory = collect();
+        if ($actor->roles()->where('code', 'kepala_unit')->exists() && $actor->employee) {
+            $personalHistory = SpCandidate::query()
+                ->where('employee_id', $actor->employee->id)
+                ->whereIn('status', ['resolved_issued', 'cancelled_manual', 'cancelled_late_checkin_decision'])
+                ->with(['spLetter', 'department'])
+                ->latest('updated_at')
+                ->get();
+        }
+
         return view('schedule::sp-candidates.index', [
             'candidates' => $grouped[$tab],
             'counts' => $counts,
             'tab' => $tab,
+            'personalHistory' => $personalHistory,
         ]);
     }
 
@@ -66,7 +78,7 @@ class SpCandidateController extends Controller
             abort(404);
         }
 
-        $candidate->load(['spLetter', 'employee' => fn ($q) => $q->withTrashed()]);
+        $candidate->load(['spLetter', 'employee' => fn($q) => $q->withTrashed()]);
 
         return view('schedule::sp-candidates.show', compact('candidate'));
     }

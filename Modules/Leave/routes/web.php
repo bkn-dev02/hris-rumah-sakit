@@ -13,6 +13,8 @@ Route::middleware(['auth', 'verified'])
         Route::get('/', [DashboardLeaveController::class, 'index'])->name('index');
 
         Route::get('/requests', [LeaveController::class, 'index'])->name('requests.index');
+        Route::get('/requests/create', [LeaveController::class, 'create'])->name('requests.create');
+        Route::post('/requests', [LeaveController::class, 'store'])->name('requests.store');
 
         Route::middleware('permission:leave-types.manage')->group(function () {
             Route::resource('leave-types', LeaveTypeController::class);

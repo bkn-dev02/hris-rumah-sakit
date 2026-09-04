@@ -13,13 +13,33 @@ use Modules\Master\Contracts\Services\EmployeeServiceInterface;
 use Modules\Master\Models\Employee;
 use Modules\Leave\Models\LeaveRequest;
 use Modules\Attendance\Models\CheckIn;
+use Modules\Attendance\Models\AttendanceExceptionRequest;
 use Modules\Schedule\Models\SpCandidate;
+use Modules\Master\Models\Department;
 use Modules\Master\Models\Shift;
 use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
 use Modules\Dashboard\Exceptions\EmployeeNotLinkedException;
 
 class DashboardController extends Controller
 {
+    /**
+     * Role codes yang berhak melihat section organisasi/KPI.
+     */
+    protected const ELEVATED_ROLES = ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit'];
+
+    /**
+     * Urutan tampil section.
+     */
+    protected const SECTION_ORDER = ['pegawai', 'hrd'];
+
+    /**
+     * Pemetaan key section -> partial view yang merendernya.
+     */
+    protected const SECTION_VIEWS = [
+        'pegawai' => 'dashboard::partials.employee-section',
+        'hrd' => 'dashboard::partials.hrd-section',
+    ];
+
     public function __construct(
         protected AttendanceServiceInterface $attendanceService,
         protected EmployeeServiceInterface $employeeService,
@@ -29,120 +49,216 @@ class DashboardController extends Controller
     {
         $actor = $request->user();
 
-        $isPegawai = $actor->roles()
-            ->where('code', 'pegawai')
-            ->exists();
+        // 1 query untuk semua kode role
+        $roleCodes = $actor->roles()->pluck('code')->all();
 
-        if ($isPegawai) {
-            if (!$actor->employee) {
-                $isDeactivated = Employee::onlyTrashed()
-                    ->where('user_id', $actor->id)
-                    ->exists();
+        $built = [];
 
-                if ($isDeactivated) {
-                    throw new EmployeeNotLinkedException(
-                        'Akun Anda telah dinonaktifkan. Jika ini keliru, silakan hubungi Admin atau HRD untuk mengaktifkan kembali.',
-                        'Akun Dinonaktifkan'
-                    );
-                }
-
-                throw new EmployeeNotLinkedException();
-            }
-
-            return $this->employeeDashboard($actor->employee);
+        if (in_array('pegawai', $roleCodes, true) && $actor->employee) {
+            $built['pegawai'] = $this->buildPegawaiSection($actor->employee);
         }
 
+        if (array_intersect($roleCodes, self::ELEVATED_ROLES)) {
+            $built['hrd'] = $this->buildHrdSection($request, $roleCodes);
+        }
 
-        $isElevated = $actor->roles()
-            ->whereIn('code', ['super-admin', 'admin', 'hrd', 'direktur', 'kepala-unit'])
-            ->exists();
+        $sections = [];
+        foreach (self::SECTION_ORDER as $key) {
+            if (isset($built[$key])) {
+                $sections[$key] = $built[$key];
+            }
+        }
 
-        if (!$isElevated) {
-            $isPegawai = $actor->roles()
-                ->where('code', 'pegawai')
+        if (empty($sections)) {
+            $isDeactivated = Employee::onlyTrashed()
+                ->where('user_id', $actor->id)
                 ->exists();
 
-            if ($isPegawai) {
-                return $this->employeeDashboard($actor->employee);
+            if ($isDeactivated) {
+                throw new EmployeeNotLinkedException(
+                    'Akun Anda telah dinonaktifkan. Jika ini keliru, silakan hubungi Admin atau HRD untuk mengaktifkan kembali.',
+                    'Akun Dinonaktifkan'
+                );
             }
 
-            if ($actor->employee) {
-                return $this->personalDashboard($actor->employee);
-            }
+            throw new EmployeeNotLinkedException();
         }
 
-        $summary = $this->attendanceService->todaySummary();
-
-        $stats = [
-            'total' => (int) ($summary['total'] ?? 0),
-            'aktif' => (int) ($summary['aktif'] ?? 0),
-            'nonaktif' => (int) ($summary['nonaktif'] ?? 0),
-            'present' => (int) ($summary['present'] ?? 0),
-            'late' => (int) ($this->lateTodayCount() ?? 0),
-            'absent' => (int) ($summary['absent'] ?? 0),
-            'leave' => (int) ($summary['on_leave'] ?? 0),
-        ];
-
-        $stats['present_pct'] = $stats['total'] > 0 ? round(($stats['present'] / $stats['total']) * 100) : 0;
-        $stats['late_pct'] = $stats['present'] > 0 ? round(($stats['late'] / $stats['present']) * 100) : 0;
-        $stats['absent_pct'] = $stats['total'] > 0 ? round(($stats['absent'] / $stats['total']) * 100) : 0;
-
-        $chartData = $this->buildChartData();
-
-        $departmentDistribution = $this->employeeService->getDepartmentDistribution();
-
-        $recentActivities = $this->buildRecentActivities();
-
-        $quickAccessMenus = $this->buildQuickAccessMenus();
-
-        $pendingLeaveCount = LeaveRequest::query()
-            ->where('status', 'pending')
-            ->count();
-
-        $pendingEmergencyCount = CheckIn::query()
-            ->where('type', 'emergency')
-            ->where('emergency_status', 'pending')
-            ->count();
-
-        $pendingSpCandidateCount = SpCandidate::query()
-            ->whereIn('status', ['candidate', 'pending_decision'])
-            ->count();
-
-        return view('dashboard::index', compact(
-            'stats',
-            'chartData',
-            'departmentDistribution',
-            'recentActivities',
-            'quickAccessMenus',
-            'pendingLeaveCount',
-            'pendingEmergencyCount',
-            'pendingSpCandidateCount',
-        ));
+        return view('dashboard::home', [
+            'sections'     => $sections,
+            'sectionViews' => self::SECTION_VIEWS,
+        ]);
     }
 
-    protected function employeeDashboard($employee)
+    /**
+     * Bangun payload untuk section "pegawai" — ringkasan personal.
+     */
+    protected function buildPegawaiSection(Employee $employee): array
     {
         $today = Carbon::today();
         $tomorrow = Carbon::tomorrow();
 
-        $attendance = $this->attendanceService->todayForDisplay($employee->id);
+        return [
+            'employee'      => $employee,
+            'attendance'    => $this->attendanceService->todayForDisplay($employee->id),
+            'monthlyStats'  => $this->attendanceService->getMonthlyPersonalSummary(
+                $employee->id,
+                $today->year,
+                $today->month
+            ),
+            'todayShift'    => $this->resolveShiftInfo($employee->id, $today),
+            'tomorrowShift' => $this->resolveShiftInfo($employee->id, $tomorrow),
+        ];
+    }
 
-        $monthlyStats = $this->attendanceService->getMonthlyPersonalSummary(
-            $employee->id,
-            $today->year,
-            $today->month
-        );
+    /**
+     * Bangun payload untuk section "hrd" — KPI & ringkasan organisasi.
+     */
+    protected function buildHrdSection(Request $request, array $roleCodes): array
+    {
+        $scope = $this->resolveDepartmentScope($request, $roleCodes);
+        $employeeIds = $scope['employee_ids'];
+        $today = Carbon::today();
 
-        $todayShift = $this->resolveShiftInfo($employee->id, $today);
-        $tomorrowShift = $this->resolveShiftInfo($employee->id, $tomorrow);
+        $total = count($employeeIds);
+        $active = Employee::query()
+            ->whereIn('id', $employeeIds)
+            ->where('is_active', true)
+            ->count();
+        $present = Attendance::query()
+            ->whereIn('employee_id', $employeeIds)
+            ->whereDate('work_date', $today)
+            ->count();
+        $onLeave = AttendanceExceptionRequest::query()
+            ->whereIn('employee_id', $employeeIds)
+            ->whereDate('work_date', $today)
+            ->approved()
+            ->count();
+        $summary = [
+            'total' => $total,
+            'aktif' => $active,
+            'nonaktif' => $total - $active,
+            'present' => $present,
+            'on_leave' => $onLeave,
+            'absent' => max($total - $present - $onLeave, 0),
+        ];
 
-        return view('dashboard::employee.index', [
-            'employee' => $employee,
-            'attendance' => $attendance,
-            'monthlyStats' => $monthlyStats,
-            'todayShift' => $todayShift,
-            'tomorrowShift' => $tomorrowShift,
-        ]);
+        $stats = [
+            'total'    => (int) ($summary['total'] ?? 0),
+            'aktif'    => (int) ($summary['aktif'] ?? 0),
+            'nonaktif' => (int) ($summary['nonaktif'] ?? 0),
+            'present'  => (int) ($summary['present'] ?? 0),
+            'late'     => (int) ($this->lateTodayCount($employeeIds) ?? 0),
+            'absent'   => (int) ($summary['absent'] ?? 0),
+            'leave'    => (int) ($summary['on_leave'] ?? 0),
+        ];
+
+        $stats['present_pct'] = $stats['total'] > 0 ? round(($stats['present'] / $stats['total']) * 100) : 0;
+        $stats['late_pct']    = $stats['present'] > 0 ? round(($stats['late'] / $stats['present']) * 100) : 0;
+        $stats['absent_pct']  = $stats['total'] > 0 ? round(($stats['absent'] / $stats['total']) * 100) : 0;
+
+        return [
+            'stats'                   => $stats,
+            'chartData'               => $this->buildChartData($employeeIds, $scope['is_global']),
+            'departmentDistribution'  => $scope['show_distribution']
+                ? $this->buildDepartmentDistribution($employeeIds)
+                : [],
+            'showDepartmentDistribution' => $scope['show_distribution'],
+            'recentActivities'        => $this->buildRecentActivities($employeeIds),
+            'quickAccessMenus'        => $this->buildQuickAccessMenus(),
+            'pendingLeaveCount'       => LeaveRequest::query()
+                ->whereIn('employee_id', $employeeIds)
+                ->where('status', 'pending')
+                ->count(),
+            'pendingEmergencyCount'   => CheckIn::query()
+                ->whereIn('employee_id', $employeeIds)
+                ->where('type', 'emergency')
+                ->where('emergency_status', 'pending')
+                ->count(),
+            'pendingSpCandidateCount' => SpCandidate::query()
+                ->whereIn('employee_id', $employeeIds)
+                ->whereIn('status', ['candidate', 'pending_decision'])
+                ->count(),
+            'departmentScope'         => $scope['department'],
+        ];
+    }
+
+    protected function resolveDepartmentScope(Request $request, array $roleCodes): array
+    {
+        $isGlobal = count(array_intersect($roleCodes, ['super-admin', 'admin', 'hrd', 'direktur'])) > 0;
+
+        if ($isGlobal) {
+            return [
+                'employee_ids' => Employee::withTrashed()->pluck('id')->all(),
+                'show_distribution' => true,
+                'department' => null,
+                'is_global' => true,
+            ];
+        }
+
+        $department = $request->user()->employee?->currentDepartment();
+
+        if (!$department) {
+            return [
+                'employee_ids' => [],
+                'show_distribution' => false,
+                'department' => null,
+                'is_global' => false,
+            ];
+        }
+
+        $departmentIds = $this->descendantDepartmentIds($department);
+        $employeeIds = Employee::withTrashed()
+            ->whereHas('placements', fn($query) => $query
+                ->active()
+                ->whereIn('department_id', $departmentIds))
+            ->pluck('id')
+            ->all();
+
+        return [
+            'employee_ids' => $employeeIds,
+            'show_distribution' => count($departmentIds) > 1,
+            'department' => $department,
+            'is_global' => false,
+        ];
+    }
+
+    protected function descendantDepartmentIds(Department $department): array
+    {
+        $ids = [$department->id];
+        $children = Department::whereIn('parent_id', $ids)->pluck('id')->all();
+
+        while ($children) {
+            $children = array_values(array_diff($children, $ids));
+            if (!$children) {
+                break;
+            }
+
+            $ids = array_merge($ids, $children);
+            $children = Department::whereIn('parent_id', $children)->pluck('id')->all();
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    protected function buildDepartmentDistribution(array $employeeIds): array
+    {
+        $employees = Employee::query()
+            ->whereIn('id', $employeeIds)
+            ->where('is_active', true)
+            ->get();
+        $total = $employees->count();
+
+        return $employees
+            ->groupBy(fn($employee) => $employee->currentDepartment()?->name ?? 'Belum Ditempatkan')
+            ->map(fn($group, $name) => [
+                'name' => $name,
+                'total' => $group->count(),
+                'percent' => $total > 0 ? round(($group->count() / $total) * 100) . '%' : '0%',
+            ])
+            ->sortByDesc('total')
+            ->values()
+            ->all();
     }
 
     protected function resolveShiftInfo(int $employeeId, Carbon $date): array
@@ -169,20 +285,7 @@ class DashboardController extends Controller
         ];
     }
 
-    protected function personalDashboard(Employee $employee)
-    {
-        $today = $this->attendanceService->todayForDisplay($employee->id);
-        $monthSummary = $this->attendanceService->getMonthlyPersonalSummary($employee->id, now()->year, now()->month);
-
-        return view('dashboard::personal', [
-            'employee' => $employee,
-            'today' => $today,
-            'monthSummary' => $monthSummary,
-            'monthLabel' => now()->translatedFormat('F Y'),
-        ]);
-    }
-
-    protected function buildChartData(): array
+    protected function buildChartData(array $employeeIds, bool $isGlobal): array
     {
         $base = [
             ['day' => 'Sen', 'height' => '70%', 'value' => '980'],
@@ -200,7 +303,10 @@ class DashboardController extends Controller
 
         for ($i = 6; $i >= 0; $i--) {
             $date = $today->copy()->subDays($i);
-            $count = Attendance::query()->whereDate('work_date', $date)->count();
+            $count = Attendance::query()
+                ->whereIn('employee_id', $employeeIds)
+                ->whereDate('work_date', $date)
+                ->count();
             $days[] = [
                 'day' => $date->translatedFormat('D'),
                 'value' => (int) $count,
@@ -211,7 +317,11 @@ class DashboardController extends Controller
         $hasRealData = collect($days)->contains(fn($item) => (int) $item['value'] > 0);
 
         if (! $hasRealData) {
-            return $base;
+            return $isGlobal ? $base : collect($days)->map(fn($item) => [
+                'day' => $item['day'],
+                'height' => '18%',
+                'value' => '0',
+            ])->all();
         }
 
         $realChart = [];
@@ -229,9 +339,10 @@ class DashboardController extends Controller
         return $realChart;
     }
 
-    protected function lateTodayCount(): ?int
+    protected function lateTodayCount(array $employeeIds): ?int
     {
         $late = Attendance::query()
+            ->whereIn('employee_id', $employeeIds)
             ->whereDate('work_date', today())
             ->whereNotNull('attendance_status_id')
             ->whereHas('status', fn($query) => $query->where('code', 'TERLAMBAT'))
@@ -240,11 +351,12 @@ class DashboardController extends Controller
         return $late > 0 ? $late : null;
     }
 
-    protected function buildRecentActivities(int $limit = 10): array
+    protected function buildRecentActivities(array $employeeIds, int $limit = 10): array
     {
         $activities = collect();
 
         Employee::query()
+            ->whereIn('id', $employeeIds)
             ->latest('created_at')
             ->limit(5)
             ->get()
@@ -260,6 +372,7 @@ class DashboardController extends Controller
 
         LeaveRequest::query()
             ->with(['employee' => fn($q) => $q->withTrashed()])
+            ->whereIn('employee_id', $employeeIds)
             ->whereIn('status', ['approved', 'rejected'])
             ->latest('updated_at')
             ->limit(5)
@@ -277,6 +390,7 @@ class DashboardController extends Controller
 
         CheckIn::query()
             ->with(['employee' => fn($q) => $q->withTrashed()])
+            ->whereIn('employee_id', $employeeIds)
             ->where('type', 'emergency')
             ->latest('updated_at')
             ->limit(5)
@@ -300,6 +414,7 @@ class DashboardController extends Controller
 
         SpCandidate::query()
             ->with(['employee' => fn($q) => $q->withTrashed()])
+            ->whereIn('employee_id', $employeeIds)
             ->latest('updated_at')
             ->limit(5)
             ->get()

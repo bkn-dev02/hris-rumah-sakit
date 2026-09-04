@@ -13,6 +13,7 @@ use Modules\Master\Contracts\Services\EmploymentStatusServiceInterface;
 use Modules\Master\DTOs\EmployeeData;
 use Modules\Security\Services\UserService;
 use Modules\Master\Models\Employee;
+use Modules\Master\Models\Department;
 use Modules\Leave\Contracts\Repositories\LeaveTypeRepositoryInterface;
 use Modules\Leave\Contracts\Repositories\EmployeeLeaveQuotaRepositoryInterface;
 use Modules\Leave\Contracts\Repositories\LeaveRequestRepositoryInterface;
@@ -30,13 +31,50 @@ class EmployeeController extends Controller
 
     public function index(Request $request)
     {
-        $employees = $this->employeeService->paginate(10, trashed: $request->boolean('trashed'));
+        $employees = $this->employeeService->paginate(
+            10,
+            trashed: $request->boolean('trashed'),
+            departmentIds: $this->resolveDepartmentScope($request)
+        );
         $attendanceLocations = AttendanceLocation::query()
             ->active()
             ->orderBy('name')
             ->get();
 
         return view('master::employees.index', compact('employees', 'attendanceLocations'));
+    }
+
+    protected function resolveDepartmentScope(Request $request): ?array
+    {
+        $isGlobalRole = $request->user()
+            ->roles()
+            ->whereIn('code', ['super-admin', 'admin', 'hrd', 'direktur'])
+            ->exists();
+
+        if ($isGlobalRole) {
+            return null;
+        }
+
+        $department = $request->user()->employee?->currentDepartment();
+
+        if (!$department) {
+            return [0];
+        }
+
+        $departmentIds = [$department->id];
+        $children = Department::whereIn('parent_id', $departmentIds)->pluck('id')->all();
+
+        while ($children) {
+            $children = array_values(array_diff($children, $departmentIds));
+            if (!$children) {
+                break;
+            }
+
+            $departmentIds = array_merge($departmentIds, $children);
+            $children = Department::whereIn('parent_id', $children)->pluck('id')->all();
+        }
+
+        return array_values(array_unique($departmentIds));
     }
 
     public function create()

@@ -8,6 +8,16 @@ class SidebarComposer
 {
     public function compose(View $view): void
     {
+        $roleCodes = request()->user()?->roles()->pluck('code')->all() ?? [];
+        $canViewMaster = (bool) array_intersect(
+            $roleCodes,
+            ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit']
+        );
+        $canViewRestrictedMaster = (bool) array_intersect(
+            $roleCodes,
+            ['super-admin', 'admin', 'hrd', 'direktur']
+        );
+
         $menus = [
             [
                 'label' => 'Dashboard',
@@ -183,6 +193,125 @@ class SidebarComposer
                 ],
             ],
         ];
+
+        if (!$canViewMaster) {
+            $menus = collect($menus)
+                ->reject(fn($menu) => $menu['label'] === 'Data Masters')
+                ->values()
+                ->all();
+        }
+
+        if (!$canViewRestrictedMaster) {
+            $menus = collect($menus)
+                ->map(function ($menu) {
+                    if ($menu['label'] === 'Data Masters') {
+                        $menu['children'] = collect($menu['children'])
+                            ->reject(fn($child) => in_array($child['label'], [
+                                'Manajemen Department',
+                                'Manajemen Position',
+                                'Status Kepegawaian',
+                            ], true))
+                            ->values()
+                            ->all();
+                    }
+
+                    if ($menu['label'] === 'Attendance') {
+                        $menu['children'] = collect($menu['children'])
+                            ->reject(fn($child) => in_array($child['label'], [
+                                'Lokasi Absensi',
+                                'Pengajuan',
+                                'Status Kehadiran',
+                            ], true))
+                            ->values()
+                            ->all();
+                    }
+
+                    if ($menu['label'] === 'Manajemen Cuti') {
+                        $menu['children'] = collect($menu['children'])
+                            ->reject(fn($child) => $child['label'] === 'Jenis Cuti')
+                            ->values()
+                            ->all();
+                    }
+
+                    if (!in_array($menu['label'], ['Data Masters', 'Attendance', 'Manajemen Cuti'], true)) {
+                        return $menu;
+                    }
+
+                    return $menu;
+                })
+                ->all();
+        }
+
+        $isEmployeeOnly = in_array('pegawai', $roleCodes, true)
+            && !array_intersect($roleCodes, [
+                'super-admin',
+                'admin',
+                'hrd',
+                'direktur',
+                'kepala_unit',
+            ]);
+
+        if ($isEmployeeOnly) {
+            $menus = collect($menus)
+                ->map(function ($menu) {
+                    if ($menu['label'] !== 'Attendance') {
+                        return $menu;
+                    }
+
+                    return [
+                        'label' => 'Riwayat Absensi',
+                        'icon' => 'fa-solid fa-clock-rotate-left',
+                        'route' => 'attendance.attendances.history',
+                        'active' => ['attendance.attendances.history'],
+                    ];
+                })
+                ->all();
+
+            $menus = collect($menus)
+                ->map(function ($menu) {
+                    if ($menu['label'] !== 'Jadwal & SP') {
+                        return $menu;
+                    }
+
+                    return [
+                        'label' => 'Jadwal Saya',
+                        'icon' => 'fa-solid fa-calendar-days',
+                        'route' => 'schedule.monthly-grid.personal',
+                        'active' => ['schedule.monthly-grid.personal'],
+                    ];
+                })
+                ->all();
+
+            $menus = collect($menus)
+                ->map(function ($menu) {
+                    if ($menu['label'] !== 'Manajemen Cuti') {
+                        return $menu;
+                    }
+
+                    return [
+                        'label' => 'Riwayat Cuti',
+                        'icon' => 'fa-solid fa-calendar-days',
+                        'route' => 'leave.index',
+                        'active' => ['leave.index'],
+                    ];
+                })
+                ->all();
+
+            $menus = collect($menus)
+                ->map(function ($menu) {
+                    if ($menu['label'] !== 'Security & Account') {
+                        return $menu;
+                    }
+
+                    return [
+                        'label' => 'Profil Saya',
+                        'icon' => 'fa-solid fa-user-pen',
+                        'route' => 'profile.show',
+                        'active' => ['profile.*'],
+                    ];
+                })
+                ->all();
+        }
 
         $openMenu = collect($menus)->first(function ($menu) {
             if (!isset($menu['children'])) {

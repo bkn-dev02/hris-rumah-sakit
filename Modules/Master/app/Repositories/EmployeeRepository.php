@@ -34,11 +34,17 @@ class EmployeeRepository implements EmployeeRepositoryInterface
         ];
     }
 
-    public function paginate(int $perPage = 10, bool $trashed = false): LengthAwarePaginator
+    public function paginate(int $perPage = 10, bool $trashed = false, ?array $departmentIds = null): LengthAwarePaginator
     {
         return $this->model
             ->with(['employmentStatus', 'user', 'placements.position'])
             ->when($trashed, fn($query) => $query->onlyTrashed())
+            ->when($departmentIds !== null, fn($query) => $query->whereHas(
+                'placements',
+                fn($placementQuery) => $placementQuery
+                    ->active()
+                    ->whereIn('department_id', $departmentIds)
+            ))
             ->orderBy('name')
             ->paginate($perPage);
     }

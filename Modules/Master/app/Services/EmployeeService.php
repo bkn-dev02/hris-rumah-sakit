@@ -28,9 +28,9 @@ class EmployeeService implements EmployeeServiceInterface
         return $this->employeeRepository->getActiveInactiveCounts();
     }
 
-    public function paginate(int $perPage = 10, bool $trashed = false): LengthAwarePaginator
+    public function paginate(int $perPage = 10, bool $trashed = false, ?array $departmentIds = null): LengthAwarePaginator
     {
-        return $this->employeeRepository->paginate($perPage, $trashed);
+        return $this->employeeRepository->paginate($perPage, $trashed, $departmentIds);
     }
 
     public function findBySlug(string $slug, bool $withTrashed = false): Employee
