@@ -47,7 +47,37 @@
         </form>
     </div>
 
-    <div class="bg-white rounded-b-2xl shadow-md overflow-x-auto">
+    @if ($personalSchedule)
+    <div class="mt-4 rounded-2xl border border-[#dfeee1] bg-white p-5 shadow-xl">
+        <div class="mb-4 flex items-center gap-2">
+            <i class="fas fa-user-clock text-[#2a684f]"></i>
+            <div>
+                <h2 class="font-semibold text-[#173f34]">Jadwal Saya</h2>
+                <p class="mt-1 text-xs text-slate-500">Jadwal pribadi kepala unit pada bulan ini</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-7">
+            @foreach ($personalSchedule as $entry)
+            <div class="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 {{ \Carbon\Carbon::parse($entry['date'])->isWeekend() ? 'bg-slate-50' : 'bg-white' }}">
+                <div>
+                    <p class="text-xs font-semibold text-slate-700">{{ \Carbon\Carbon::parse($entry['date'])->translatedFormat('D, d M') }}</p>
+                    @if ($entry['is_libur'])
+                    <p class="mt-0.5 text-xs text-slate-500">Libur</p>
+                    @elseif ($entry['shift'])
+                    <p class="mt-0.5 text-xs text-[#567564]">{{ $entry['shift']['name'] }} · {{ $entry['shift']['start_time'] }}-{{ $entry['shift']['end_time'] }}</p>
+                    @else
+                    <p class="mt-0.5 text-xs text-slate-400">Belum diatur</p>
+                    @endif
+                </div>
+                <i class="fas {{ $entry['is_libur'] ? 'fa-mug-hot text-slate-400' : ($entry['shift'] ? 'fa-clock text-[#2a684f]' : 'fa-minus text-slate-300') }} text-xs"></i>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    <div class="bg-white rounded-2xl shadow-xl overflow-x-auto mt-4">
         @if (!$departmentId)
         <div class="p-10 text-center text-slate-400">
             <i class="fas fa-building text-3xl mb-3"></i>
@@ -59,38 +89,40 @@
             <p>Tidak ada pegawai aktif di departemen ini.</p>
         </div>
         @else
-        <table class="text-xs">
-            <thead>
-                <tr class="border-b border-slate-100">
-                    <th class="text-left px-4 py-3 font-medium text-slate-500 sticky left-0 bg-white z-10 min-w-[160px]">Pegawai</th>
-                    @foreach ($dates as $date)
-                    <th class="px-1 py-3 font-medium text-slate-400 text-center w-8 {{ $date->isWeekend() ? 'bg-slate-50' : '' }}">
-                        {{ $date->format('d') }}
-                    </th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($employees as $employee)
-                <tr class="border-b border-slate-50 hover:bg-[#f8fbf8]/40 transition">
-                    <td class="px-4 py-2 font-medium text-slate-700 whitespace-nowrap sticky left-0 bg-white">
-                        {{ $employee->name }}
-                    </td>
-                    @foreach ($dates as $date)
-                    @php
-                    $entry = $scheduleMap[$employee->id][$date->toDateString()] ?? null;
-                    $label = $entry
-                    ? ($entry['type'] === 'libur' ? 'L' : $entry['shift_label'])
-                    : '-';
-                    @endphp
-                    <td class="px-1 py-2 text-center {{ $date->isWeekend() ? 'bg-slate-50' : '' }} {{ $label === '-' ? 'text-slate-300' : 'text-slate-700 font-medium' }}">
-                        {{ $label }}
-                    </td>
-                    @endforeach
-                </tr>
+        @php
+        $gridTemplateColumns = '180px repeat(' . $dates->count() . ', 40px)';
+        @endphp
+        <div class="w-max min-w-full text-xs">
+            <div class="grid border-b border-slate-100 bg-white" style="grid-template-columns: {{ $gridTemplateColumns }}">
+                <div class="sticky left-0 z-10 w-[180px] bg-white px-4 py-3 text-left font-medium text-slate-500">Pegawai</div>
+                @foreach ($dates as $date)
+                <div class="px-1 py-3 text-center font-medium text-slate-400 {{ $date->isWeekend() ? 'bg-slate-50' : '' }}">
+                    {{ $date->format('d') }}
+                </div>
                 @endforeach
-            </tbody>
-        </table>
+            </div>
+
+            @foreach ($employees as $employee)
+            <div class="grid border-b border-slate-50 transition hover:bg-[#f8fbf8]/40" style="grid-template-columns: {{ $gridTemplateColumns }}">
+                <div class="sticky left-0 z-10 w-[180px] min-w-0 bg-white px-4 py-2 font-medium text-slate-700">
+                    <span class="block truncate" title="{{ $employee->name }}">
+                        {{ $employee->name }}
+                    </span>
+                </div>
+                @foreach ($dates as $date)
+                @php
+                $entry = $scheduleMap[$employee->id][$date->toDateString()] ?? null;
+                $label = $entry
+                ? ($entry['type'] === 'libur' ? 'L' : $entry['shift_label'])
+                : '-';
+                @endphp
+                <div class="px-1 py-2 text-center {{ $date->isWeekend() ? 'bg-slate-50' : '' }} {{ $label === '-' ? 'text-slate-300' : 'font-medium text-slate-700' }}">
+                    {{ $label }}
+                </div>
+                @endforeach
+            </div>
+            @endforeach
+        </div>
         @endif
     </div>
 </div>

@@ -1,16 +1,12 @@
-@extends('shared::layouts.app')
-
-@section('title', 'Dashboard Page')
-
-@section('content')
 <div class="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8">
-    <div class="bg-[#edf5ee] p-4 rounded-xl shadow-sm mb-6">
-        <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <h1 class="text-2xl font-bold tracking-tight text-[#1f4d3d]">
-                Dashboard
-            </h1>
-        </div>
+    @if ($departmentScope)
+    <div class="mb-6 rounded-xl border border-[#dfeee1] bg-[#f8fbf8] px-5 py-4">
+        <p class="text-xs font-semibold uppercase tracking-wide text-[#6c877d]">Cakupan dashboard</p>
+        <p class="mt-1 font-semibold text-[#1f4d3d]">{{ $departmentScope->name }} dan seluruh department di bawahnya</p>
+    </div>
+    @endif
 
+    <div class="bg-[#edf5ee] p-4 rounded-xl shadow-sm mb-6">
         <div class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 
             {{-- Total Employees --}}
@@ -30,7 +26,6 @@
                     <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#dfeee1] text-[#1f4d3d]">
                         <i class="fa-solid fa-users text-lg"></i>
                     </div>
-
                 </div>
             </div>
 
@@ -303,8 +298,9 @@
         </div>
     </div>
 
-    <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+    <div class="mt-6 grid grid-cols-1 gap-6 {{ $showDepartmentDistribution ? 'xl:grid-cols-2' : '' }}">
 
+        @if ($showDepartmentDistribution)
         <div class="rounded-xl border border-[#dfeee1] bg-white shadow-sm">
 
             <div class="border-b border-[#edf5ee] px-6 py-5">
@@ -352,6 +348,7 @@
             </div>
 
         </div>
+        @endif
 
         <div class="rounded-xl border border-[#dfeee1] bg-white shadow-sm">
             <div class="flex items-center justify-between border-b border-[#edf5ee] px-6 py-5">
@@ -407,4 +404,3 @@
     </div>
 
 </div>
-@endsection

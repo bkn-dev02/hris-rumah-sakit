@@ -1,9 +1,4 @@
-@extends('shared::layouts.app')
-
-@section('title', 'Dashboard Pegawai')
-
-@section('content')
-<div class="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8">
+<div class="mx-auto max-w-7xl px-3 pt-4 sm:px-6 sm:pt-8">
 
     {{-- ================= HEADER GREETING ================= --}}
     <div class="mb-5 rounded-2xl bg-gradient-to-br from-[#042A22] via-[#0F5C48] to-[#1B7A5C] p-5 text-white shadow-sm sm:p-6">
@@ -32,7 +27,7 @@
                 <span class="text-xs font-semibold text-slate-700">Presensi Darurat</span>
             </a>
 
-            <a href="#" class="flex flex-col items-center gap-2 rounded-xl border border-slate-100 p-3 text-center transition hover:border-[#A9C23F] hover:bg-[#A9C23F]/5">
+            <a href="{{ route('leave.requests.create') }}" class="flex flex-col items-center gap-2 rounded-xl border border-slate-100 p-3 text-center transition hover:border-[#A9C23F] hover:bg-[#A9C23F]/5">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#0F5C48]/10 text-[#0F5C48]">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3-15H6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 006 21h12a2.25 2.25 0 002.25-2.25V8.25L15 3z" />
@@ -41,7 +36,12 @@
                 <span class="text-xs font-semibold text-slate-700">Ajukan Cuti</span>
             </a>
 
-            <a href="#" class="flex flex-col items-center gap-2 rounded-xl border border-slate-100 p-3 text-center transition hover:border-[#A9C23F] hover:bg-[#A9C23F]/5">
+            @php
+            $monthlyScheduleRoute = auth()->user()->roles()->where('code', 'kepala_unit')->exists()
+            ? route('schedule.monthly-grid.index')
+            : route('schedule.monthly-grid.personal');
+            @endphp
+            <a href="{{ $monthlyScheduleRoute }}" class="flex flex-col items-center gap-2 rounded-xl border border-slate-100 p-3 text-center transition hover:border-[#A9C23F] hover:bg-[#A9C23F]/5">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#A9C23F]/15 text-[#6B8E2F]">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -198,4 +198,3 @@
     </div>
 
 </div>
-@endsection

@@ -38,6 +38,8 @@ Route::prefix('schedule')->name('schedule.')->middleware(['auth'])->group(functi
     });
 
     Route::prefix('monthly-grid')->name('monthly-grid.')->group(function () {
+        Route::get('/personal', [MonthlyGridController::class, 'personal'])
+            ->name('personal');
         Route::get('/', [MonthlyGridController::class, 'index'])
             ->name('index')
             ->middleware('permission:schedule.view');

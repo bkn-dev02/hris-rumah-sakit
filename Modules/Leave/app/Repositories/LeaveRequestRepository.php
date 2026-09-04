@@ -15,7 +15,7 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
     {
         return LeaveRequest::query()
             ->where('employee_id', $employeeId)
-            ->with('approvals.approver')
+            ->with(['leaveType', 'approvals.approver'])
             ->orderByDesc('created_at')
             ->get();
     }

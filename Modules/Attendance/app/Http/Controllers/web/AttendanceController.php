@@ -29,6 +29,14 @@ class AttendanceController extends Controller
         return view('attendance::attendances.index', compact('attendances', 'statuses'));
     }
 
+    public function personalHistory(Request $request)
+    {
+        $employeeId = $this->resolveEmployeeId($request);
+        $history = $this->attendanceService->historyForDisplay($employeeId);
+
+        return view('attendance::attendances.personal-history', compact('history'));
+    }
+
     public function show(int $attendance)
     {
         $attendance = $this->attendanceService->findById($attendance);

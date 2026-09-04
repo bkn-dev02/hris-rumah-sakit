@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])
             ->controller(AttendanceController::class)
             ->group(function () {
                 Route::get('/', 'index')->name('index');
+                Route::get('/history', 'personalHistory')->name('history');
                 Route::get('/{attendance}', 'show')->name('show')->middleware('permission:attendances.view');
                 Route::post('/{attendance}/correct', 'correctStatus')->name('correct')->middleware('permission:attendances.correct');
             });

@@ -17,6 +17,13 @@
                 <i class="fa-solid fa-file-signature text-xs"></i>
                 Pengajuan Cuti
             </a>
+            @if ($employee)
+            <a href="{{ route('leave.requests.create') }}"
+                class="inline-flex items-center gap-2 rounded-lg bg-[#1f4d3d] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#173f34]">
+                <i class="fa-solid fa-plus text-xs"></i>
+                Ajukan Cuti
+            </a>
+            @endif
             <a href="{{ route('leave.leave-types.index') }}"
                 class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-[#173f34] shadow-sm transition hover:bg-[#f8fbf8]">
                 <i class="fa-solid fa-list-ul text-xs"></i>
@@ -24,6 +31,37 @@
             </a>
         </div>
     </div>
+
+    @if ($employee)
+    <div class="mb-6 rounded-xl border border-[#dfeee1] bg-white p-5 shadow-sm">
+        <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+                <h2 class="text-sm font-bold text-[#173f34]">Riwayat Cuti Saya</h2>
+                <p class="mt-1 text-xs text-slate-500">Pantau status pengajuan cuti Anda</p>
+            </div>
+            <a href="{{ route('leave.requests.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#edf5ee] px-3 py-2 text-xs font-semibold text-[#1f4d3d] transition hover:bg-[#dfeee1]">
+                <i class="fa-solid fa-file-signature"></i>
+                Ajukan Cuti
+            </a>
+        </div>
+
+        <div class="space-y-2">
+            @forelse ($personalLeaveRequests as $leaveRequest)
+            <a href="{{ route('leave.show', $leaveRequest) }}" class="flex flex-col gap-2 rounded-lg border border-[#dfeee1] p-3 transition hover:bg-[#f8fbf8] sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-[#173f34]">{{ $leaveRequest->leaveType?->name ?? 'Jenis cuti' }}</p>
+                    <p class="mt-1 text-xs text-slate-500">{{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }} · {{ $leaveRequest->total_days }} hari kerja</p>
+                </div>
+                <span class="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold {{ $leaveRequest->status === 'approved' ? 'bg-emerald-50 text-emerald-700' : ($leaveRequest->status === 'rejected' ? 'bg-rose-50 text-rose-700' : ($leaveRequest->status === 'cancelled' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-700')) }}">
+                    {{ $leaveRequest->statusLabel() }}
+                </span>
+            </a>
+            @empty
+            <p class="py-4 text-center text-sm text-slate-400">Belum ada riwayat cuti Anda.</p>
+            @endforelse
+        </div>
+    </div>
+    @endif
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
         <div class="rounded-xl border border-[#dfeee1] bg-white p-5 shadow-sm">
