@@ -57,7 +57,7 @@
             @if ($needsDecision->isNotEmpty())
             <div class="text-xs font-semibold text-violet-700 mb-2 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span>
-                MENUNGGU KEPUTUSAN ANDA â€” {{ $needsDecision->count() }}
+                MENUNGGU KEPUTUSAN ANDA  <span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span> {{ $needsDecision->count() }}
             </div>
             <div class="space-y-2 mb-5">
                 @foreach ($needsDecision as $candidate)
@@ -105,7 +105,7 @@
             @if ($needsInfo->isNotEmpty())
             <div class="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                BELUM ADA KABAR â€” {{ $needsInfo->count() }}
+                BELUM ADA KABAR <span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span> {{ $needsInfo->count() }}
             </div>
             <div class="space-y-2">
                 @foreach ($needsInfo as $candidate)
@@ -118,7 +118,7 @@
                         <div>
                             <div class="font-medium text-slate-700 text-sm">{{ $candidate->employee->name }}</div>
                             <div class="text-xs text-slate-400">
-                                {{ $candidate->department->name }} Â· {{ $candidate->date->translatedFormat('d M') }} Â· {{ $candidate->shift->name }}
+                                {{ $candidate->department->name }} · {{ $candidate->date->translatedFormat('d M') }} · {{ $candidate->shift->name }}
                             </div>
                         </div>
                     </div>

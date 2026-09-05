@@ -26,6 +26,8 @@ class Shift extends Model
             'effective_date' => 'date',
             'end_date' => 'date',
             'is_active' => 'boolean',
+            'start_time' => 'datetime:H:i:s',
+            'end_time' => 'datetime:H:i:s',
         ];
     }
 
@@ -47,6 +49,6 @@ class Shift extends Model
             return strtoupper(substr($this->name, 0, 1));
         }
 
-        return strtoupper(implode('', array_map(fn ($w) => substr($w, 0, 1), $words)));
+        return strtoupper(implode('', array_map(fn($w) => substr($w, 0, 1), $words)));
     }
 }
