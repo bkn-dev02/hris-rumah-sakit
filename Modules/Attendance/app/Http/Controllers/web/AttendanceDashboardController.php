@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Modules\Attendance\Contracts\Services\AttendanceServiceInterface;
 use Modules\Master\Models\Department;
 use Modules\Master\Models\Employee;
+use Modules\Master\Models\Shift;
 use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
 
 class AttendanceDashboardController extends Controller
@@ -22,7 +23,7 @@ class AttendanceDashboardController extends Controller
         $summary = $this->attendanceService->todaySummary();
         $recentAttendances = $this->attendanceService->recentTodayForDisplay();
 
-        [$expectedToday, $showFilter, $departmentsForFilter, $departmentId] = $this->buildExpectedTodaySections($request);
+        [$expectedToday, $showFilter, $departmentsForFilter, $departmentId, $isGlobalRole] = $this->buildExpectedTodaySections($request);
 
         return view('attendance::index', compact(
             'summary',
@@ -30,7 +31,8 @@ class AttendanceDashboardController extends Controller
             'expectedToday',
             'showFilter',
             'departmentsForFilter',
-            'departmentId'
+            'departmentId',
+            'isGlobalRole'
         ));
     }
 
@@ -39,16 +41,18 @@ class AttendanceDashboardController extends Controller
         $actor = $request->user();
 
         $isGlobalRole = $actor->roles()
-            ->whereIn('code', ['super-admin', 'hrd', 'direktur'])
+            ->whereIn('code', ['super-admin', 'admin', 'hrd', 'direktur'])
             ->exists();
 
         $showFilter = true;
         $departmentsForFilter = collect();
         $departmentId = null;
+        $departmentScope = null;
 
         if ($isGlobalRole) {
-            $departmentId = $request->integer('department_id');
+            $departmentId = $request->integer('department_id') ?: null;
             $departmentsForFilter = Department::orderBy('name')->get();
+            $departmentScope = $departmentId ? [$departmentId] : null;
         } else {
             $ownDepartment = $actor->employee?->currentDepartment();
 
@@ -66,18 +70,27 @@ class AttendanceDashboardController extends Controller
                     $departmentId = $ownDepartment->id;
                     $departmentsForFilter = collect([$ownDepartment]);
                 }
+
+                $departmentScope = [$departmentId];
             }
         }
 
         $expectedToday = collect();
 
-        if ($departmentId) {
-            $employees = Employee::whereHas('placements', function ($query) use ($departmentId) {
-                $query->active()->where('department_id', $departmentId);
-            })
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->get();
+        if ($isGlobalRole || $departmentId) {
+            $employeesQuery = Employee::query()->where('is_active', true);
+
+            if ($departmentScope) {
+                $employeesQuery->whereHas('placements', function ($query) use ($departmentScope) {
+                    $query->active()->whereIn('department_id', $departmentScope);
+                });
+            } else {
+                $employeesQuery->whereHas('placements', function ($query) {
+                    $query->active();
+                });
+            }
+
+            $employees = $employeesQuery->orderBy('name')->get();
 
             $today = Carbon::today();
             $checkInTimes = $this->attendanceService->getCheckInTimesForEmployeesToday($employees->pluck('id')->toArray());
@@ -91,7 +104,7 @@ class AttendanceDashboardController extends Controller
                     continue;
                 }
 
-                $shift = \Modules\Master\Models\Shift::find($resolved['shift_id']);
+                $shift = Shift::find($resolved['shift_id']);
                 if (!$shift) {
                     continue;
                 }
@@ -119,6 +132,6 @@ class AttendanceDashboardController extends Controller
                 ->values();
         }
 
-        return [$expectedToday, $showFilter, $departmentsForFilter, $departmentId];
+        return [$expectedToday, $showFilter, $departmentsForFilter, $departmentId, $isGlobalRole];
     }
 }

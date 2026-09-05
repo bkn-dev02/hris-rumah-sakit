@@ -10,6 +10,7 @@ use Modules\Attendance\Contracts\Services\CheckOutServiceInterface;
 use Modules\Attendance\Exceptions\AttendanceException;
 use Modules\Attendance\Http\Requests\Api\StoreCheckOutRequest;
 use Modules\Shared\Traits\ApiResponse;
+use Modules\Attendance\Models\AttendanceLocation;
 
 class AttendanceController extends Controller
 {
@@ -65,20 +66,20 @@ class AttendanceController extends Controller
         try {
             $attendance = DB::transaction(function () use ($request, $employeeId) {
                 $photoPath = $request->file('photo')->store('attendance/check-outs', 'public');
-                $location = \Modules\Attendance\Models\AttendanceLocation::findOrFail($request->location_id);
+                $location = AttendanceLocation::findOrFail($request->location_id);
                 $distance = $location->distanceTo((float) $request->latitude, (float) $request->longitude);
 
                 $checkOut = $this->checkOutService->create([
-                    'employee_id'     => $employeeId,
-                    'checked_at'      => now(),
-                    'latitude'        => $request->latitude,
-                    'longitude'       => $request->longitude,
-                    'photo'           => $photoPath,
-                    'location_id'     => $request->location_id,
+                    'employee_id' => $employeeId,
+                    'checked_at' => now(),
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'photo' => $photoPath,
+                    'location_id' => $request->location_id,
                     'distance_meters' => (int) $distance,
-                    'ip'              => $request->ip(),
-                    'device'          => $request->userAgent(),
-                    'note'            => $request->note,
+                    'ip' => $request->ip(),
+                    'device' => $request->userAgent(),
+                    'note' => $request->note,
                 ]);
 
                 return $this->attendanceService->checkOut($employeeId, $checkOut->id);
@@ -93,7 +94,7 @@ class AttendanceController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Check-out berhasil.',
-            'data'    => $attendance->load(['shift', 'checkIn', 'checkOut', 'status']),
+            'data' => $attendance->load(['shift', 'checkIn', 'checkOut', 'status']),
         ], 201);
     }
 

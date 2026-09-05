@@ -118,125 +118,6 @@
         </div>
     </div>
 
-    {{-- Attendance List --}}
-    <!-- <div class="space-y-2 bg-[#edf5ee] mt-4 p-4 rounded-lg">
-        <div class="hidden lg:grid lg:grid-cols-12 lg:items-center rounded-lg bg-gradient-to-r from-[#173f34] to-[#2a684f] px-6 py-4 shadow-md">
-
-            <div class="col-span-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
-                <i class="fa-solid fa-user"></i>
-                <span>Info Karyawan</span>
-            </div>
-
-            <div class="col-span-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
-                <i class="fa-solid fa-clock"></i>
-                <span>Shift</span>
-            </div>
-
-            <div class="col-span-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
-                <i class="fa-solid fa-right-to-bracket"></i>
-                <span>Jam Masuk</span>
-            </div>
-
-            <div class="col-span-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Jam Pulang</span>
-            </div>
-
-            <div class="col-span-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>Status Absensi</span>
-            </div>
-
-            <div class="col-span-1 text-end text-sm font-semibold uppercase tracking-wider text-white">
-                <i class="fa-solid fa-gear"></i>
-                Action
-            </div>
-
-        </div>
-
-        @forelse($recentAttendances as $attendance)
-        <div class="rounded-xl border border-[#dfeee1] bg-white p-4 shadow-sm transition hover:border-[#dfeee1] hover:shadow-md">
-            <div class="flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:items-center">
-
-                <div class="flex items-center gap-3 lg:col-span-3">
-                    <div>
-                        <p class="font-semibold text-[#173f34]">{{ $attendance['employee_name'] }}</p>
-                        <p class="text-xs text-gray-500">{{ $attendance['employee_position_name'] }}</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 lg:col-span-2">
-                    <div>
-                        <p class="font-bold uppercase text-[#173f34] text-xs">{{ $attendance['shift_name'] }}</p>
-                        <p class="text-xs text-gray-500">({{ $attendance['start_time'] }} - {{ $attendance['end_time'] }})</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 lg:col-span-2">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf5ee] text-[#173f34] ring-2 ring-sky-500 overflow-hidden">
-                        @if($attendance['check_in_photo_url'])
-                        <img src="{{ $attendance['check_in_photo_url'] }}" alt="Foto check-in" class="h-full w-full object-cover">
-                        @else
-                        <i class="fa-solid fa-right-to-bracket text-sm"></i>
-                        @endif
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium uppercase text-gray-400">Check In</p>
-                        <div class="flex text-[#1f4d3d] items-center gap-1">
-                            <i class="fa-solid fa-clock"></i>
-                            <p class="font-semibold">{{ $attendance['check_in_time'] }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 lg:col-span-2">
-                    @if($attendance['check_out_time'])
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf5ee] text-[#173f34] ring-2 ring-sky-500 overflow-hidden">
-                        @if($attendance['check_out_photo_url'])
-                        <img src="{{ $attendance['check_out_photo_url'] }}" alt="Foto check-out" class="h-full w-full object-cover">
-                        @else
-                        <i class="fa-solid fa-right-to-bracket text-sm"></i>
-                        @endif
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium uppercase text-gray-400">Check Out</p>
-                        <p class="font-semibold text-gray-800">{{ $attendance['check_out_time'] }}</p>
-                    </div>
-                    @else
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium uppercase text-gray-400">Check Out</p>
-                        <p class="font-semibold text-gray-400">-</p>
-                    </div>
-                    @endif
-                </div>
-
-                <div class="lg:col-span-2">
-                    <span class="inline-flex items-center rounded-full bg-{{ $attendance['badge_color'] }}-100 px-3 py-1 text-xs font-semibold text-{{ $attendance['badge_color'] }}-700">
-                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-{{ $attendance['badge_color'] }}-500"></span>
-                        {{ $attendance['badge_label'] }}
-                    </span>
-                </div>
-
-                <div class="lg:col-span-1 lg:text-end">
-                    <a href="{{ route('attendance.attendances.show', $attendance['id']) }}" class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-br from-[#173f34] via-[#1f4d3d] to-[#2a684f] hover:bg-gradient-to-tl px-4 py-2 text-sm font-medium text-white transition duration-200 transform translate-y-0 hover:translate-y-[-2px] cursor-pointer">
-                        <i class="fa-solid fa-eye text-sm"></i>
-                        Detail
-                    </a>
-                </div>
-
-            </div>
-        </div>
-        @empty
-        <div class="rounded-xl border border-[#dfeee1] bg-white p-10 text-center text-sm text-slate-400">
-            Belum ada aktivitas check-in hari ini.
-        </div>
-        @endforelse
-
-    </div> -->
-
     {{-- Pegawai Bertugas Hari Ini --}}
     <div class="space-y-2 bg-[#edf5ee] mt-4 p-4 rounded-lg">
         <div class="flex flex-col gap-3 rounded-lg bg-gradient-to-r from-[#173f34] to-[#2a684f] px-3 py-3 shadow-md sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
@@ -249,8 +130,8 @@
             <form method="GET" class="w-full sm:w-auto">
                 <select name="department_id" onchange="this.form.submit()"
                     class="w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-[#dfeee1] sm:w-auto">
-                    @if ($departmentsForFilter->count() > 1 || !$departmentId)
-                    <option value="">Pilih Departemen</option>
+                    @if ($isGlobalRole)
+                    <option value="" {{ !$departmentId ? 'selected' : '' }}>Semua Departemen</option>
                     @endif
                     @foreach ($departmentsForFilter as $department)
                     <option value="{{ $department->id }}" {{ $departmentId == $department->id ? 'selected' : '' }}>
@@ -264,10 +145,10 @@
             @endif
         </div>
 
-        @if (!$departmentId)
+        @if ($departmentsForFilter->isEmpty() && !$isGlobalRole)
         <div class="rounded-xl border border-[#dfeee1] bg-white p-10 text-center text-sm text-slate-400">
             <i class="fa-solid fa-building text-2xl mb-2 block"></i>
-            Pilih departemen untuk melihat pegawai bertugas hari ini.
+            Anda belum memiliki penempatan departemen.
         </div>
         @elseif ($expectedToday->isEmpty())
         <div class="rounded-xl border border-[#dfeee1] bg-white p-10 text-center text-sm text-slate-400">

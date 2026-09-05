@@ -367,10 +367,8 @@ class AttendanceService implements AttendanceServiceInterface
 
     public function todayForDisplay(int $employeeId): ?array
     {
-        $attendance = $this->attendanceRepository->findByEmployeeAndDate(
-            $employeeId,
-            Carbon::today()->toDateString()
-        );
+        $attendance = $this->attendanceRepository->findOpenForEmployee($employeeId)
+            ?? $this->attendanceRepository->findByEmployeeAndDate($employeeId, Carbon::today()->toDateString());
 
         return $attendance ? $this->toMobileArray($attendance) : null;
     }
