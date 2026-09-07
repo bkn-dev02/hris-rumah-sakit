@@ -78,6 +78,38 @@ class PermissionSeeder extends Seeder
             ['module' => 'Attendance', 'name' => 'Hapus Status Kehadiran', 'code' => 'attendance-statuses.delete'],
             // Attendance - Presensi Darurat
             ['module' => 'Attendance', 'name' => 'Approve Presensi Darurat', 'code' => 'emergency-attendance.approve'],
+
+            // Schedul
+             [
+                'module' => 'Schedule',
+                'name' => 'Kelola Jadwal',
+                'code' => 'schedule.manage',
+                'description' => 'Membuat dan mengubah jadwal kerja/libur pegawai per hari',
+            ],
+            [
+                'module' => 'Schedule',
+                'name' => 'Lihat Jadwal',
+                'code' => 'schedule.view',
+                'description' => 'Melihat jadwal dan distribusi pegawai per departemen/shift',
+            ],
+            [
+                'module' => 'Schedule',
+                'name' => 'Lihat SP Candidate',
+                'code' => 'sp-candidates.view',
+                'description' => 'Melihat daftar SP Candidate dan riwayat SP pegawai',
+            ],
+            [
+                'module' => 'Schedule',
+                'name' => 'Konfirmasi Manual SP',
+                'code' => 'sp-candidates.confirm',
+                'description' => 'Membuat Konfirmasi Manual untuk mencegah/membatalkan SP Candidate',
+            ],
+            [
+                'module' => 'Schedule',
+                'name' => 'Terbitkan Surat SP',
+                'code' => 'sp-letters.issue',
+                'description' => 'Memutuskan dan menerbitkan Surat Peringatan resmi',
+            ],
         ];
 
         foreach ($permissions as $permission) {

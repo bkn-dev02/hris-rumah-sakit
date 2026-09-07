@@ -24,13 +24,15 @@ class ApprovalChainBuilder
         }
 
         $hrd = $this->resolveHrd();
+        $chain[] = ['employee' => $hrd, 'type' => 'hrd'];
 
-        if (empty($chain)) {
-            $chain[] = ['employee' => $hrd, 'type' => 'hrd'];
-        } else {
-            $topApprover = array_pop($chain);
-            $chain[] = ['employee' => $hrd, 'type' => 'hrd'];
-            $chain[] = ['employee' => $topApprover['employee'], 'type' => 'director'];
+        $director = $this->resolveDirector();
+        if ($director) {
+            $alreadyInChain = collect($chain)->contains(fn ($step) => $step['employee']->id === $director->id);
+
+            if (! $alreadyInChain) {
+                $chain[] = ['employee' => $director, 'type' => 'director'];
+            }
         }
 
         return array_values(array_map(
@@ -53,5 +55,12 @@ class ApprovalChainBuilder
         }
 
         return $hrd;
+    }
+
+    protected function resolveDirector(): ?Employee
+    {
+        return Employee::query()
+            ->whereHas('user.roles', fn($q) => $q->where('code', 'direktur'))
+            ->first();
     }
 }
