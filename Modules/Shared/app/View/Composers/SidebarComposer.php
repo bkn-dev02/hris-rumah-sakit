@@ -11,7 +11,7 @@ class SidebarComposer
         $roleCodes = request()->user()?->roles()->pluck('code')->all() ?? [];
         $canViewMaster = (bool) array_intersect(
             $roleCodes,
-            ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit']
+            ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_ruangan', 'kepala_unit']
         );
         $canViewRestrictedMaster = (bool) array_intersect(
             $roleCodes,
@@ -233,8 +233,13 @@ class SidebarComposer
                             ->all();
                     }
 
-                    if (!in_array($menu['label'], ['Data Masters', 'Attendance', 'Manajemen Cuti'], true)) {
-                        return $menu;
+                    if ($menu['label'] === 'Security & Account') {
+                        return [
+                            'label' => 'Profil Saya',
+                            'icon' => 'fa-solid fa-user-pen',
+                            'route' => 'profile.show',
+                            'active' => ['profile.*'],
+                        ];
                     }
 
                     return $menu;
@@ -249,6 +254,7 @@ class SidebarComposer
                 'hrd',
                 'direktur',
                 'kepala_unit',
+                'kepala_ruangan',
             ]);
 
         if ($isEmployeeOnly) {
@@ -293,21 +299,6 @@ class SidebarComposer
                         'icon' => 'fa-solid fa-calendar-days',
                         'route' => 'leave.index',
                         'active' => ['leave.index'],
-                    ];
-                })
-                ->all();
-
-            $menus = collect($menus)
-                ->map(function ($menu) {
-                    if ($menu['label'] !== 'Security & Account') {
-                        return $menu;
-                    }
-
-                    return [
-                        'label' => 'Profil Saya',
-                        'icon' => 'fa-solid fa-user-pen',
-                        'route' => 'profile.show',
-                        'active' => ['profile.*'],
                     ];
                 })
                 ->all();

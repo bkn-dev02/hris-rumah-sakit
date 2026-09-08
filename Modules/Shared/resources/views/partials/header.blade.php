@@ -12,8 +12,7 @@
             type="button"
             class="flex h-10 w-10 items-center justify-center rounded-lg border border-[#cfe1d3] bg-white text-[#1f4d3d] shadow-sm transition hover:bg-[#eaf7ee] hover:text-[#143e32] lg:hidden"
             @click="mobileSidebarOpen = !mobileSidebarOpen"
-            aria-label="Buka menu navigasi"
-        >
+            aria-label="Buka menu navigasi">
             <i class="fa-solid fa-bars text-lg"></i>
         </button>
 
@@ -28,7 +27,12 @@
                     size="sm" />
                 <div class="flex flex-col text-left">
                     <span class="text-sm font-medium text-[#1d3b31]">{{ auth()->user()->employee?->name ?? auth()->user()->username }}</span>
-                    <span class="text-xs text-[#567564]">{{ auth()->user()->roles->first()?->name ?? 'Tanpa Role' }}</span>
+                    <span class="text-xs text-[#567564]">
+                        {{ (auth()->user()->roles->firstWhere('code', '!=', 'pegawai') ?? auth()->user()->roles->first())?->name ?? 'Tanpa Role' }}
+                        @if (auth()->user()->employee?->currentDepartment())
+                        {{ auth()->user()->employee->currentDepartment()->name }}
+                        @endif
+                    </span>
                 </div>
                 <i class="fa-solid fa-chevron-down text-xs text-[#567564] transition-transform" :class="open && 'rotate-180'"></i>
             </button>

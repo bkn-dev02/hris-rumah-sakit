@@ -41,4 +41,38 @@ class LeaveRequestApproval extends Model
             default => ucfirst($this->type),
         };
     }
+
+    public function isEligibleApprover(Employee $employee): bool
+    {
+        if ($this->approver_employee_id === $employee->id) {
+            return true;
+        }
+
+        $originalApprover = Employee::withTrashed()->find($this->approver_employee_id);
+
+        if (! $originalApprover) {
+            return false;
+        }
+
+        $isOriginalInactive = $originalApprover->trashed() || ! $originalApprover->is_active;
+
+        if (! $isOriginalInactive) {
+            return false;
+        }
+
+        $originalPlacement = $originalApprover->placements()
+            ->withTrashed()
+            ->orderByDesc('start_date')
+            ->with('position')
+            ->first();
+
+        $approverPlacement = $employee->currentPlacement();
+
+        if (! $originalPlacement || ! $approverPlacement) {
+            return false;
+        }
+
+        return $originalPlacement->department_id === $approverPlacement->department_id
+            && $originalPlacement->position?->level === $approverPlacement->position?->level;
+    }
 }
