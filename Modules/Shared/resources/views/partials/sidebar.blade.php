@@ -19,7 +19,11 @@
                     size="sm" />
                 <div class="min-w-0">
                     <p class="truncate text-sm font-semibold text-white">{{ auth()->user()->employee?->name ?? auth()->user()->username }}</p>
-                    <p class="truncate text-[11px] text-[#dfeee1]">{{ auth()->user()->roles->first()?->name ?? 'Tanpa Role' }}</p>
+                    <p class="truncate text-sm text-[#edf5ee]">{{ (auth()->user()->roles->firstWhere('code', '!=', 'pegawai') ?? auth()->user()->roles->first())?->name ?? 'Tanpa Role' }}
+                        @if (auth()->user()->employee?->currentDepartment())
+                        {{ auth()->user()->employee->currentDepartment()->name }}
+                        @endif
+                    </p>
                 </div>
             </div>
 
@@ -30,23 +34,34 @@
     </div>
 
     @php
-        $primaryRoleName = auth()->user()->roles->first()?->name ?? 'User';
-        $normalizedRoleName = strtolower(trim($primaryRoleName));
+    $roles = auth()->user()->roles;
+    $nonPegawaiRoles = $roles->where('code', '!=', 'pegawai');
 
-        if (str_contains($normalizedRoleName, 'admin')) {
-            $rolePanelLabel = 'Panel Admin';
-        } elseif (str_contains($normalizedRoleName, 'pegawai') || str_contains($normalizedRoleName, 'staff') || str_contains($normalizedRoleName, 'employee')) {
-            $rolePanelLabel = 'Panel Pegawai';
-        } else {
-            $rolePanelLabel = 'Panel ' . ucfirst($primaryRoleName);
-        }
+    if ($nonPegawaiRoles->count() > 1) {
+    $primaryRole = $nonPegawaiRoles->sortByDesc(fn($r) => $r->pivot->created_at)->first();
+    } elseif ($nonPegawaiRoles->count() === 1) {
+    $primaryRole = $nonPegawaiRoles->first();
+    } else {
+    $primaryRole = $roles->first();
+    }
+
+    $primaryRoleName = $primaryRole?->name ?? 'User';
+    $normalizedRoleName = strtolower(trim($primaryRoleName));
+
+    if (str_contains($normalizedRoleName, 'admin')) {
+    $rolePanelLabel = 'Panel Admin';
+    } elseif (str_contains($normalizedRoleName, 'pegawai') || str_contains($normalizedRoleName, 'staff') || str_contains($normalizedRoleName, 'employee')) {
+    $rolePanelLabel = 'Panel Pegawai';
+    } else {
+    $rolePanelLabel = 'Panel ' . ucfirst($primaryRoleName);
+    }
     @endphp
 
     <div class="hidden border-b border-[#2d5d4d] bg-[#173f34] px-3 py-3 lg:block">
         <div class="rounded-xl border border-[#dfeee1]/20 bg-white/5 px-3 py-3 text-center">
             <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#dfeee1] text-[#173f34] shadow-sm ring-2 ring-white/10">
                 @php
-                    $roleIcon = str_contains(strtolower($primaryRoleName), 'admin') ? 'fa-user-shield' : 'fa-user';
+                $roleIcon = str_contains(strtolower($primaryRoleName), 'admin') ? 'fa-user-shield' : 'fa-user';
                 @endphp
                 <i class="fa-solid {{ $roleIcon }} text-lg"></i>
             </div>

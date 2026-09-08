@@ -16,6 +16,7 @@ use Modules\Leave\Models\Holiday;
 use Modules\Leave\Models\LeaveRequest;
 use Modules\Master\Models\Employee;
 use RuntimeException;
+use Modules\Leave\Models\LeaveRequestApproval;
 
 class LeaveRequestService implements LeaveRequestServiceInterface
 {
@@ -151,11 +152,12 @@ class LeaveRequestService implements LeaveRequestServiceInterface
 
             $currentStep = $leaveRequest->currentApproval();
 
-            if (! $currentStep || $currentStep->approver_employee_id !== $approver->id) {
+            if (! $currentStep || ! $currentStep->isEligibleApprover($approver)) {
                 throw new RuntimeException('Belum giliran Anda untuk memutuskan pengajuan ini.');
             }
 
             $currentStep->update([
+                'approver_employee_id' => $approver->id,
                 'status' => $approve ? 'approved' : 'rejected',
                 'decided_at' => now(),
                 'note' => $note,

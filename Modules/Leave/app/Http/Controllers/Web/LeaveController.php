@@ -86,7 +86,7 @@ class LeaveController extends Controller
     {
         $roleCodes = Auth::user()->roles()->pluck('code')->all();
         $isEmployeeOnly = in_array('pegawai', $roleCodes, true)
-            && !array_intersect($roleCodes, ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit']);
+            && !array_intersect($roleCodes, ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit', 'kepala_ruangan']);
 
         if ($isEmployeeOnly && $leaveRequest->employee_id !== Auth::user()->employee?->id) {
             abort(404);

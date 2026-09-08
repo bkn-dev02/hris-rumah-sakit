@@ -53,7 +53,7 @@ class LeaveRequest extends Model
     {
         $current = $this->currentApproval();
 
-        return $current && $current->approver_employee_id === $employee->id;
+        return $current && $current->isEligibleApprover($employee);
     }
 
     public function statusLabel(): string
@@ -70,6 +70,10 @@ class LeaveRequest extends Model
 
     protected function approverLabel(?Employee $approver): string
     {
+        if (! $approver) {
+            return 'Pegawai (nonaktif)';
+        }
+
         $position = $approver->currentPosition()?->name;
         $department = $approver->currentDepartment()?->name;
         $roleLabel = trim("{$position} {$department}");
