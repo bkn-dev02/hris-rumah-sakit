@@ -206,6 +206,7 @@ class Employee extends Model
                 ->where('department_id', $department->id)
                 ->where('employee_id', '!=', $this->id)
                 ->whereHas('position', fn($q) => $q->where('level', '>', $myLevel))
+                ->whereHas('employee')
                 ->with('position')
                 ->get()
                 ->sortBy(fn($placement) => $placement->position->level)
