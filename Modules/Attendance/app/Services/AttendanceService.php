@@ -21,6 +21,8 @@ use Illuminate\Support\Carbon;
 use Modules\Schedule\Contracts\Services\SpCandidateServiceInterface;
 use Illuminate\Support\Facades\Log;
 use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
+use Modules\Attendance\Models\CheckIn;
+use Modules\Master\Models\Shift;
 
 class AttendanceService implements AttendanceServiceInterface
 {
@@ -48,6 +50,17 @@ class AttendanceService implements AttendanceServiceInterface
                 throw new AttendanceException('Data absensi untuk hari ini sudah ada.');
             }
 
+            $hasEmergencyToday = CheckIn::where('employee_id', $employeeId)
+                ->where('id', '!=', $checkInId)
+                ->whereDate('checked_at', $workDate)
+                ->where('type', 'emergency')
+                ->whereIn('emergency_status', ['pending', 'approved'])
+                ->exists();
+
+            if ($hasEmergencyToday) {
+                throw new AttendanceException('Anda memiliki presensi darurat yang masih diproses/disetujui hari ini.');
+            }
+
             $resolved = app(ScheduleServiceInterface::class)
                 ->resolveEffectiveShift($employeeId, $workDate);
 
@@ -55,6 +68,18 @@ class AttendanceService implements AttendanceServiceInterface
 
             if (!$resolved['shift_id']) {
                 throw new AttendanceException('Anda belum memiliki jadwal shift aktif. Hubungi admin.');
+            }
+
+            $shift = Shift::find($resolved['shift_id']);
+            $checkIn = CheckIn::find($checkInId);
+
+            if ($checkIn && $shift) {
+                $shiftStart = Carbon::parse($workDate->toDateString() . ' ' . $shift->start_time->format('H:i'))
+                    ->addMinutes(self::DEFAULT_LATE_TOLERANCE_MINUTES);
+
+                $checkIn->update([
+                    'punctuality_status' => $checkIn->checked_at->greaterThan($shiftStart) ? 'telat' : 'tepat_waktu',
+                ]);
             }
 
             $attendance = $this->attendanceRepository->create([
@@ -118,7 +143,7 @@ class AttendanceService implements AttendanceServiceInterface
             ?? $this->attendanceRepository->findByEmployeeAndDate($employeeId, Carbon::today()->toDateString());
     }
 
-    public function recentTodayForDisplay(int $limit = 10): array
+    public function recentTodayForDisplay(int $limit = 50): array
     {
         $today = Carbon::today()->toDateString();
 
@@ -162,6 +187,12 @@ class AttendanceService implements AttendanceServiceInterface
                 : null,
             'badge_label' => $badgeLabel,
             'badge_color' => $badgeColor,
+            'punctuality_status' => $attendance->checkIn?->punctuality_status,
+            'punctuality_label' => match ($attendance->checkIn?->punctuality_status) {
+                'ontime' => 'On Time',
+                'late' => 'Late',
+                default => null,
+            },
         ];
     }
 
