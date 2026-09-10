@@ -133,4 +133,40 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             ])
             ->toArray();
     }
+
+    public function getCheckInStatusForEmployeesToday(array $employeeIds): array
+    {
+        return Attendance::whereIn('employee_id', $employeeIds)
+            ->whereDate('work_date', Carbon::today())
+            ->with('checkIn')
+            ->get()
+            ->mapWithKeys(fn($attendance) => [
+                $attendance->employee_id => $attendance->checkIn?->punctuality_status
+            ])
+            ->toArray();
+    }
+
+    public function getShiftStartTimesForEmployeesToday(array $employeeIds): array
+    {
+        return Attendance::whereIn('employee_id', $employeeIds)
+            ->whereDate('work_date', Carbon::today())
+            ->with('shift')
+            ->get()
+            ->mapWithKeys(fn($attendance) => [
+                $attendance->employee_id => $attendance->shift?->start_time?->format('H:i'),
+            ])
+            ->toArray();
+    }
+
+    public function getCheckOutTimesForEmployeesToday(array $employeeIds): array
+    {
+        return Attendance::whereIn('employee_id', $employeeIds)
+            ->whereDate('work_date', Carbon::today())
+            ->with('checkOut')
+            ->get()
+            ->mapWithKeys(fn($attendance) => [
+                $attendance->employee_id => $attendance->checkOut?->checked_at?->format('H:i'),
+            ])
+            ->toArray();
+    }
 }
