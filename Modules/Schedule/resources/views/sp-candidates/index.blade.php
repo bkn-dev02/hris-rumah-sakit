@@ -57,7 +57,7 @@
             @if ($needsDecision->isNotEmpty())
             <div class="text-xs font-semibold text-violet-700 mb-2 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span>
-                MENUNGGU KEPUTUSAN ANDA  <span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span> {{ $needsDecision->count() }}
+                MENUNGGU KEPUTUSAN ANDA <span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span> {{ $needsDecision->count() }}
             </div>
             <div class="space-y-2 mb-5">
                 @foreach ($needsDecision as $candidate)
@@ -70,7 +70,7 @@
                             <div>
                                 <div class="font-medium text-slate-700 text-sm">{{ $candidate->employee->name }}</div>
                                 <div class="text-xs text-slate-400">
-                                    {{ $candidate->department->name }} Â· {{ $candidate->date->translatedFormat('d M') }} Â· Terlambat check-in {{ $candidate->late_checkin_at?->format('H:i') }}
+                                    {{ $candidate->department->name }} · {{ $candidate->date->translatedFormat('d M') }} · Terlambat check-in {{ $candidate->late_checkin_at?->format('H:i') }}
                                 </div>
                             </div>
                         </div>
@@ -94,7 +94,7 @@
                     </div>
                     @else
                     <a href="{{ route('schedule.sp-candidates.show', $candidate->id) }}" class="text-xs text-violet-700 hover:underline">
-                        Lihat detail â†’
+                        Lihat detail
                     </a>
                     @endif
                 </div>
@@ -140,9 +140,9 @@
                         <div>
                             <div class="font-medium text-slate-600 text-sm">{{ $candidate->employee?->name ?? 'Pegawai (nonaktif)' }}</div>
                             <div class="text-xs text-slate-400">
-                                {{ $candidate->department->name }} Â· {{ $candidate->date->translatedFormat('d M Y') }}
+                                {{ $candidate->department->name }} · {{ $candidate->date->translatedFormat('d M Y') }}
                                 @if ($tab === 'issued' && $candidate->spLetter)
-                                Â· SP ke-{{ $candidate->spLetter->sp_number }}
+                                · SP ke-{{ $candidate->spLetter->sp_number }}
                                 @endif
                             </div>
                         </div>

@@ -25,7 +25,7 @@ class DashboardController extends Controller
     /**
      * Role codes yang berhak melihat section organisasi/KPI.
      */
-    protected const ELEVATED_ROLES = ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit'];
+    protected const ELEVATED_ROLES = ['super-admin', 'admin', 'hrd', 'direktur', 'kepala_unit', 'kepala_ruangan'];
 
     /**
      * Urutan tampil section.
@@ -49,7 +49,6 @@ class DashboardController extends Controller
     {
         $actor = $request->user();
 
-        // 1 query untuk semua kode role
         $roleCodes = $actor->roles()->pluck('code')->all();
 
         $built = [];
@@ -111,9 +110,6 @@ class DashboardController extends Controller
         ];
     }
 
-    /**
-     * Bangun payload untuk section "hrd" — KPI & ringkasan organisasi.
-     */
     protected function buildHrdSection(Request $request, array $roleCodes): array
     {
         $scope = $this->resolveDepartmentScope($request, $roleCodes);

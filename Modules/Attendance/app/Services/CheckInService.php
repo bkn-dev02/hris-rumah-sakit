@@ -9,6 +9,7 @@ use Modules\Attendance\Contracts\Repositories\CheckInRepositoryInterface;
 use Modules\Attendance\Contracts\Services\CheckInServiceInterface;
 use Modules\Attendance\Models\CheckIn;
 use Modules\Master\Models\Employee;
+use Modules\Attendance\Models\Attendance;
 
 
 class CheckInService implements CheckInServiceInterface
@@ -54,6 +55,14 @@ class CheckInService implements CheckInServiceInterface
 
     public function createEmergency(array $data): CheckIn
     {
+        $existingAttendance = Attendance::where('employee_id', $data['employee_id'])
+            ->whereDate('work_date', today())
+            ->exists();
+
+        if ($existingAttendance) {
+            throw new \RuntimeException('Tidak dapat membuat presensi darurat karena sudah ada presensi untuk hari ini.');
+        }
+
         $data['type'] = 'emergency';
         $data['emergency_status'] = 'pending';
         $data['location_id'] = null;

@@ -98,7 +98,7 @@
                     <div class="mt-1 sm:mt-0 sm:w-2/3">
                         <p class="text-sm text-slate-700">
                             {{ $leaveRequest->start_date->format('d M Y') }}
-                            <span class="mx-1 text-slate-400">â€”</span>
+                            <span class="mx-1 text-slate-400 italic">sd.</span>
                             {{ $leaveRequest->end_date->format('d M Y') }}
                         </p>
 
@@ -193,7 +193,7 @@
 
                             <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                 <p class="text-sm font-semibold text-slate-700">
-                                    {{ $approval->approver->name }}
+                                    {{ $approval->approver?->name ?? 'Pegawai (nonaktif)' }}
                                 </p>
 
                                 <span class="text-xs text-slate-400">
@@ -208,15 +208,15 @@
                                 @else
                                 @if ($approval->status === 'approved')
                                 <i class="fa-solid fa-circle-check mr-1"></i>
-                                Disetujui
+                                Disetujui,
                                 @else
                                 <i class="fa-solid fa-circle-xmark mr-1"></i>
-                                Ditolak
+                                Ditolak,
                                 @endif
 
                                 @if ($approval->decided_at)
                                 <span class="ml-1 font-normal text-slate-400">
-                                    â€” {{ $approval->decided_at->format('d M Y H:i') }}
+                                    {{ $approval->decided_at->format('d M Y H:i') }}
                                 </span>
                                 @endif
                                 @endif

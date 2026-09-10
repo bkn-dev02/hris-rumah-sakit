@@ -27,6 +27,7 @@ class CheckIn extends Model
         'emergency_decided_by',
         'emergency_decided_at',
         'emergency_decision_note',
+        'punctuality_status',
     ];
     protected function casts(): array
     {

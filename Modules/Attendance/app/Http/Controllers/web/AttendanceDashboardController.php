@@ -93,7 +93,11 @@ class AttendanceDashboardController extends Controller
             $employees = $employeesQuery->orderBy('name')->get();
 
             $today = Carbon::today();
-            $checkInTimes = $this->attendanceService->getCheckInTimesForEmployeesToday($employees->pluck('id')->toArray());
+            $employeeIds = $employees->pluck('id')->toArray(); // <- definisikan sekali di awal, biar reuse
+
+            $checkInTimes = $this->attendanceService->getCheckInTimesForEmployeesToday($employeeIds);
+            $punctualityLabels = $this->attendanceService->getCheckInStatusForEmployeesToday($employeeIds);
+            $checkOutTimes = $this->attendanceService->getCheckOutTimesForEmployeesToday($employeeIds);
 
             $byShift = [];
 
@@ -113,6 +117,12 @@ class AttendanceDashboardController extends Controller
                 $byShift[$shift->id]['employees'][] = [
                     'employee' => $employee,
                     'checked_in_at' => $checkInTimes[$employee->id] ?? null,
+                    'punctuality_label' => $punctualityLabels[$employee->id] ?? null,
+                    'checked_out_at' => $checkOutTimes[$employee->id] ?? null,
+                    'work_duration' => $this->attendanceService->calculateWorkDuration(
+                        $checkInTimes[$employee->id] ?? null,
+                        $checkOutTimes[$employee->id] ?? null
+                    ),
                 ];
             }
 

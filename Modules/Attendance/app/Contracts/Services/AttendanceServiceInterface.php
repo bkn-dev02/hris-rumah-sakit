@@ -28,7 +28,7 @@ interface AttendanceServiceInterface
 
     public function recentToday(int $limit = 10): Collection;
 
-    public function recentTodayForDisplay(int $limit = 10): array;
+    public function recentTodayForDisplay(int $limit = 50): array;
 
     public function paginateForDisplay(int $perPage = 15, array $filters = []): LengthAwarePaginator;
 

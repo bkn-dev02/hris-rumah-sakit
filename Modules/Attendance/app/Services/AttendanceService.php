@@ -21,6 +21,8 @@ use Illuminate\Support\Carbon;
 use Modules\Schedule\Contracts\Services\SpCandidateServiceInterface;
 use Illuminate\Support\Facades\Log;
 use Modules\Schedule\Contracts\Services\ScheduleServiceInterface;
+use Modules\Attendance\Models\CheckIn;
+use Modules\Master\Models\Shift;
 
 class AttendanceService implements AttendanceServiceInterface
 {
@@ -48,6 +50,17 @@ class AttendanceService implements AttendanceServiceInterface
                 throw new AttendanceException('Data absensi untuk hari ini sudah ada.');
             }
 
+            $hasEmergencyToday = CheckIn::where('employee_id', $employeeId)
+                ->where('id', '!=', $checkInId)
+                ->whereDate('checked_at', $workDate)
+                ->where('type', 'emergency')
+                ->whereIn('emergency_status', ['pending', 'approved'])
+                ->exists();
+
+            if ($hasEmergencyToday) {
+                throw new AttendanceException('Anda memiliki presensi darurat yang masih diproses/disetujui hari ini.');
+            }
+
             $resolved = app(ScheduleServiceInterface::class)
                 ->resolveEffectiveShift($employeeId, $workDate);
 
@@ -55,6 +68,18 @@ class AttendanceService implements AttendanceServiceInterface
 
             if (!$resolved['shift_id']) {
                 throw new AttendanceException('Anda belum memiliki jadwal shift aktif. Hubungi admin.');
+            }
+
+            $shift = Shift::find($resolved['shift_id']);
+            $checkIn = CheckIn::find($checkInId);
+
+            if ($checkIn && $shift) {
+                $shiftStart = Carbon::parse($workDate->toDateString() . ' ' . $shift->start_time->format('H:i'))
+                    ->addMinutes(self::DEFAULT_LATE_TOLERANCE_MINUTES);
+
+                $checkIn->update([
+                    'punctuality_status' => $checkIn->checked_at->greaterThan($shiftStart) ? 'late' : 'ontime',
+                ]);
             }
 
             $attendance = $this->attendanceRepository->create([
@@ -118,7 +143,7 @@ class AttendanceService implements AttendanceServiceInterface
             ?? $this->attendanceRepository->findByEmployeeAndDate($employeeId, Carbon::today()->toDateString());
     }
 
-    public function recentTodayForDisplay(int $limit = 10): array
+    public function recentTodayForDisplay(int $limit = 50): array
     {
         $today = Carbon::today()->toDateString();
 
@@ -162,6 +187,12 @@ class AttendanceService implements AttendanceServiceInterface
                 : null,
             'badge_label' => $badgeLabel,
             'badge_color' => $badgeColor,
+            'punctuality_status' => $attendance->checkIn?->punctuality_status,
+            'punctuality_label' => match ($attendance->checkIn?->punctuality_status) {
+                'ontime' => 'Tepat Waktu',
+                'late' => 'Terlambat',
+                default => null,
+            },
         ];
     }
 
@@ -401,12 +432,66 @@ class AttendanceService implements AttendanceServiceInterface
             'check_out_time'      => $attendance->checkOut?->checked_at?->format('H:i'),
             'check_out_photo_url' => $attendance->checkOut?->photo ? asset('storage/' . $attendance->checkOut->photo) : null,
             'attendance_status'   => $attendance->status->name ?? null,
+            'punctuality_label' => match ($attendance->checkIn?->punctuality_status) {
+                'ontime' => 'Tepat Waktu',
+                'late' => 'Terlambat',
+                default => null,
+            },
         ];
     }
 
     public function getCheckInTimesForEmployeesToday(array $employeeIds): array
     {
         return $this->attendanceRepository->getCheckInTimesForEmployeesToday($employeeIds);
+    }
+
+    public function getCheckInStatusForEmployeesToday(array $employeeIds): array
+    {
+        $statuses = $this->attendanceRepository->getCheckInStatusForEmployeesToday($employeeIds);
+        $checkInTimes = $this->attendanceRepository->getCheckInTimesForEmployeesToday($employeeIds);
+        $shiftStartTimes = $this->attendanceRepository->getShiftStartTimesForEmployeesToday($employeeIds);
+
+        $today = Carbon::today()->toDateString();
+        $result = [];
+
+        foreach ($statuses as $employeeId => $status) {
+            if ($status === 'ontime') {
+                $result[$employeeId] = 'Ontime';
+                continue;
+            }
+
+            if ($status === 'late') {
+                $checkInTime = $checkInTimes[$employeeId] ?? null;
+                $shiftStart = $shiftStartTimes[$employeeId] ?? null;
+
+                if (!$checkInTime || !$shiftStart) {
+                    $result[$employeeId] = 'Telat';
+                    continue;
+                }
+
+                $checkedAt = Carbon::parse("{$today} {$checkInTime}");
+                $shiftStartAt = Carbon::parse("{$today} {$shiftStart}");
+
+                $diffMinutes = $shiftStartAt->diffInMinutes($checkedAt);
+                $hours = intdiv($diffMinutes, 60);
+                $minutes = $diffMinutes % 60;
+
+                $result[$employeeId] = $hours > 0
+                    ? "Telat {$hours} jam {$minutes} menit"
+                    : "Telat {$minutes} menit";
+
+                continue;
+            }
+
+            $result[$employeeId] = null;
+        }
+
+        return $result;
+    }
+
+    public function getCheckOutTimesForEmployeesToday(array $employeeIds): array
+    {
+        return $this->attendanceRepository->getCheckOutTimesForEmployeesToday($employeeIds);
     }
 
     public function getMonthlyPersonalSummary(int $employeeId, int $year, int $month): array
@@ -458,5 +543,22 @@ class AttendanceService implements AttendanceServiceInterface
         }
 
         return $counts;
+    }
+
+    public function calculateWorkDuration(?string $checkInAt, ?string $checkOutAt): ?string
+    {
+        if (!$checkInAt || !$checkOutAt) {
+            return null;
+        }
+
+        $checkIn = Carbon::parse($checkInAt);
+        $checkOut = Carbon::parse($checkOutAt);
+
+        $totalMinutes = $checkIn->diffInMinutes($checkOut);
+
+        $hours = intdiv($totalMinutes, 60);
+        $minutes = $totalMinutes % 60;
+
+        return "{$hours} jam {$minutes} menit";
     }
 }
