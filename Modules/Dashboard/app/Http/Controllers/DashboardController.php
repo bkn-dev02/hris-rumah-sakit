@@ -110,9 +110,6 @@ class DashboardController extends Controller
         ];
     }
 
-    /**
-     * Bangun payload untuk section "hrd" — KPI & ringkasan organisasi.
-     */
     protected function buildHrdSection(Request $request, array $roleCodes): array
     {
         $scope = $this->resolveDepartmentScope($request, $roleCodes);

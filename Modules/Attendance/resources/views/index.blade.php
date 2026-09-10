@@ -145,6 +145,33 @@
             @endif
         </div>
 
+        <div class="hidden lg:grid grid-cols-12 items-center px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 border-b border-slate-200 bg-slate-50">
+
+            <div class="col-span-3">
+                Nama
+            </div>
+
+            <div class="col-span-2 text-center">
+                Jam Masuk
+            </div>
+
+            <div class="col-span-2 text-center">
+                Keterangan
+            </div>
+
+            <div class="col-span-2 text-center">
+                Jam Pulang
+            </div>
+
+            <div class="col-span-2 text-center">
+                Jam Kerja
+            </div>
+
+            <div class="col-span-1 text-center">
+                Aksi
+            </div>
+        </div>
+
         @if ($departmentsForFilter->isEmpty() && !$isGlobalRole)
         <div class="rounded-xl border border-[#dfeee1] bg-white p-10 text-center text-sm text-slate-400">
             <i class="fa-solid fa-building text-2xl mb-2 block"></i>
@@ -169,8 +196,8 @@
                 </div>
                 <div class="space-y-2">
                     @foreach ($group['employees'] as $entry)
-                    <div class="flex flex-col gap-2 rounded-xl border border-[#dfeee1] bg-white p-3 shadow-sm transition hover:border-[#dfeee1] hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex items-center gap-3">
+                    <div class="grid grid-cols-12 gap-2 rounded-xl border border-[#dfeee1] bg-white p-3 shadow-sm transition hover:border-[#dfeee1] hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
+                        <div class="col-span-3 flex items-center gap-3">
                             <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#edf5ee] text-xs font-bold text-[#173f34]">
                                 {{ collect(explode(' ', $entry['employee']->name))->map(fn($w) => $w[0] ?? '')->take(2)->implode('') }}
                             </div>
@@ -178,16 +205,46 @@
                         </div>
 
                         @if ($entry['checked_in_at'])
-                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 sm:px-3 sm:text-xs">
-                            <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                            Hadir {{ $entry['checked_in_at'] }}
+                        <span class="col-span-2 inline-flex justify-center items-center rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 sm:px-3 sm:text-xs">
+                            <div class="flex items-center gap-1">
+                                <span>Clock in</span>
+                                <span>{{ $entry['checked_in_at'] }}</span>
+                            </div>
                         </span>
                         @else
-                        <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold text-amber-700 sm:px-3 sm:text-xs">
-                            <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                        <span class="col-span-2 inline-flex justify-center items-center rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold text-amber-700 sm:px-3 sm:text-xs">
                             Belum Hadir
                         </span>
                         @endif
+
+                        @php
+                        $isLate = $entry['punctuality_label'] && str_starts_with($entry['punctuality_label'], 'Telat');
+                        @endphp
+                        <span class="col-span-2 inline-flex justify-center items-center rounded-full px-2.5 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs {{ $isLate ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-purple-700' }}">
+                            {{ $entry['punctuality_label'] ?? '-' }}
+                        </span>
+
+                        @if ($entry['checked_out_at'])
+                        <span class="col-span-2 inline-flex justify-center items-center rounded-full bg-sky-100 px-2.5 py-1 text-[10px] font-semibold text-sky-700 sm:px-3 sm:text-xs">
+                            <div class="flex items-center gap-1">
+                                <span>Clock out</span>
+                                <span>{{ $entry['checked_out_at'] }}</span>
+                            </div>
+                        </span>
+                        @else
+                        <span class="col-span-2 inline-flex justify-center items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700 sm:px-3 sm:text-xs">
+                            <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-slate-500"></span>
+                            Belum Clock Out
+                        </span>
+                        @endif
+
+                        <span class="col-span-2 inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-semibold text-emerald-900 sm:px-3 sm:text-xs">
+                            {{ $entry['work_duration'] ?? '-' }}
+                        </span>
+
+                        <a href="" class="col-span-1 text-center bg-emerald-700 rounded-full text-xs p-2 text-slate-100 hover:text-slate-200 sm:col-span-1">
+                            Detail
+                        </a>
                     </div>
                     @endforeach
                 </div>
